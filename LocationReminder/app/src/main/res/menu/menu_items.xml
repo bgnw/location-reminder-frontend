@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+<!--    https://www.youtube.com/watch?v=pYBsbsasZwo -->
+
+    <item
+        android:id="@+id/nearby"
+        android:title="Nearby"
+        android:icon="@drawable/baseline_map_24"/>
+
+<!--    in nearby good idea to include saved locations... -->
+
+    <item
+        android:id="@+id/lists"
+        android:title="Lists"
+        android:icon="@drawable/baseline_checklist_24"/>
+
+    <item
+        android:id="@+id/collaborators"
+        android:title="Collaborators"
+        android:icon="@drawable/baseline_group_24"/>
+
+    <item
+        android:id="@+id/account"
+        android:title="Account"
+        android:icon="@drawable/baseline_account_circle_24"/>
+
+    <item
+        android:id="@+id/Settings"
+        android:title="Settings"
+        android:icon="@drawable/baseline_settings_24"/>
+
+
+
+
+</menu>
