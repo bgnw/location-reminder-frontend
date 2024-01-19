@@ -2,3 +2,4 @@
 17-Jan, Nav drawer tutorial, https://www.youtube.com/watch?v=zQh-QGGKPw0
 17-Jan, Nav drawer tutorial (further), https://www.youtube.com/watch?v=AxjKfZr3Crk
 17-Jan, Google icons, https://fonts.google.com/icons
+18-Jan, Custom listview, https://www.youtube.com/watch?v=KPvYXXERLjk
