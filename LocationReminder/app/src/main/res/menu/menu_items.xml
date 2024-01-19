@@ -6,34 +6,49 @@
 
 <!--    https://www.youtube.com/watch?v=pYBsbsasZwo -->
 
-    <item
-        android:id="@+id/nearby"
-        android:title="Nearby"
-        android:icon="@drawable/baseline_map_24"/>
 
-<!--    in nearby good idea to include saved locations... -->
+    <item android:title="Tasks">
+        <menu>
+            <group android:checkableBehavior="single">
+            <item
+                android:id="@+id/nearby"
+                android:title="Nearby"
+                android:icon="@drawable/baseline_map_24"/>
 
-    <item
-        android:id="@+id/lists"
-        android:title="Lists"
-        android:icon="@drawable/baseline_checklist_24"/>
+            <!-- in nearby good idea to include saved locations... -->
 
-    <item
-        android:id="@+id/collaborators"
-        android:title="Collaborators"
-        android:icon="@drawable/baseline_group_24"/>
+            <item
+                android:id="@+id/lists"
+                android:title="Lists"
+                android:icon="@drawable/baseline_checklist_24"/>
 
-    <item
-        android:id="@+id/account"
-        android:title="Account"
-        android:icon="@drawable/baseline_account_circle_24"/>
+            <item
+                android:id="@+id/sharing"
+                android:title="Sharing"
+                android:icon="@drawable/baseline_group_24"/>
+            </group>
+        </menu>
+    </item>
 
-    <item
-        android:id="@+id/Settings"
-        android:title="Settings"
-        android:icon="@drawable/baseline_settings_24"/>
+    <item android:title="System">
+        <menu>
+            <group android:checkableBehavior="single">
+            <item
+                android:id="@+id/account"
+                android:title="Account"
+                android:icon="@drawable/baseline_account_circle_24"/>
 
+            <item
+                android:id="@+id/settings"
+                android:title="Settings"
+                android:icon="@drawable/baseline_settings_24"/>
 
-
+            <item
+                android:id="@+id/sign_out"
+                android:title="Sign out"
+                android:icon="@drawable/baseline_logout_24"/>
+            </group>
+        </menu>
+    </item>
 
 </menu>
