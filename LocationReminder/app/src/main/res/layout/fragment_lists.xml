@@ -5,13 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".Lists">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="wrap_content"
+    <ListView
+        android:id="@+id/lv_tasklist_list"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Lists fragment"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        tools:listitem="@layout/list_tasklist_item" />
 
 </FrameLayout>

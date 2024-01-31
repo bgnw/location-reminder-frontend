@@ -38,37 +38,43 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <Button
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:backgroundTint="@color/orange"
-            android:minWidth="0dp"
-            android:padding="10dp"
-            app:icon="@drawable/baseline_snooze_24"
-            app:iconPadding="0dp" />
+            android:layout_alignParentEnd="true">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:minWidth="0dp"
-            android:padding="10dp"
-            app:icon="@drawable/baseline_check_circle_24"
-            app:iconPadding="0dp" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="@color/orange"
+                android:minWidth="0dp"
+                android:padding="10dp"
+                app:icon="@drawable/baseline_snooze_24"
+                app:iconPadding="0dp" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:backgroundTint="@color/dark_blue"
-            android:minWidth="0dp"
-            android:padding="10dp"
-            app:icon="@drawable/baseline_info_24"
-            app:iconPadding="0dp" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:minWidth="0dp"
+                android:padding="10dp"
+                app:icon="@drawable/baseline_check_circle_24"
+                app:iconPadding="0dp" />
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="@color/dark_blue"
+                android:minWidth="0dp"
+                android:padding="10dp"
+                app:icon="@drawable/baseline_info_24"
+                app:iconPadding="0dp" />
+
+        </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

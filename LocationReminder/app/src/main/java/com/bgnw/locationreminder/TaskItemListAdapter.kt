@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalUnit
 
-class TaskListAdapter(
+class TaskItemListAdapter(
     private val context : Activity,
-    private val tasks : ArrayList<Task>
-) : ArrayAdapter<Task>(context, R.layout.list_task_item, tasks) {
+    private val taskItems : ArrayList<TaskItem>
+) : ArrayAdapter<TaskItem>(context, R.layout.list_task_item, taskItems) {
 
     val dtFormatter : DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
 
@@ -19,15 +22,16 @@ class TaskListAdapter(
         val inflater : LayoutInflater = LayoutInflater.from(context)
         val view : View = inflater.inflate(R.layout.list_task_item, null)
 
-        val task = tasks[position]
+        val task = taskItems[position]
 
         val liTitle : TextView = view.findViewById(R.id.li_title)
         val liSubtitle : TextView = view.findViewById(R.id.li_subtitle)
 
-        liTitle.text = tasks[position].title
-        liSubtitle.text = "${task.distance}m away, due ${task.due.format(dtFormatter)}"
+        liTitle.text = taskItems[position].title
+//        liSubtitle.text = "${task.distance}m away, due ${task.due.format(dtFormatter)}"
 
-        println("Adding a list item.")
+
+        liSubtitle.text = "${task.distance}m away, due ${task.getHumanDuration()}"
 
         return view
     }

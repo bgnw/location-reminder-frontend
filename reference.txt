@@ -3,3 +3,8 @@
 17-Jan, Nav drawer tutorial (further), https://www.youtube.com/watch?v=AxjKfZr3Crk
 17-Jan, Google icons, https://fonts.google.com/icons
 18-Jan, Custom listview, https://www.youtube.com/watch?v=KPvYXXERLjk
+19-Jan, Passing intents, https://stackoverflow.com/questions/47593205/how-to-pass-custom-object-via-intent-in-kotlin
+19-Jan, Passing intents, https://stackoverflow.com/questions/3a323074/android-difference-between-parcelable-and-serializable
+19-Jan, Passing intents, https://developer.android.com/kotlin/parcelize
+19-Jan, Passing intents, https://developer.android.com/reference/android/content/Intent#getParcelableExtra(java.lang.String)
+19-Jan, Passing intents, 

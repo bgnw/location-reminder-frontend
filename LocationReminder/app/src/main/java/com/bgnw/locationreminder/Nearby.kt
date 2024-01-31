@@ -13,23 +13,35 @@ import java.time.format.DateTimeFormatter
 class Nearby : Fragment() {
 
     private lateinit var binding: FragmentNearbyBinding
-    private lateinit var sampleTaskList: ArrayList<Task>
-    private var dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    private lateinit var samples: ArrayList<TaskItem>
+    private var dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
 
     private fun makeSamples() {
 
-        val sampleTitles =
-            arrayOf("Buy milk", "Visit doctor's", "Collect prescription", "Get haircut")
-        val sampleDistances = intArrayOf(5, 2, 14, 22, 19)
-        val sampleDues = arrayOf(
-            LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now()
-        )
+        val listSamples = ArrayList<TaskList>()
 
-        sampleTaskList = ArrayList()
+        val list1 = TaskList("Italy 2024", LocalDateTime.now())
+        list1.items.add(TaskItem("Renew passport", 200, LocalDateTime.parse("2024-04-01 11:00", dtFormatter)))
+        list1.items.add(TaskItem("Buy toiletries", 18, LocalDateTime.parse("2024-04-29 18:00", dtFormatter)))
+        listSamples.add(list1)
 
-        for (i in sampleTitles.indices) {
-            sampleTaskList.add(Task(sampleTitles[i], sampleDistances[i], sampleDues[i]))
+        val list2 = TaskList("Personal to-do", LocalDateTime.now())
+        list2.items.add(TaskItem("Buy milk", 5, LocalDateTime.parse("2024-01-20 11:00", dtFormatter)))
+        list2.items.add(TaskItem("Collect prescription", 21, LocalDateTime.parse("2024-01-31 12:00", dtFormatter)))
+        listSamples.add(list2)
+
+
+        // ---------------------
+
+        samples = ArrayList()
+
+        for (list : TaskList in listSamples) {
+            for (task: TaskItem in list.items) {
+                samples.add(task)
+            }
         }
+
+        samples.sortBy { item -> item.distance }
     }
 
     override fun onCreateView(
@@ -47,7 +59,7 @@ class Nearby : Fragment() {
 
         val context = context as MainActivity
         val lv = context.findViewById(R.id.lv_nearby_tasks) as ListView
-        val adapter = TaskListAdapter(context, sampleTaskList)
+        val adapter = TaskItemListAdapter(context, samples)
         lv.adapter = adapter
     }
 }

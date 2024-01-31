@@ -1,32 +1,47 @@
 package com.bgnw.locationreminder
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListView
+import com.bgnw.locationreminder.databinding.FragmentListsBinding
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [Lists.newInstance] factory method to
- * create an instance of this fragment.
- */
 class Lists : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private lateinit var binding: FragmentListsBinding
+    private lateinit var samples: ArrayList<TaskList> // TEMP
+    private val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
+
+    private val itemClickListener = object: TaskListListAdapter.OnItemClickListener {
+        override fun onItemClick(position: TaskList) {
+            Log.d("Data: ", position.toString())
+
+            val intent = Intent(context, ViewTaskListActivity::class.java)
+            Log.d("PASSING LIST:", position.toString())
+            intent.putExtra("selected_list", position) // TODO pass whole list obj
+            startActivity(intent)
         }
+    }
+
+    private fun makeSamples() {
+
+        samples = ArrayList()
+
+        val list1 = TaskList("Italy 2024", LocalDateTime.now())
+        list1.items.add(TaskItem("Renew passport", 200, LocalDateTime.parse("2024-04-01 11:00", dtFormatter)))
+        list1.items.add(TaskItem("Buy toiletries", 18, LocalDateTime.parse("2024-04-29 18:00", dtFormatter)))
+        samples.add(list1)
+
+        val list2 = TaskList("Personal to-do", LocalDateTime.now())
+        list2.items.add(TaskItem("Buy milk", 5, LocalDateTime.parse("2024-01-20 11:00", dtFormatter)))
+        list2.items.add(TaskItem("Collect prescription", 21, LocalDateTime.parse("2024-01-31 12:00", dtFormatter)))
+        samples.add(list2)
     }
 
     override fun onCreateView(
@@ -37,23 +52,16 @@ class Lists : Fragment() {
         return inflater.inflate(R.layout.fragment_lists, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment Lists.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            Lists().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        makeSamples()
+
+        binding = FragmentListsBinding.inflate(layoutInflater)
+
+        val context = context as MainActivity
+        val lv = context.findViewById(R.id.lv_tasklist_list) as ListView
+        val adapter = TaskListListAdapter(context, samples, itemClickListener)
+        lv.adapter = adapter
     }
+
 }
