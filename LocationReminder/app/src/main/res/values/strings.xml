@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">LocationReminder</string>
+    <string name="channel_id">LocationReminder_NotifChannel_General</string>
+    <string name="channel_name">General Notifications</string>
+    <string name="channel_description">General notification channel for LocationReminder</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
     <!-- TODO: Remove or change this placeholder text -->

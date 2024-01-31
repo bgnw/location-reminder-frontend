@@ -51,4 +51,16 @@
         </menu>
     </item>
 
+    <item android:title="DEVELOPER">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/DEV_MENU"
+                    android:title="DEVELOPER OPTIONS"
+                    />
+
+            </group>
+        </menu>
+    </item>
+
 </menu>
