@@ -7,4 +7,5 @@
 19-Jan, Passing intents, https://stackoverflow.com/questions/3a323074/android-difference-between-parcelable-and-serializable
 19-Jan, Passing intents, https://developer.android.com/kotlin/parcelize
 19-Jan, Passing intents, https://developer.android.com/reference/android/content/Intent#getParcelableExtra(java.lang.String)
-19-Jan, Passing intents, 
+07-Feb, Django REST API, https://dev.to/jkaylight/django-rest-framework-with-postgresql-a-crud-tutorial-1l34
+07-FEb, Django REST API, https://youtu.be/Pwwz4_AvHDU

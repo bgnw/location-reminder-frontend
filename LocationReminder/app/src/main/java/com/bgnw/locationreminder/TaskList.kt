@@ -1,8 +1,8 @@
 package com.bgnw.locationreminder
 
 import android.os.Parcelable
-import java.time.LocalDateTime
 import kotlinx.parcelize.Parcelize
+import java.time.LocalDateTime
 
 @Parcelize
 data class TaskList(

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/lti_wrapper"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -35,14 +34,13 @@
                 android:paddingBottom="5dp"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:text="My List"
-                />
+                android:text="My List" />
 
             <TextView
                 android:id="@+id/lti_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Created 04 Jan - Shared with 2 people"/>
+                android:text="Created 04 Jan - Shared with 2 people" />
         </LinearLayout>
 
 
@@ -52,7 +50,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/chevron_right_24"
 
-            android:id="@+id/lti_chev"/>
+            android:id="@+id/lti_chev" />
 
     </RelativeLayout>
 </LinearLayout>

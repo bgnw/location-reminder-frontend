@@ -18,6 +18,9 @@ import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
+import java.sql.*
+import java.util.Properties
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,6 +29,8 @@ class MainActivity : AppCompatActivity() {
 
     // function is run once activity created (i.e. app is loaded in fg)
     override fun onCreate(savedInstanceState: Bundle?) {
+        Class.forName("org.postgresql.Driver");
+
         // call default onCreate function
         super.onCreate(savedInstanceState)
 
@@ -56,9 +61,13 @@ class MainActivity : AppCompatActivity() {
                 R.id.sign_out -> Toast.makeText(this, "Clicked sign out", Toast.LENGTH_SHORT).show()
                 // DEVELOPER MENU:
                 R.id.DEV_MENU -> changeFragment(DeveloperOptions(), it.title.toString())
+                R.id.DEV_MAP -> changeFragment(MapFragment(), it.title.toString())
             }
             true
         }
+
+        // TEMP
+//        dbPlayground()
 
         // Check and (if needed) request permission from the user to send notifications
         // TODO check this works on >= android 13
@@ -66,6 +75,8 @@ class MainActivity : AppCompatActivity() {
 
         // Create a general notification channel to send notifications from
         createNotificationChannel()
+
+        requestLocationPermission()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -127,7 +138,7 @@ class MainActivity : AppCompatActivity() {
         if (SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Channel Name"
             val descriptionText = "Channel Description"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel =
                 NotificationChannel(R.string.channel_id.toString(), name, importance).apply {
                     description = descriptionText
@@ -139,5 +150,60 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun requestLocationPermission() {
+        val requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission Granted TODO
+            } else {
+                // Permission Denied / Cancel TODO
+            }
+        }
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Do your task on permission granted
+            Log.d("LOCATION_PERMS", "permission already granted") // TEMP
+
+        } else if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            // TODO: display an educational UI explaining to the user the features that will be enabled
+            //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
+            //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
+            //       If the user selects "No thanks," allow the user to continue without notifications.
+            Log.d("LOCATION_PERMS", "would show rationale then ask for perm") // TEMP
+        } else {
+            // Directly ask for the permission
+            Log.d("LOCATION_PERMS", "asking for permission") // TEMP
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    private fun dbPlayground(){
+
+        /*
+        val host = "132.145.18.149"
+        val database = "ba2005";
+        val port = 5432;
+        val user = "ba2005";
+        val pass = "wnd4VKSANY3"
+        val url = "jdbc:postgresql://$host:$port/$database"
+        */
+
+        Log.d("DBCONN", "Start of dbPlayground")
+
+        val url = "jdbc:postgresql://132.145.18.149:5432/ba2005"
+        val props = Properties()
+        props.setProperty("user", "ba2005")
+        props.setProperty("password", "wnd4VKSANY3")
+        props.setProperty("ssl", "false")
+        val connection = DriverManager.getConnection(url, props)
+
+        Log.d("DBCONN", "is connection valid?: ${connection.isValid(0)}")
+    }
 
 }

@@ -13,10 +13,10 @@ data class TaskItem(
     var due: LocalDateTime,
     var completed: Boolean = false
 ) : Parcelable {
-    fun getHumanDuration() : String {
-        val dtFormatter : DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
-        val dueInFuture : Boolean
-        lateinit var durationUntilDue : String
+    fun getHumanDuration(): String {
+        val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
+        val dueInFuture: Boolean
+        lateinit var durationUntilDue: String
 
         val units = arrayOf(
             ChronoUnit.YEARS,
@@ -30,7 +30,7 @@ data class TaskItem(
         val secToDue = LocalDateTime.now().until(this.due, ChronoUnit.SECONDS)
         if (secToDue > 59) { // if more than 59 sec in future
             dueInFuture = true
-        } else if (secToDue <-59) { // if more than 59 sec in past
+        } else if (secToDue < -59) { // if more than 59 sec in past
             dueInFuture = false
         } else {
             return "now"
