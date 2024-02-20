@@ -20,7 +20,7 @@ class ViewTaskListActivity : AppCompatActivity() {
         } else {
             intent.getParcelableExtra<TaskList>("selected_list")
         }
-        title = list?.name
+        title = list?.title
 //        findViewById<TextView>(R.id.list_name).text = list?.toString() ?: "null sent"
 
 

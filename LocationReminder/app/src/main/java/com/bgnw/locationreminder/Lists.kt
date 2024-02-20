@@ -11,13 +11,14 @@ import androidx.fragment.app.Fragment
 import com.bgnw.locationreminder.databinding.FragmentListsBinding
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 
 class Lists : Fragment() {
 
     private lateinit var binding: FragmentListsBinding
     private lateinit var samples: ArrayList<TaskList> // TEMP
-    private val dtFormatter: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
+//    private val dtFormatter: DateTimeFormatter =
+//        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
 
     private val itemClickListener = object : TaskListListAdapter.OnItemClickListener {
         override fun onItemClick(position: TaskList) {
@@ -34,36 +35,36 @@ class Lists : Fragment() {
 
         samples = ArrayList()
 
-        val list1 = TaskList("Italy 2024", LocalDateTime.now())
+        val list1 = TaskList("Italy 2024", Calendar.getInstance())
         list1.items.add(
             TaskItem(
                 "Renew passport",
                 200,
-                LocalDateTime.parse("2024-04-01 11:00", dtFormatter)
+                Calendar.getInstance()
             )
         )
         list1.items.add(
             TaskItem(
                 "Buy toiletries",
                 18,
-                LocalDateTime.parse("2024-04-29 18:00", dtFormatter)
+                Calendar.getInstance()
             )
         )
         samples.add(list1)
 
-        val list2 = TaskList("Personal to-do", LocalDateTime.now())
+        val list2 = TaskList("Personal to-do", Calendar.getInstance())
         list2.items.add(
             TaskItem(
                 "Buy milk",
                 5,
-                LocalDateTime.parse("2024-01-20 11:00", dtFormatter)
+                Calendar.getInstance()
             )
         )
         list2.items.add(
             TaskItem(
                 "Collect prescription",
                 21,
-                LocalDateTime.parse("2024-01-31 12:00", dtFormatter)
+                Calendar.getInstance()
             )
         )
         samples.add(list2)

@@ -30,4 +30,9 @@
         android:layout_gravity="center"
         android:text="Send test request" />
 
+    <TextView
+        android:id="@+id/text_DEV_output"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>

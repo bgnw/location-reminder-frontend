@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId = "com.bgnw.locationreminder"
-        minSdk = 26
-        targetSdk = 34
+        minSdk = 22
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 
@@ -53,4 +53,8 @@ dependencies {
     implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.android.volley:volley:1.2.1")
     implementation("com.google.code.gson:gson:2.10")
+    implementation("com.squareup.retrofit2:retrofit:2.4.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.4.0")
+    implementation("com.google.code.gson:gson:2.10")
+
 }
