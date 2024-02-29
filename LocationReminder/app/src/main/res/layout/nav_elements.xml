@@ -11,8 +11,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/user_display_name"
-        android:text="Ben Agnew"
+        android:id="@+id/nav_user_display_name"
         android:textSize="18sp"
         android:paddingTop="20dp"
         android:textStyle="bold"
@@ -21,8 +20,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/user_username"
-        android:text="bgnw"
+        android:id="@+id/nav_user_username"
         android:textSize="14sp"
         android:paddingTop="4dp"
         android:background="@color/transparent" />
