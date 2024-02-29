@@ -8,14 +8,15 @@ import android.widget.ListView
 import androidx.fragment.app.Fragment
 import com.bgnw.locationreminder.databinding.FragmentNearbyBinding
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 class Nearby : Fragment() {
 
     private lateinit var binding: FragmentNearbyBinding
     private lateinit var samples: ArrayList<TaskItem>
-//    private var dtFormatter: DateTimeFormatter =
-//        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
+    private var dtFormatter: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
 
     private fun makeSamples() {
 
