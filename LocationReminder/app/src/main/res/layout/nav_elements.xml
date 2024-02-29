@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/nav_user_display_name"
+        android:text="No account"
         android:textSize="18sp"
         android:paddingTop="20dp"
         android:textStyle="bold"
@@ -21,6 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/nav_user_username"
+        android:text="Visit the Account tab to log-in"
         android:textSize="14sp"
         android:paddingTop="4dp"
         android:background="@color/transparent" />
