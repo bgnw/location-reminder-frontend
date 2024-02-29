@@ -16,7 +16,6 @@
 
 <!--    UNUSED-->
 <!--    android:dataExtractionRules="@xml/data_extraction_rules"-->
-<!--    android:usesCleartextTraffic="true"-->
 
 
     <application
@@ -28,7 +27,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LocationReminder"
         tools:targetApi="22"
-        android:requestLegacyExternalStorage="true">
+        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".ViewTaskListActivity"
             android:exported="false" />
@@ -37,7 +37,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
