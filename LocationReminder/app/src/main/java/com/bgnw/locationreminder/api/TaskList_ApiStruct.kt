@@ -3,7 +3,7 @@ package com.bgnw.locationreminder.api
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 
-data class TaskList_ApiStruct (
+data class TaskList_ApiStruct(
     val list_id: Int?,
     val title: String,
     val icon_name: String?,
@@ -14,7 +14,8 @@ data class TaskList_ApiStruct (
 ) {
     override fun toString(): String {
 
-        var dateFormatZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+        var dateFormatZulu: DateTimeFormatter =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
         val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
         return """
             {

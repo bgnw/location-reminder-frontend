@@ -1,6 +1,6 @@
 package com.bgnw.locationreminder.api
 
-data class TaskItem_ApiStruct (
+data class TaskItem_ApiStruct(
     var item_id: Int?,
     var list: Int,
     var body_text: String,

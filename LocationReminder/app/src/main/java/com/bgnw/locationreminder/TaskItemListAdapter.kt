@@ -13,7 +13,7 @@ class TaskItemListAdapter(
     private val taskItems: ArrayList<TaskItem>
 ) : ArrayAdapter<TaskItem>(context, R.layout.list_task_item, taskItems) {
 
-//    val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
+    val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -25,10 +25,10 @@ class TaskItemListAdapter(
         val liSubtitle: TextView = view.findViewById(R.id.li_subtitle)
 
         liTitle.text = taskItems[position].title
-//        liSubtitle.text = "${task.distance}m away, due ${task.due.format(dtFormatter)}"
+        liSubtitle.text = "${task.distance}m away, due ${task.due.format(dtFormatter)}"
 
 
-        liSubtitle.text = "${task.distance}m away, due XX"//${task.getHumanDuration()}"
+        liSubtitle.text = "${task.distance}m away, due ${task.getHumanDuration()}"
 
         return view
     }

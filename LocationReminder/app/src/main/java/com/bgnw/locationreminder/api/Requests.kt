@@ -15,7 +15,6 @@ import retrofit2.HttpException
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.Calendar
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -54,7 +53,10 @@ class Requests {
                             continuation.resumeWithException(t)
                         }
 
-                        override fun onResponse(call: Call<Account_ApiStruct>, response: Response<Account_ApiStruct>) {
+                        override fun onResponse(
+                            call: Call<Account_ApiStruct>,
+                            response: Response<Account_ApiStruct>
+                        ) {
                             if (response.isSuccessful) {
                                 val account = response.body()
                                 if (account != null) {
@@ -87,7 +89,10 @@ class Requests {
                             continuation.resumeWithException(t)
                         }
 
-                        override fun onResponse(call: Call<Account_ApiStruct>, response: Response<Account_ApiStruct>) {
+                        override fun onResponse(
+                            call: Call<Account_ApiStruct>,
+                            response: Response<Account_ApiStruct>
+                        ) {
                             if (response.isSuccessful) {
                                 val account = response.body()
                                 if (account != null) {
@@ -135,7 +140,10 @@ class Requests {
                             tv?.text = "ERROR: $t"
                         }
 
-                        override fun onResponse(call: Call<TaskList_ApiStruct>, response: Response<TaskList_ApiStruct>) {
+                        override fun onResponse(
+                            call: Call<TaskList_ApiStruct>,
+                            response: Response<TaskList_ApiStruct>
+                        ) {
                             Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
                             tv?.text = "RESPONSE: ${response.body().toString()}"
                         }
@@ -144,8 +152,6 @@ class Requests {
                 }
             }
         }
-
-
 
 
         @OptIn(DelicateCoroutinesApi::class)
@@ -165,7 +171,10 @@ class Requests {
                             tv?.text = "ERROR: $t"
                         }
 
-                        override fun onResponse(call: Call<List<TaskItem_ApiStruct>>, response: Response<List<TaskItem_ApiStruct>>) {
+                        override fun onResponse(
+                            call: Call<List<TaskItem_ApiStruct>>,
+                            response: Response<List<TaskItem_ApiStruct>>
+                        ) {
                             Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
                             tv?.text = "RESPONSE: ${response.body().toString()}"
                         }
@@ -174,7 +183,6 @@ class Requests {
                 }
             }
         }
-
 
 
     }

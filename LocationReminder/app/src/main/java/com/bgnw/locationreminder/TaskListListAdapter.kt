@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import java.time.format.DateTimeFormatter
 
 class TaskListListAdapter(
     private val context: Activity,
@@ -13,7 +14,7 @@ class TaskListListAdapter(
     private val onItemClickListener: OnItemClickListener
 ) : ArrayAdapter<TaskList>(context, R.layout.list_tasklist_item, taskLists) {
 
-   // val dtFormatterDateOnly: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM")
+     val dtFormatterDateOnly: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM")
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -29,7 +30,7 @@ class TaskListListAdapter(
 
         ltiName.text = taskList.title
         ltiDescription.text =
-            "${taskList.items.size} items • "//Created ${taskList.created.format(dtFormatterDateOnly)}"
+            "${taskList.items.size} items • Created ${taskList.created.format(dtFormatterDateOnly)}"
 
         return view
     }

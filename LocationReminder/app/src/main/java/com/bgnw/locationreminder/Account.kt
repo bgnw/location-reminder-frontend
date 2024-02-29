@@ -1,6 +1,5 @@
 package com.bgnw.locationreminder
 
-import AccountApi
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,7 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import com.bgnw.locationreminder.api.*
+import com.bgnw.locationreminder.api.Requests
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -43,21 +42,23 @@ class Account : Fragment() {
         val loginPassword = getView()?.findViewById<EditText>(R.id.account_login_password)
         val loginSubmitButton = getView()?.findViewById<Button>(R.id.account_login_submit)
 
-        viewModel.loggedInUsername.observe(viewLifecycleOwner, Observer {
-                username ->
-            Log.d("OBSERVER", "(in frag) username changed to $username");
+        viewModel.loggedInUsername.observe(viewLifecycleOwner, Observer { username ->
+            Log.d("OBSERVER", "(in frag) username changed to $username")
             devtextview?.text = username
         })
 
-        loginSubmitButton?.setOnClickListener{
+        loginSubmitButton?.setOnClickListener {
             val username: String = loginUsername?.text.toString()
-            if (username.isEmpty()) { return@setOnClickListener }
+            if (username.isEmpty()) {
+                return@setOnClickListener
+            }
 
             GlobalScope.launch(Dispatchers.Main) {
                 try {
                     val account = Requests.lookupUser(username, devtextview)
                     viewModel.loggedInUsername.value = account.username
-                    viewModel.loggedInDisplayName.value = account.display_name // TEMP change to display name
+                    viewModel.loggedInDisplayName.value =
+                        account.display_name // TEMP change to display name
 
                 } catch (e: Exception) {
                     // Handle exception

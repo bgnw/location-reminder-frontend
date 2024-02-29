@@ -10,7 +10,6 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,12 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.google.android.material.navigation.NavigationView
-import java.sql.*
-import java.util.Properties
 
 
 class MainActivity : AppCompatActivity() {
@@ -37,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     // function is run once activity created (i.e. app is loaded in fg)
     override fun onCreate(savedInstanceState: Bundle?) {
-        Class.forName("org.postgresql.Driver");
+        Class.forName("org.postgresql.Driver")
 
         // call default onCreate function
         super.onCreate(savedInstanceState)
@@ -55,12 +50,13 @@ class MainActivity : AppCompatActivity() {
 
         // intialise account information in nav drawer
         val navUsername: TextView = navView.getHeaderView(0).findViewById(R.id.nav_user_username)
-        val navDisplayName: TextView =  navView.getHeaderView(0).findViewById(R.id.nav_user_display_name)
-        viewModel.loggedInUsername.observe(this, Observer {
-                username -> navUsername.text = username
+        val navDisplayName: TextView =
+            navView.getHeaderView(0).findViewById(R.id.nav_user_display_name)
+        viewModel.loggedInUsername.observe(this, Observer { username ->
+            navUsername.text = username
         })
-        viewModel.loggedInDisplayName.observe(this, Observer {
-                displayName -> navDisplayName.text = displayName
+        viewModel.loggedInDisplayName.observe(this, Observer { displayName ->
+            navDisplayName.text = displayName
         })
 
         // open default fragment
@@ -186,7 +182,8 @@ class MainActivity : AppCompatActivity() {
             Log.d("LOCATION_PERMS", "permission already granted") // TEMP
 
         } else if (SDK_INT >= Build.VERSION_CODES.M
-                && shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            && shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
+        ) {
             // TODO: display an educational UI explaining to the user the features that will be enabled
             //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
             //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.

@@ -2,11 +2,10 @@ package com.bgnw.locationreminder
 
 import android.graphics.Rect
 import android.os.Bundle
-import android.preference.PreferenceManager
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import org.osmdroid.config.Configuration
 import org.osmdroid.config.IConfigurationProvider
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -15,14 +14,14 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 
-class MapFragment : Fragment()  {
+class MapFragment : Fragment() {
 
-    private lateinit var mapView : MapView;
+    private lateinit var mapView: MapView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ):  View {
+    ): View {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_map, container, false)
     }
@@ -30,7 +29,10 @@ class MapFragment : Fragment()  {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Configuration.getInstance().load(context, androidx.preference.PreferenceManager.getDefaultSharedPreferences(context as MainActivity))
+        Configuration.getInstance().load(
+            context,
+            androidx.preference.PreferenceManager.getDefaultSharedPreferences(context as MainActivity)
+        )
 //        Configuration.getInstance().load(context as MainActivity, PreferenceManager.getDefaultSharedPreferences(context as MainActivity));
 
         val configuration: IConfigurationProvider = Configuration.getInstance()

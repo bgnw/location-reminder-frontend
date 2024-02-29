@@ -1,5 +1,4 @@
 import com.bgnw.locationreminder.api.TaskItem_ApiStruct
-import com.bgnw.locationreminder.api.TaskList_ApiStruct
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET

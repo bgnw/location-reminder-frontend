@@ -53,7 +53,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
     private var reqButton: Button? = null
 
     private var reqQueue: RequestQueue? = null //gson
-    private var tvOutput: TextView? = null;
+    private var tvOutput: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -203,7 +203,10 @@ class DeveloperOptions : Fragment(), CoroutineScope {
                     tvOutput?.text = "ERROR: $t"
                 }
 
-                override fun onResponse(call: Call<TaskList_ApiStruct>, response: Response<TaskList_ApiStruct>) {
+                override fun onResponse(
+                    call: Call<TaskList_ApiStruct>,
+                    response: Response<TaskList_ApiStruct>
+                ) {
                     Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
                     tvOutput?.text = "RESPONSE: ${response.body().toString()}"
                 }
