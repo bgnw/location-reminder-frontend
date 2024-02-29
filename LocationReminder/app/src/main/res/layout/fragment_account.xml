@@ -1,14 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+<LinearLayout
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
     tools:context=".Account">
 
-    <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:id="@+id/account_temp_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DEV STRING"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/update_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="update username"
+        android:visibility="invisible" />
+
+
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
 
-</FrameLayout>
+        android:text="Create an account"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textSize="27sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/account_create_displayName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="5dp"
+        android:hint="Display name"
+        android:maxLength="80"
+        android:singleLine="true" />
+
+    <EditText
+        android:id="@+id/account_create_biography"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="5dp"
+        android:hint="Biography"
+        android:lines="3"
+        android:maxLength="600"
+        android:singleLine="false" />
+
+    <EditText
+        android:id="@+id/account_create_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="5dp"
+        android:hint="Username"
+        android:maxLength="30"
+        android:singleLine="true" />
+
+    <EditText
+        android:id="@+id/account_create_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="5dp"
+        android:hint="Password"
+        android:maxLength="200"
+        android:singleLine="true" />
+
+    <Button
+        android:id="@+id/account_create_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
+        android:layout_marginHorizontal="20dp"
+        android:text="Create account" />
+
+    <!--    TODO choose profile img   -->
+
+
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="50dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+
+        android:text="Log-in to your account"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textSize="27sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/account_login_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="5dp"
+        android:hint="Username"
+        android:maxLength="30"
+        android:singleLine="true" />
+
+    <EditText
+        android:id="@+id/account_login_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="5dp"
+        android:hint="Password"
+        android:maxLength="200"
+        android:singleLine="true" />
+
+    <Button
+        android:id="@+id/account_login_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
+        android:layout_marginHorizontal="20dp"
+        android:text="Log-in" />
+
+
+</LinearLayout>
+
+</ScrollView>
