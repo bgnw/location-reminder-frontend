@@ -1,6 +1,7 @@
 package com.bgnw.locationreminder
 
 import AccountApi
+import TaskListApi
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -17,19 +18,36 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
-import com.bgnw.locationreminder.api.Account
+import com.bgnw.locationreminder.api.Requests
+import com.bgnw.locationreminder.api.TaskList_ApiStruct
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.coroutines.CoroutineContext
 
 
-class DeveloperOptions : Fragment() {
+class DeveloperOptions : Fragment(), CoroutineScope {
+
+
+    // coroutine boilerplate from https://stackoverflow.com/questions/53928668/
+    private var job: Job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
 
     private var notifButton: Button? = null
     private var reqButton: Button? = null
@@ -64,7 +82,11 @@ class DeveloperOptions : Fragment() {
             Log.d("BGNW-req", "req btn pressed")
             tvOutput?.text = "req btn pressed"
 //            sendRq()
-            initialiseApi()
+//            initialiseApi()
+            launch {
+                getListItemsTest()
+            }
+
             Log.d("BGNW-req", "functions done.")
         }
     }
@@ -98,10 +120,12 @@ class DeveloperOptions : Fragment() {
             .baseUrl(getString(R.string.API_URL))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        val api: AccountApi = retrofit.create(AccountApi::class.java)
+        val accountApi: AccountApi = retrofit.create(AccountApi::class.java)
+        val tasklApi: TaskListApi = retrofit.create(TaskListApi::class.java)
 
+//        *************** LOOKUP ACCOUNT ba *************************
 //        GlobalScope.launch(Dispatchers.IO) {
-//            var call = api.getAccount("ba", "json")
+//            var call = accountApi.getAccount("ba", "json")
 //
 //            call.enqueue(object : Callback<Account> {
 //                override fun onFailure(call: Call<Account>, t: Throwable) {
@@ -117,22 +141,69 @@ class DeveloperOptions : Fragment() {
 //            })
 //        }
 
-        GlobalScope.launch(Dispatchers.IO) {
-            var call = api.createAccount( com.bgnw.locationreminder.api.Account(
-                username = "sim",
-                display_name = "simran",
-                password = "pass",
-                biography = "hello",
-                profile_img_path = "none"
-            ))
+//        *********************** CREATE ACCOUNT sim **************************
+//        GlobalScope.launch(Dispatchers.IO) {
+//            var call = accountApi.createAccount( com.bgnw.locationreminder.api.Account(
+//                username = "sim",
+//                display_name = "simran",
+//                password = "pass",
+//                biography = "hello",
+//                profile_img_path = "none"
+//            ))
+//
+//            call.enqueue(object : Callback<Account> {
+//                override fun onFailure(call: Call<Account>, t: Throwable) {
+//                    Log.d("DJA API", "ERROR: $t")
+//                    tvOutput?.text = "ERROR: $t"
+//                }
+//
+//                override fun onResponse(call: Call<Account>, response: Response<Account>) {
+//                    Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
+//                    tvOutput?.text = "RESPONSE: ${response.body().toString()}"
+//                }
+//
+//            })
+//        }
 
-            call.enqueue(object : Callback<Account> {
-                override fun onFailure(call: Call<Account>, t: Throwable) {
+
+//        GlobalScope.launch(Dispatchers.IO) {
+//            val obj = TaskList_ApiStruct(
+//                title = "test3",
+//                icon_name = "none",
+//                created_at = Calendar.getInstance(),
+//                owner_username = "sim",
+//                sort_by = "name",
+//                visibility = 0
+//            )
+//            Log.d("DJA API", obj.toString())
+//            var call = tasklApi.createList(obj)
+//
+//            call.enqueue(object : Callback<TaskList_ApiStruct> {
+//                override fun onFailure(call: Call<TaskList_ApiStruct>, t: Throwable) {
+//                    Log.d("DJA API", "ERROR: $t")
+//                    tvOutput?.text = "ERROR: $t"
+//                }
+//
+//                override fun onResponse(call: Call<TaskList_ApiStruct>, response: Response<TaskList_ApiStruct>) {
+//                    Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
+//                    tvOutput?.text = "RESPONSE: ${response.body().toString()}"
+//                }
+//
+//            })
+//        }
+
+
+        GlobalScope.launch(Dispatchers.IO) {
+
+            var call = tasklApi.getList(5, "json")
+
+            call.enqueue(object : Callback<TaskList_ApiStruct> {
+                override fun onFailure(call: Call<TaskList_ApiStruct>, t: Throwable) {
                     Log.d("DJA API", "ERROR: $t")
                     tvOutput?.text = "ERROR: $t"
                 }
 
-                override fun onResponse(call: Call<Account>, response: Response<Account>) {
+                override fun onResponse(call: Call<TaskList_ApiStruct>, response: Response<TaskList_ApiStruct>) {
                     Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
                     tvOutput?.text = "RESPONSE: ${response.body().toString()}"
                 }
@@ -141,5 +212,11 @@ class DeveloperOptions : Fragment() {
         }
 
 
+    }
+
+
+    private suspend fun getListItemsTest() {
+        Requests.initialiseApi()
+        Requests.getListItems(3, tvOutput)
     }
 }
