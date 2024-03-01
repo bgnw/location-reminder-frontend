@@ -84,7 +84,7 @@ class Nearby : Fragment() {
 
         val context = context as MainActivity
         val lv = context.findViewById(R.id.lv_nearby_tasks) as ListView
-        val adapter = TaskItemListAdapter(context, samples)
-        lv.adapter = adapter
+//        val adapter = TaskItemListAdapter(context, samples)
+//        lv.adapter = adapter
     }
 }

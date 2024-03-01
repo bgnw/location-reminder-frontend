@@ -1,8 +1,11 @@
 package com.bgnw.locationreminder.api
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 
+@Parcelize
 data class TaskList_ApiStruct(
     val list_id: Int?,
     val title: String,
@@ -12,7 +15,7 @@ data class TaskList_ApiStruct(
     val sort_by: String?,
     val visibility: Int,
     var items: List<TaskItem_ApiStruct>? = null
-) {
+): Parcelable {
     override fun toString(): String {
 
         var dateFormatZulu: DateTimeFormatter =

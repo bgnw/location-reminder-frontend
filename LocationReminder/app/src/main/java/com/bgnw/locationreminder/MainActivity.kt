@@ -99,9 +99,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     Log.d("DJA API", "response2x: ${resultTL?.first()?.items.toString()}")
 
 
-
-
-
+                    viewModel.lists.value = resultTL
                 }
             }
         })

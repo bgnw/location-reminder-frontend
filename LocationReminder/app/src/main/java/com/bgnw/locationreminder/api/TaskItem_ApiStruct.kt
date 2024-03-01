@@ -1,5 +1,9 @@
 package com.bgnw.locationreminder.api
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class TaskItem_ApiStruct(
     var item_id: Int?,
     var list: Int,
@@ -11,7 +15,7 @@ data class TaskItem_ApiStruct(
     var due_at: String?,
     var is_sub_task: Boolean,
     var parent_task: Int?,
-) {
+): Parcelable {
     override fun toString(): String {
         return """
             {
