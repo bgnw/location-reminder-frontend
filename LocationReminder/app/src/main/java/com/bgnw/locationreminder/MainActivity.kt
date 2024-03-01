@@ -21,7 +21,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.api.Requests
-import com.bgnw.locationreminder.api.TaskList_ApiStruct
+import com.bgnw.locationreminder.api.TaskList
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
                     if (resultTL != null) {
-                        for (list: TaskList_ApiStruct in resultTL) {
+                        for (list: TaskList in resultTL) {
                             Log.d("DJA API", "running loop")
 
                             if (list.list_id == null) continue

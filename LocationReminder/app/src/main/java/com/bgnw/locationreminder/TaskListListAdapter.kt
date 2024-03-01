@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import com.bgnw.locationreminder.api.TaskList_ApiStruct
+import com.bgnw.locationreminder.api.TaskList
 import java.time.format.DateTimeFormatter
 
 class TaskListListAdapter(
     private val context: Activity,
-    private val taskLists: List<TaskList_ApiStruct>,
+    private val taskLists: List<TaskList>,
     private val onItemClickListener: OnItemClickListener
-) : ArrayAdapter<TaskList_ApiStruct>(context, R.layout.list_tasklist_item, taskLists) {
+) : ArrayAdapter<TaskList>(context, R.layout.list_tasklist_item, taskLists) {
 
      val dtFormatterDateOnly: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM")
 
@@ -38,6 +38,6 @@ class TaskListListAdapter(
 
 
     interface OnItemClickListener {
-        fun onItemClick(position: TaskList_ApiStruct)
+        fun onItemClick(position: TaskList)
     }
 }

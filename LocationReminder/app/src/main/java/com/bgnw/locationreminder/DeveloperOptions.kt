@@ -19,7 +19,7 @@ import androidx.fragment.app.Fragment
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.bgnw.locationreminder.api.Requests
-import com.bgnw.locationreminder.api.TaskList_ApiStruct
+import com.bgnw.locationreminder.api.TaskList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -167,7 +167,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 
 
 //        GlobalScope.launch(Dispatchers.IO) {
-//            val obj = TaskList_ApiStruct(
+//            val obj = TaskList(
 //                title = "test3",
 //                icon_name = "none",
 //                created_at = Calendar.getInstance(),
@@ -178,13 +178,13 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //            Log.d("DJA API", obj.toString())
 //            var call = tasklApi.createList(obj)
 //
-//            call.enqueue(object : Callback<TaskList_ApiStruct> {
-//                override fun onFailure(call: Call<TaskList_ApiStruct>, t: Throwable) {
+//            call.enqueue(object : Callback<TaskList> {
+//                override fun onFailure(call: Call<TaskList>, t: Throwable) {
 //                    Log.d("DJA API", "ERROR: $t")
 //                    tvOutput?.text = "ERROR: $t"
 //                }
 //
-//                override fun onResponse(call: Call<TaskList_ApiStruct>, response: Response<TaskList_ApiStruct>) {
+//                override fun onResponse(call: Call<TaskList>, response: Response<TaskList>) {
 //                    Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
 //                    tvOutput?.text = "RESPONSE: ${response.body().toString()}"
 //                }
@@ -197,15 +197,15 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 
             var call = tasklApi.getList(5, "json")
 
-            call.enqueue(object : Callback<TaskList_ApiStruct> {
-                override fun onFailure(call: Call<TaskList_ApiStruct>, t: Throwable) {
+            call.enqueue(object : Callback<TaskList> {
+                override fun onFailure(call: Call<TaskList>, t: Throwable) {
                     Log.d("DJA API", "ERROR: $t")
                     tvOutput?.text = "ERROR: $t"
                 }
 
                 override fun onResponse(
-                    call: Call<TaskList_ApiStruct>,
-                    response: Response<TaskList_ApiStruct>
+                    call: Call<TaskList>,
+                    response: Response<TaskList>
                 ) {
                     Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
                     tvOutput?.text = "RESPONSE: ${response.body().toString()}"

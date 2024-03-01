@@ -4,7 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
-import com.bgnw.locationreminder.api.TaskList_ApiStruct
+import com.bgnw.locationreminder.api.TaskList
 import com.bgnw.locationreminder.databinding.FragmentNearbyBinding
 
 @Suppress("DEPRECATION") // suppress deprecation warning for getParcelableExtra, handled.
@@ -15,10 +15,10 @@ class ViewTaskListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_task_list)
 
-        val list: TaskList_ApiStruct? = if (Build.VERSION.SDK_INT >= 33) {
-            intent.getParcelableExtra("selected_list", TaskList_ApiStruct::class.java)
+        val list: TaskList? = if (Build.VERSION.SDK_INT >= 33) {
+            intent.getParcelableExtra("selected_list", TaskList::class.java)
         } else {
-            intent.getParcelableExtra<TaskList_ApiStruct>("selected_list")
+            intent.getParcelableExtra<TaskList>("selected_list")
         }
         title = list?.title
 

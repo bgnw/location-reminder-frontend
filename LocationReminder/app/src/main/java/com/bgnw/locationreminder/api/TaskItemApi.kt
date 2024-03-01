@@ -1,4 +1,4 @@
-import com.bgnw.locationreminder.api.TaskItem_ApiStruct
+import com.bgnw.locationreminder.api.TaskItem
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -11,16 +11,16 @@ interface TaskItemApi {
     fun getItem(
         @Path("item_id") listId: Int,
         @Query("format") format: String,
-    ): Call<TaskItem_ApiStruct>
+    ): Call<TaskItem>
 
     @GET("prod-taski/from-list/{list_id}")
     fun getListItems(
         @Path("list_id") listId: Int,
         @Query("format") format: String,
-    ): Call<List<TaskItem_ApiStruct>>
+    ): Call<List<TaskItem>>
 
     @POST("prod-taski/create/")
     fun createItem(
-        @Body body: TaskItem_ApiStruct
-    ): Call<TaskItem_ApiStruct>
+        @Body body: TaskItem
+    ): Call<TaskItem>
 }

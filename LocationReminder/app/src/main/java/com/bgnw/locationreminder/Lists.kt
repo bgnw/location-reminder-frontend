@@ -9,9 +9,8 @@ import android.view.ViewGroup
 import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.bgnw.locationreminder.api.TaskList_ApiStruct
+import com.bgnw.locationreminder.api.TaskList
 import com.bgnw.locationreminder.databinding.FragmentListsBinding
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class Lists : Fragment() {
@@ -19,12 +18,12 @@ class Lists : Fragment() {
     private val viewModel: ApplicationState by activityViewModels()
 
     private lateinit var binding: FragmentListsBinding
-    private lateinit var samples: List<TaskList_ApiStruct> // TEMP
+    private lateinit var samples: List<TaskList> // TEMP
     private val dtFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
 
     private val itemClickListener = object : TaskListListAdapter.OnItemClickListener {
-        override fun onItemClick(position: TaskList_ApiStruct) {
+        override fun onItemClick(position: TaskList) {
             Log.d("Data: ", position.toString())
 
             val intent = Intent(context, ViewTaskListActivity::class.java)
@@ -33,45 +32,6 @@ class Lists : Fragment() {
             startActivity(intent)
         }
     }
-
-//    private fun makeSamples() {
-//
-//        samples = ArrayList()
-//
-//        val list1 = TaskList("Italy 2024", LocalDateTime.now())
-//        list1.items.add(
-//            TaskItem(
-//                "Renew passport",
-//                200,
-//                LocalDateTime.parse("2024-04-01 11:00", dtFormatter)
-//            )
-//        )
-//        list1.items.add(
-//            TaskItem(
-//                "Buy toiletries",
-//                18,
-//                LocalDateTime.parse("2024-04-29 18:00", dtFormatter)
-//            )
-//        )
-//        samples.add(list1)
-//
-//        val list2 = TaskList("Personal to-do", LocalDateTime.now())
-//        list2.items.add(
-//            TaskItem(
-//                "Buy milk",
-//                5,
-//                LocalDateTime.parse("2024-01-20 11:00", dtFormatter)
-//            )
-//        )
-//        list2.items.add(
-//            TaskItem(
-//                "Collect prescription",
-//                21,
-//                LocalDateTime.parse("2024-01-31 12:00", dtFormatter)
-//            )
-//        )
-//        samples.add(list2)
-//    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

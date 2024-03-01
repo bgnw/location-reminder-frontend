@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import com.bgnw.locationreminder.api.TaskItem_ApiStruct
+import com.bgnw.locationreminder.api.TaskItem
 import java.time.format.DateTimeFormatter
 
 class TaskItemListAdapter(
     private val context: Activity,
-    private val taskItems: List<TaskItem_ApiStruct>
-) : ArrayAdapter<TaskItem_ApiStruct>(context, R.layout.list_task_item, taskItems) {
+    private val taskItems: List<TaskItem>
+) : ArrayAdapter<TaskItem>(context, R.layout.list_task_item, taskItems) {
 
     val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
 

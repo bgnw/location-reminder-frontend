@@ -1,4 +1,4 @@
-import com.bgnw.locationreminder.api.TaskList_ApiStruct
+import com.bgnw.locationreminder.api.TaskList
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -11,16 +11,16 @@ interface TaskListApi {
     fun getList(
         @Path("list_id") listId: Int,
         @Query("format") format: String,
-    ): Call<TaskList_ApiStruct>
+    ): Call<TaskList>
 
     @POST("prod-taskl/create/")
     fun createList(
-        @Body body: TaskList_ApiStruct
-    ): Call<TaskList_ApiStruct>
+        @Body body: TaskList
+    ): Call<TaskList>
 
     @GET("prod-taskl/from-user/{username}")
     fun getOwnedLists(
         @Path("username") username: String,
         @Query("format") format: String,
-    ): Call<List<TaskList_ApiStruct>>
+    ): Call<List<TaskList>>
 }
