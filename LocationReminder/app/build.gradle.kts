@@ -39,6 +39,7 @@ android {
     }
 }
 
+
 dependencies {
 
     implementation("androidx.core:core-ktx:1.12.0")
@@ -51,6 +52,8 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation("org.postgresql:postgresql:42.2.27") // for JDBC TODO remove
     implementation("org.osmdroid:osmdroid-android:6.1.14")
+    implementation("org.osmdroid:osmdroid-mapsforge:6.1.10")
+    implementation("com.github.MKergall:osmbonuspack:6.9.0")
     implementation("com.android.volley:volley:1.2.1")
     implementation("com.google.code.gson:gson:2.10")
     implementation("com.squareup.retrofit2:retrofit:2.4.0")
@@ -60,3 +63,4 @@ dependencies {
 
 
 }
+

@@ -11,10 +11,13 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.map_aux.MapInfoBox
 import org.osmdroid.config.Configuration
 import org.osmdroid.config.IConfigurationProvider
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
@@ -77,9 +80,9 @@ class MapFragment : Fragment() {
             }
         }
         mapView.overlays.add(locationOverlay)
+
+        addMarker(GeoPoint(55.91201, -3.31961), "GRID", "Research building")
         mapView.invalidate()
-
-
 
         /*
         val mapLoadingMessage = getView()?.findViewById<TextView>(R.id.map_loading_message)
@@ -94,6 +97,15 @@ class MapFragment : Fragment() {
         Log.d("MAP", "ready")
         */
 
+    }
 
+
+    private fun addMarker(geoPoint: GeoPoint, name: String, information: String) {
+        val marker = Marker(mapView)
+        marker.position = geoPoint
+        marker.title = name
+        marker.snippet = information
+        marker.infoWindow = MapInfoBox(mapView)
+        mapView.overlays.add(marker)
     }
 }
