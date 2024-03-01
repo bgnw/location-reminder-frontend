@@ -2,7 +2,7 @@ package com.bgnw.locationreminder
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.bgnw.locationreminder.api.TaskList
+import com.bgnw.locationreminder.data.TaskList
 
 class ApplicationState : ViewModel() {
     val loggedInUsername: MutableLiveData<String?> by lazy {

@@ -21,7 +21,13 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.api.Requests
-import com.bgnw.locationreminder.api.TaskList
+import com.bgnw.locationreminder.data.TaskList
+import com.bgnw.locationreminder.frag.AccountFragment
+import com.bgnw.locationreminder.frag.ListsFragment
+import com.bgnw.locationreminder.frag.MapFragment
+import com.bgnw.locationreminder.frag.NearbyFragment
+import com.bgnw.locationreminder.frag.SettingsFragment
+import com.bgnw.locationreminder.frag.SharingFragment
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -108,18 +114,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         })
 
         // open default fragment
-        changeFragment(Nearby(), "Nearby")
-        navView.setCheckedItem(R.id.nearby)
+        changeFragment(ListsFragment(), "Lists")
+        navView.setCheckedItem(R.id.lists)
 
         // nav menu click handler
         navView.setNavigationItemSelectedListener {
             it.isChecked = true
             when (it.itemId) {
-                R.id.nearby -> changeFragment(Nearby(), it.title.toString())
-                R.id.lists -> changeFragment(Lists(), it.title.toString())
-                R.id.sharing -> changeFragment(Sharing(), it.title.toString())
-                R.id.account -> changeFragment(Account(), it.title.toString())
-                R.id.settings -> changeFragment(Settings(), it.title.toString())
+                R.id.nearby -> changeFragment(NearbyFragment(), it.title.toString())
+                R.id.lists -> changeFragment(ListsFragment(), it.title.toString())
+                R.id.sharing -> changeFragment(SharingFragment(), it.title.toString())
+                R.id.account -> changeFragment(AccountFragment(), it.title.toString())
+                R.id.settings -> changeFragment(SettingsFragment(), it.title.toString())
                 R.id.sign_out -> Toast.makeText(this, "Clicked sign out", Toast.LENGTH_SHORT).show()
                 // DEVELOPER MENU:
                 R.id.DEV_MENU -> changeFragment(DeveloperOptions(), it.title.toString())

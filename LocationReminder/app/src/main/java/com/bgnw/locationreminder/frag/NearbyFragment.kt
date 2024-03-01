@@ -1,4 +1,4 @@
-package com.bgnw.locationreminder
+package com.bgnw.locationreminder.frag
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,11 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import androidx.fragment.app.Fragment
+import com.bgnw.locationreminder.MainActivity
+import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.databinding.FragmentNearbyBinding
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class Nearby : Fragment() {
+class NearbyFragment : Fragment() {
 
     private lateinit var binding: FragmentNearbyBinding
     private var dtFormatter: DateTimeFormatter =

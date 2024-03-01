@@ -1,4 +1,4 @@
-package com.bgnw.locationreminder
+package com.bgnw.locationreminder.frag
 
 import android.graphics.Rect
 import android.os.Bundle
@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.bgnw.locationreminder.MainActivity
+import com.bgnw.locationreminder.R
 import org.osmdroid.config.Configuration
 import org.osmdroid.config.IConfigurationProvider
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory

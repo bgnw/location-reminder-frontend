@@ -19,7 +19,7 @@ import androidx.fragment.app.Fragment
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.bgnw.locationreminder.api.Requests
-import com.bgnw.locationreminder.api.TaskList
+import com.bgnw.locationreminder.data.TaskList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -127,13 +127,13 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //        GlobalScope.launch(Dispatchers.IO) {
 //            var call = accountApi.getAccount("ba", "json")
 //
-//            call.enqueue(object : Callback<Account> {
-//                override fun onFailure(call: Call<Account>, t: Throwable) {
+//            call.enqueue(object : Callback<AccountFragment> {
+//                override fun onFailure(call: Call<AccountFragment>, t: Throwable) {
 //                    Log.d("DJA API", "ERROR: $t")
 //                    tvOutput?.text = "ERROR: $t"
 //                }
 //
-//                override fun onResponse(call: Call<Account>, response: Response<Account>) {
+//                override fun onResponse(call: Call<AccountFragment>, response: Response<AccountFragment>) {
 //                    Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
 //                    tvOutput?.text = "RESPONSE: ${response.body().toString()}"
 //                }
@@ -143,7 +143,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 
 //        *********************** CREATE ACCOUNT sim **************************
 //        GlobalScope.launch(Dispatchers.IO) {
-//            var call = accountApi.createAccount( com.bgnw.locationreminder.api.Account(
+//            var call = accountApi.createAccount( com.bgnw.locationreminder.api.AccountFragment(
 //                username = "sim",
 //                display_name = "simran",
 //                password = "pass",
@@ -151,13 +151,13 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //                profile_img_path = "none"
 //            ))
 //
-//            call.enqueue(object : Callback<Account> {
-//                override fun onFailure(call: Call<Account>, t: Throwable) {
+//            call.enqueue(object : Callback<AccountFragment> {
+//                override fun onFailure(call: Call<AccountFragment>, t: Throwable) {
 //                    Log.d("DJA API", "ERROR: $t")
 //                    tvOutput?.text = "ERROR: $t"
 //                }
 //
-//                override fun onResponse(call: Call<Account>, response: Response<Account>) {
+//                override fun onResponse(call: Call<AccountFragment>, response: Response<AccountFragment>) {
 //                    Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
 //                    tvOutput?.text = "RESPONSE: ${response.body().toString()}"
 //                }

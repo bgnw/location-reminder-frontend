@@ -1,4 +1,4 @@
-import com.bgnw.locationreminder.api.TaskList
+import com.bgnw.locationreminder.data.TaskList
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET

@@ -5,6 +5,9 @@ import TaskItemApi
 import TaskListApi
 import android.util.Log
 import android.widget.TextView
+import com.bgnw.locationreminder.data.Account
+import com.bgnw.locationreminder.data.TaskItem
+import com.bgnw.locationreminder.data.TaskList
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -44,20 +47,20 @@ class Requests {
         }
 
         @OptIn(DelicateCoroutinesApi::class)
-        suspend fun lookupUser(username: String, tv: TextView?): Account_ApiStruct {
+        suspend fun lookupUser(username: String, tv: TextView?): Account {
             // *************** LOOKUP ACCOUNT  *************************
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
                     var call = accountApi.getAccount(username, "json")
 
-                    call.enqueue(object : Callback<Account_ApiStruct> {
-                        override fun onFailure(call: Call<Account_ApiStruct>, t: Throwable) {
+                    call.enqueue(object : Callback<Account> {
+                        override fun onFailure(call: Call<Account>, t: Throwable) {
                             continuation.resumeWithException(t)
                         }
 
                         override fun onResponse(
-                            call: Call<Account_ApiStruct>,
-                            response: Response<Account_ApiStruct>
+                            call: Call<Account>,
+                            response: Response<Account>
                         ) {
                             if (response.isSuccessful) {
                                 val account = response.body()
@@ -80,20 +83,20 @@ class Requests {
             username: String,
             password: String,
             tv: TextView?
-        ): Account_ApiStruct {
+        ): Account {
             // *************** LOOKUP ACCOUNT  *************************
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
                     var call = accountApi.getAccount(username, "json")
 
-                    call.enqueue(object : Callback<Account_ApiStruct> {
-                        override fun onFailure(call: Call<Account_ApiStruct>, t: Throwable) {
+                    call.enqueue(object : Callback<Account> {
+                        override fun onFailure(call: Call<Account>, t: Throwable) {
                             continuation.resumeWithException(t)
                         }
 
                         override fun onResponse(
-                            call: Call<Account_ApiStruct>,
-                            response: Response<Account_ApiStruct>
+                            call: Call<Account>,
+                            response: Response<Account>
                         ) {
                             if (response.isSuccessful) {
                                 val account = response.body()
@@ -120,7 +123,7 @@ class Requests {
             sort_by: String,
             visibility: Int,
             tv: TextView?
-        ): Account_ApiStruct {
+        ): Account {
             // *************** CREATE TASK LIST  *************************
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {

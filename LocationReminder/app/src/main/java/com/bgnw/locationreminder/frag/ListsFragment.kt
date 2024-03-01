@@ -1,4 +1,4 @@
-package com.bgnw.locationreminder
+package com.bgnw.locationreminder.frag
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,11 +9,16 @@ import android.view.ViewGroup
 import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.bgnw.locationreminder.api.TaskList
+import com.bgnw.locationreminder.ApplicationState
+import com.bgnw.locationreminder.MainActivity
+import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.adapter.TaskListListAdapter
+import com.bgnw.locationreminder.activity.ViewTaskListActivity
+import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.databinding.FragmentListsBinding
 import java.time.format.DateTimeFormatter
 
-class Lists : Fragment() {
+class ListsFragment : Fragment() {
 
     private val viewModel: ApplicationState by activityViewModels()
 

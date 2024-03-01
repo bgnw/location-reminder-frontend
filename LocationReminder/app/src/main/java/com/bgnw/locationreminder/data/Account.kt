@@ -1,6 +1,6 @@
-package com.bgnw.locationreminder.api
+package com.bgnw.locationreminder.data
 
-data class Account_ApiStruct(
+data class Account(
     var username: String,
     var display_name: String,
     var password: String,

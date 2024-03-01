@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context=".Nearby">
+    tools:context=".frag.NearbyFragment">
 
     <ListView
         android:id="@+id/lv_nearby_tasks"

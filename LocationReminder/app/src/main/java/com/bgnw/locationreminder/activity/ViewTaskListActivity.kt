@@ -1,10 +1,12 @@
-package com.bgnw.locationreminder
+package com.bgnw.locationreminder.activity
 
 import android.os.Build
 import android.os.Bundle
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
-import com.bgnw.locationreminder.api.TaskList
+import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.adapter.TaskItemListAdapter
+import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.databinding.FragmentNearbyBinding
 
 @Suppress("DEPRECATION") // suppress deprecation warning for getParcelableExtra, handled.

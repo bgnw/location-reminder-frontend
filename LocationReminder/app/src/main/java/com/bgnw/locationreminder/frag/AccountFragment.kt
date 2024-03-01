@@ -1,4 +1,4 @@
-package com.bgnw.locationreminder
+package com.bgnw.locationreminder.frag
 
 import android.os.Bundle
 import android.util.Log
@@ -11,13 +11,15 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import com.bgnw.locationreminder.ApplicationState
+import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.api.Requests
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class Account : Fragment() {
+class AccountFragment : Fragment() {
 
     private val viewModel: ApplicationState by activityViewModels()
 

@@ -1,4 +1,4 @@
-import com.bgnw.locationreminder.api.Account_ApiStruct
+import com.bgnw.locationreminder.data.Account
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -11,10 +11,10 @@ interface AccountApi {
     fun getAccount(
         @Path("username") username: String?,
         @Query("format") format: String?,
-    ): Call<Account_ApiStruct>
+    ): Call<Account>
 
     @POST("prod-account/create/")
     fun createAccount(
-        @Body body: Account_ApiStruct
-    ): Call<Account_ApiStruct>
+        @Body body: Account
+    ): Call<Account>
 }
