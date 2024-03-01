@@ -54,9 +54,7 @@ class ListsFragment : Fragment() {
 
         val context = context as MainActivity
         val lv = context.findViewById(R.id.lv_tasklist_list) as ListView
-//        val adapter = TaskListListAdapter(context, samples, itemClickListener)
-        val adapter =
-            viewModel.lists.value?.let { TaskListListAdapter(context, it, itemClickListener) }
+        val adapter = viewModel.lists.value?.let { TaskListListAdapter(context, it, itemClickListener) }
         lv.adapter = adapter
     }
 

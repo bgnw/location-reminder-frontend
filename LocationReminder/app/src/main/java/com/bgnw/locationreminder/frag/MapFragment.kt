@@ -8,9 +8,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
+import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.data.TaskItem
+import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.map_aux.MapInfoBox
 import org.osmdroid.config.Configuration
 import org.osmdroid.config.IConfigurationProvider
@@ -24,6 +30,8 @@ import java.io.File
 
 
 class MapFragment : Fragment() {
+
+    private val viewModel: ApplicationState by activityViewModels()
 
     private lateinit var mapView: MapView
 
@@ -97,7 +105,24 @@ class MapFragment : Fragment() {
         Log.d("MAP", "ready")
         */
 
+        var i = -3.31961
+
+        viewModel.lists.observe(viewLifecycleOwner, Observer { lists ->
+            if (lists != null) {
+                for (list: TaskList in lists) {
+                    if (list.items != null) {
+                        for (item: TaskItem in list.items!!) {
+                            i -= 0.002
+                            addMarker(GeoPoint(55.91201, i), item.body_text, "Sample")
+                        }
+                    }
+                }
+            }
+        })
+
     }
+
+
 
 
     private fun addMarker(geoPoint: GeoPoint, name: String, information: String) {
