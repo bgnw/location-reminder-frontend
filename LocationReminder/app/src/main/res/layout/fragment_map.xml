@@ -8,8 +8,17 @@
     <org.osmdroid.views.MapView
         android:id="@+id/osm_map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-
+        android:layout_height="match_parent">
     </org.osmdroid.views.MapView>
+
+<!--    <TextView-->
+<!--        android:id="@+id/map_loading_message"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:gravity="center"-->
+<!--        android:text="Map is loading..."-->
+<!--        android:textSize="24sp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:visibility="visible" />-->
+
 </FrameLayout>

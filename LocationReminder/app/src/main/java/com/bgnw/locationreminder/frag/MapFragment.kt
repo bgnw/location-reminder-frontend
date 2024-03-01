@@ -2,9 +2,12 @@ package com.bgnw.locationreminder.frag
 
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
@@ -15,6 +18,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
+
 
 class MapFragment : Fragment() {
 
@@ -74,6 +78,22 @@ class MapFragment : Fragment() {
         }
         mapView.overlays.add(locationOverlay)
         mapView.invalidate()
+
+
+
+        /*
+        val mapLoadingMessage = getView()?.findViewById<TextView>(R.id.map_loading_message)
+
+        val tileStates = mapView.overlayManager.tilesOverlay.tileStates
+        // evaluate the tile states
+        while (tileStates.total != tileStates.upToDate) {
+            Thread.sleep(1000)
+            Log.d("MAP", "not ready")
+        }
+        mapLoadingMessage?.visibility = View.GONE
+        Log.d("MAP", "ready")
+        */
+
 
     }
 }
