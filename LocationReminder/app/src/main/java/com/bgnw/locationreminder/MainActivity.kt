@@ -1,6 +1,7 @@
 package com.bgnw.locationreminder
 
 import android.Manifest
+import android.app.LauncherActivity.ListItem
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -21,6 +22,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.api.Requests
+import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.frag.AccountFragment
 import com.bgnw.locationreminder.frag.ListsFragment
@@ -96,6 +98,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                             if (list.list_id == null) continue
                             val items = Requests.getListItemsById(list.list_id, null)
                             list.items = items
+
+                            if (items != null) {
+                                for (item: TaskItem in items) {
+                                    if (item.item_id != null) {
+                                        val results = Requests.getItemOpportunitiesByItemId(item.item_id!!)
+                                        Log.d("DJA API", "[opps] results: $results")
+                                        item.opportunities = results
+
+                                    }
+                                }
+                            }
                         }
                     } else {
                         Log.d("DJA API", "body is null")

@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.map_aux.MapInfoBox
@@ -105,15 +106,25 @@ class MapFragment : Fragment() {
         Log.d("MAP", "ready")
         */
 
-        var i = -3.31961
+        var i = 0.0
 
         viewModel.lists.observe(viewLifecycleOwner, Observer { lists ->
             if (lists != null) {
                 for (list: TaskList in lists) {
+                    Log.d("map-load-lists", "in lists")
                     if (list.items != null) {
                         for (item: TaskItem in list.items!!) {
-                            i -= 0.002
-                            addMarker(GeoPoint(55.91201, i), item.body_text, "Sample")
+                            Log.d("map-load-lists", "in items")
+                            if (item.opportunities != null) {
+                                for (opp: ItemOpportunity in item.opportunities!!) {
+                                    Log.d("map-load-lists", "in opps")
+
+                                    i += 0.002
+                                    Log.d("map-load-lists", "adding marker")
+
+                                    addMarker(GeoPoint(opp.lati, opp.longi), opp.place_name, opp.category)
+                                }
+                            }
                         }
                     }
                 }

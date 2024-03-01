@@ -1,3 +1,4 @@
+import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
 import retrofit2.Call
 import retrofit2.http.Body
@@ -23,4 +24,15 @@ interface TaskItemApi {
     fun createItem(
         @Body body: TaskItem
     ): Call<TaskItem>
+
+    @GET("prod-taski/opps/{item_id}")
+    fun getItemOpps(
+        @Path("item_id") itemId: Int,
+        @Query("format") format: String,
+    ): Call<MutableList<ItemOpportunity>>
+
+    @POST("prod-taski/opps/create/")
+    fun createItemOpp(
+        @Body body: ItemOpportunity
+    ): Call<MutableList<ItemOpportunity>>
 }

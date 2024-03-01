@@ -6,6 +6,7 @@ import TaskListApi
 import android.util.Log
 import android.widget.TextView
 import com.bgnw.locationreminder.data.Account
+import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -178,6 +179,39 @@ class Requests {
                                 continuation.resume(responseBody)
                             } else {
                                 Log.d("DJA API", "body is null")
+                                continuation.resume(null)
+                            }
+                        }
+                    })
+                }
+            }
+        }
+
+        @OptIn(DelicateCoroutinesApi::class)
+        suspend fun getItemOpportunitiesByItemId(
+            itemId: Int,
+        ): MutableList<ItemOpportunity>? = withContext(Dispatchers.IO) {
+            // *************** LOOKUP LIST ITEMS  *************************
+            return@withContext suspendCoroutine { continuation ->
+                GlobalScope.launch(Dispatchers.IO) {
+
+                    var call = taskItemApi.getItemOpps(itemId, "json")
+
+                    call.enqueue(object : Callback<MutableList<ItemOpportunity>> {
+                        override fun onFailure(call: Call<MutableList<ItemOpportunity>>, t: Throwable) {
+                            Log.d("DJA API", "[opps] ERROR: $t")
+                            continuation.resume(null)
+                        }
+
+                        override fun onResponse(
+                            call: Call<MutableList<ItemOpportunity>>,
+                            response: Response<MutableList<ItemOpportunity>>
+                        ) {
+                            if (response.isSuccessful) {
+                                val responseBody = response.body()
+                                continuation.resume(responseBody)
+                            } else {
+                                Log.d("DJA API", "[opps] body is null")
                                 continuation.resume(null)
                             }
                         }
