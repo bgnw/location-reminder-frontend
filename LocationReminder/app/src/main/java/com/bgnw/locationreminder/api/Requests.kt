@@ -47,7 +47,7 @@ class Requests {
         }
 
         @OptIn(DelicateCoroutinesApi::class)
-        suspend fun lookupUser(username: String, tv: TextView?): Account {
+        suspend fun lookupUser(username: String): Account {
             // *************** LOOKUP ACCOUNT  *************************
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
@@ -82,38 +82,31 @@ class Requests {
         suspend fun authenticateUser(
             username: String,
             password: String,
-            tv: TextView?
-        ): Account {
-            // *************** LOOKUP ACCOUNT  *************************
-            return suspendCoroutine { continuation ->
-                GlobalScope.launch(Dispatchers.IO) {
-                    var call = accountApi.getAccount(username, "json")
+        ): AuthResponse? = withContext(Dispatchers.IO) {
+            return@withContext suspendCoroutine { continuation ->
+                val call = accountApi.authenticate(username, password, "json")
 
-                    call.enqueue(object : Callback<Account> {
-                        override fun onFailure(call: Call<Account>, t: Throwable) {
-                            continuation.resumeWithException(t)
-                        }
+                call.enqueue(object : Callback<AuthResponse> {
+                    override fun onFailure(call: Call<AuthResponse>, t: Throwable) {
+                        Log.d("DJA API", "ERROR: $t")
+                        continuation.resume(null)
+                    }
 
-                        override fun onResponse(
-                            call: Call<Account>,
-                            response: Response<Account>
-                        ) {
-                            if (response.isSuccessful) {
-                                val account = response.body()
-                                if (account != null) {
-                                    continuation.resume(account)
-                                } else {
-                                    continuation.resumeWithException(NullPointerException("Response body is null"))
-                                }
-                            } else {
-                                continuation.resumeWithException(HttpException(response))
-                            }
+                    override fun onResponse(
+                        call: Call<AuthResponse>,
+                        response: Response<AuthResponse>
+                    ) {
+                        if (response.isSuccessful) {
+                            val responseBody = response.body()
+                            continuation.resume(responseBody)
+                        } else {
+                            Log.d("DJA API", "body is null")
+                            continuation.resume(null)
                         }
-                    })
-                }
+                    }
+                })
             }
-        }
-
+            }
 
         @OptIn(DelicateCoroutinesApi::class)
         suspend fun createList(

@@ -1,3 +1,4 @@
+import com.bgnw.locationreminder.api.AuthResponse
 import com.bgnw.locationreminder.data.Account
 import retrofit2.Call
 import retrofit2.http.Body
@@ -17,4 +18,11 @@ interface AccountApi {
     fun createAccount(
         @Body body: Account
     ): Call<Account>
+
+    @GET("prod-account/auth/{username}/{password}")
+    fun authenticate(
+        @Path("username") username: String?,
+        @Path("password") password: String?,
+        @Query("format") format: String?,
+    ): Call<AuthResponse>
 }

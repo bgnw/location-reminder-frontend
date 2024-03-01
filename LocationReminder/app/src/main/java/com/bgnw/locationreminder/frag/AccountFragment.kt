@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.api.AuthResponse
 import com.bgnw.locationreminder.api.Requests
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +53,8 @@ class AccountFragment : Fragment() {
         val wrapperCreate = getView()?.findViewById<LinearLayout>(R.id.create_account_dialog_wrapper)
         val wrapperLogin = getView()?.findViewById<LinearLayout>(R.id.login_dialog_wrapper)
 
+        val loginResultText = getView()?.findViewById<TextView>(R.id.login_result_text)
+
         val blue = ContextCompat.getColor(requireContext(), R.color.blue)
         val grey = ContextCompat.getColor(requireContext(), R.color.grey)
         toggleCreate?.backgroundTintList = ColorStateList.valueOf(grey)
@@ -78,18 +81,38 @@ class AccountFragment : Fragment() {
             devtextview?.text = username
         })
 
+        fun clearLoginResult() { loginResultText?.text = "" }
+
+        loginUsername?.setOnFocusChangeListener { _, _ -> clearLoginResult() }
+        loginPassword?.setOnFocusChangeListener { _, _ -> clearLoginResult() }
+        toggleLogin?.setOnFocusChangeListener { _, _ -> clearLoginResult() }
+
         loginSubmitButton?.setOnClickListener {
+
+            clearLoginResult()
+
             val username: String = loginUsername?.text.toString()
-            if (username.isEmpty()) {
+            val password: String = loginPassword?.text.toString()
+
+            if (username.isEmpty() || password.isEmpty()) {
+                loginResultText?.text = "Error: You could not be authenticated."
                 return@setOnClickListener
             }
 
             GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    val account = Requests.lookupUser(username, devtextview)
-                    viewModel.loggedInUsername.value = account.username
-                    viewModel.loggedInDisplayName.value =
-                        account.display_name // TEMP change to display name
+                    val authSuccess: AuthResponse? = Requests.authenticateUser(username, password)
+                    if (authSuccess?.authentication_success != null
+                            && authSuccess.authentication_success) {
+                        loginResultText?.text = "Success: you're now logged in as $username."
+                        val accountData = Requests.lookupUser(username)
+                        viewModel.loggedInUsername.value = accountData.username
+                        viewModel.loggedInDisplayName.value = accountData.display_name
+                    } else {
+                        loginResultText?.text = "Error: You could not be authenticated."
+                    }
+
+
 
                 } catch (e: Exception) {
                     // Handle exception
