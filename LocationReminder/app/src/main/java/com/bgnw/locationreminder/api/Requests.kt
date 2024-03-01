@@ -9,6 +9,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.HttpException
@@ -18,6 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+
 
 class Requests {
 
@@ -127,7 +129,7 @@ class Requests {
                         title = "test3",
                         icon_name = "none",
                         created_at = "xx TODO",
-                        owner_username = "sim",
+                        owner = "sim",
                         sort_by = "name",
                         visibility = 0
                     )
@@ -155,34 +157,140 @@ class Requests {
 
 
         @OptIn(DelicateCoroutinesApi::class)
-        suspend fun getListItems(
-            list_id: Int,
+        suspend fun getListItemsById(
+            listId: Int,
             tv: TextView?
-        ): Account_ApiStruct {
+        ): List<TaskItem_ApiStruct>? = withContext(Dispatchers.IO) {
             // *************** LOOKUP LIST ITEMS  *************************
-            return suspendCoroutine { continuation ->
+            return@withContext suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
 
-                    var call = taskItemApi.getListItems(list_id, "json")
+                    var call = taskItemApi.getListItems(listId, "json")
 
                     call.enqueue(object : Callback<List<TaskItem_ApiStruct>> {
                         override fun onFailure(call: Call<List<TaskItem_ApiStruct>>, t: Throwable) {
                             Log.d("DJA API", "ERROR: $t")
-                            tv?.text = "ERROR: $t"
+                            continuation.resume(null)
                         }
 
                         override fun onResponse(
                             call: Call<List<TaskItem_ApiStruct>>,
                             response: Response<List<TaskItem_ApiStruct>>
                         ) {
-                            Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
-                            tv?.text = "RESPONSE: ${response.body().toString()}"
+                            if (response.isSuccessful) {
+                                val responseBody = response.body()
+                                continuation.resume(responseBody)
+                            } else {
+                                Log.d("DJA API", "body is null")
+                                continuation.resume(null)
+                            }
                         }
-
                     })
                 }
             }
         }
+
+        @OptIn(DelicateCoroutinesApi::class)
+        suspend fun getTaskListsByUsername(username: String): List<TaskList_ApiStruct>? = withContext(Dispatchers.IO) {
+            return@withContext suspendCoroutine { continuation ->
+                val call = taskListApi.getOwnedLists(username, "json")
+
+                call.enqueue(object : Callback<List<TaskList_ApiStruct>> {
+                    override fun onFailure(call: Call<List<TaskList_ApiStruct>>, t: Throwable) {
+                        Log.d("DJA API", "ERROR: $t")
+                        continuation.resume(null)
+                    }
+
+                    override fun onResponse(
+                        call: Call<List<TaskList_ApiStruct>>,
+                        response: Response<List<TaskList_ApiStruct>>
+                    ) {
+                        if (response.isSuccessful) {
+                            val responseBody = response.body()
+                            continuation.resume(responseBody)
+                            } else {
+                                Log.d("DJA API", "body is null")
+                                continuation.resume(null)
+                            }
+                        }
+                })
+            }
+        }
+
+
+        /* @OptIn(DelicateCoroutinesApi::class)
+         suspend fun getTaskListsByUsername(username: String): List<TaskList_ApiStruct>? = withContext(Dispatchers.IO) {
+             var call = taskListApi.getOwnedLists(username, "json")
+
+             call.enqueue(object : Callback<List<TaskList_ApiStruct>> {
+                 override fun onFailure(call: Call<List<TaskList_ApiStruct>>, t: Throwable) {
+                     Log.d("DJA API", "ERROR: $t")
+                 }
+
+                 override fun onResponse(
+                     call: Call<List<TaskList_ApiStruct>>,
+                     response: Response<List<TaskList_ApiStruct>>
+                 ) {
+                     val responseBody = response.body()
+
+
+                     Log.d("DJA API", "RESPONSE: ${responseBody.toString()}")
+                     GlobalScope.launch(Dispatchers.IO) {
+                         if (responseBody != null) {
+                             for (list: TaskList_ApiStruct in responseBody) {
+                                 if (list.list_id == null) continue
+                                 val items = getListItemsById(list.list_id, null)
+                                 list.items = items
+                             }
+                         } else {
+                             Log.d("DJA API", "body is null")
+                         }
+                     }
+                 }
+             })
+             return@withContext null
+         } */
+
+
+
+//            // *************** LOOKUP LIST ITEMS  *************************
+//            return suspendCoroutine { continuation ->
+//                GlobalScope.launch(Dispatchers.IO) {
+//                    var call = taskListApi.getOwnedLists(username, "json")
+//
+//                    call.enqueue(object : Callback<List<TaskList_ApiStruct>> {
+//                        override fun onFailure(call: Call<List<TaskList_ApiStruct>>, t: Throwable) {
+//                            Log.d("DJA API", "ERROR: $t")
+//                        }
+//
+//                        override fun onResponse(
+//                            call: Call<List<TaskList_ApiStruct>>,
+//                            response: Response<List<TaskList_ApiStruct>>
+//                        ) {
+//                            val responseBody = response.body()
+//
+//
+//                            Log.d("DJA API", "RESPONSE: ${responseBody.toString()}")
+//                            GlobalScope.launch(Dispatchers.IO) {
+//                                if (responseBody != null) {
+//                                    for (list: TaskList_ApiStruct in responseBody) {
+//                                        if (list.list_id == null) continue
+//                                        val items = getListItemsById(list.list_id, null)
+//                                        list.items = items
+//
+//                                        richLists.add(list)
+//                                    }
+//                                }
+//                            }
+//                            return richLists.toList()
+//                        }
+//
+//                    })
+//                }
+//            }
+//        }
+
+
 
 
     }

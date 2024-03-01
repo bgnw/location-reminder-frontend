@@ -20,10 +20,30 @@ import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import com.bgnw.locationreminder.api.Requests
+import com.bgnw.locationreminder.api.TaskList_ApiStruct
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope {
+
+    // coroutine boilerplate from https://stackoverflow.com/questions/53928668/
+    private var job: Job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
+
 
     lateinit var toggle: ActionBarDrawerToggle
     lateinit var drawerLayout: DrawerLayout
@@ -54,6 +74,36 @@ class MainActivity : AppCompatActivity() {
             navView.getHeaderView(0).findViewById(R.id.nav_user_display_name)
         viewModel.loggedInUsername.observe(this, Observer { username ->
             navUsername.text = username
+            if (username != null) {
+                launch {
+                    Log.d("DJA API", "before**")
+                    val resultTL = Requests.getTaskListsByUsername(username)
+                    Log.d("DJA API", "after1**")
+                    Log.d("DJA API", "response1: $resultTL")
+                    Log.d("DJA API", "response1x: ${resultTL?.first()?.items.toString()}")
+
+
+                    if (resultTL != null) {
+                        for (list: TaskList_ApiStruct in resultTL) {
+                            Log.d("DJA API", "running loop")
+
+                            if (list.list_id == null) continue
+                            val items = Requests.getListItemsById(list.list_id, null)
+                            list.items = items
+                        }
+                    } else {
+                        Log.d("DJA API", "body is null")
+                    }
+                    Log.d("DJA API", "after2**")
+                    Log.d("DJA API", "response2: $resultTL")
+                    Log.d("DJA API", "response2x: ${resultTL?.first()?.items.toString()}")
+
+
+
+
+
+                }
+            }
         })
         viewModel.loggedInDisplayName.observe(this, Observer { displayName ->
             navDisplayName.text = displayName
@@ -195,6 +245,4 @@ class MainActivity : AppCompatActivity() {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
-
-
 }

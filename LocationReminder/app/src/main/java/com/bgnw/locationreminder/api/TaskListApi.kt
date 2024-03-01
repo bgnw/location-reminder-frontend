@@ -17,4 +17,10 @@ interface TaskListApi {
     fun createList(
         @Body body: TaskList_ApiStruct
     ): Call<TaskList_ApiStruct>
+
+    @GET("prod-taskl/from-user/{username}")
+    fun getOwnedLists(
+        @Path("username") username: String,
+        @Query("format") format: String,
+    ): Call<List<TaskList_ApiStruct>>
 }

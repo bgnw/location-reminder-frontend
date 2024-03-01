@@ -8,9 +8,10 @@ data class TaskList_ApiStruct(
     val title: String,
     val icon_name: String?,
     val created_at: String,
-    val owner_username: String,
+    val owner: String,
     val sort_by: String?,
     val visibility: Int,
+    var items: List<TaskItem_ApiStruct>? = null
 ) {
     override fun toString(): String {
 
@@ -23,7 +24,7 @@ data class TaskList_ApiStruct(
                 "title": "$title",
                 "icon_name": "$icon_name",
                 "created_at": "${dateFormatZulu.parse(created_at)}",
-                "owner": "$owner_username",
+                "owner": "$owner",
                 "sort_by": "$sort_by",
                 "visibility": $visibility
             }

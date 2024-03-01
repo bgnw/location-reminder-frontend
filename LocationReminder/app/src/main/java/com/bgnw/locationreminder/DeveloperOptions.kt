@@ -171,7 +171,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //                title = "test3",
 //                icon_name = "none",
 //                created_at = Calendar.getInstance(),
-//                owner_username = "sim",
+//                owner = "sim",
 //                sort_by = "name",
 //                visibility = 0
 //            )
@@ -220,6 +220,6 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 
     private suspend fun getListItemsTest() {
         Requests.initialiseApi()
-        Requests.getListItems(3, tvOutput)
+        Requests.getListItemsById(3, tvOutput)
     }
 }
