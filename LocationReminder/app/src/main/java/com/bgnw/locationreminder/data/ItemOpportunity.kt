@@ -2,13 +2,11 @@ package com.bgnw.locationreminder.data
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 
 @Parcelize
 data class ItemOpportunity(
     val opp_id: Int,
-    val item: TaskItem,
+    val item_id: Int,
     val suppressed: Boolean,
     val place_name: String,
     val category: String,
@@ -20,7 +18,7 @@ data class ItemOpportunity(
         return """
             {
                 "opp_id": $opp_id
-                "item": $item
+                "item_id": $item_id
                 "suppressed": $suppressed
                 "place_name": $place_name
                 "category": $category
