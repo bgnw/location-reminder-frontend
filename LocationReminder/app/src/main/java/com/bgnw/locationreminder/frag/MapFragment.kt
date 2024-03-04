@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -22,13 +23,17 @@ import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.map_aux.MapInfoBox
 import org.osmdroid.config.Configuration
 import org.osmdroid.config.IConfigurationProvider
+import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
+
 
 
 class MapFragment : Fragment() {
@@ -94,7 +99,7 @@ class MapFragment : Fragment() {
         addMarker(GeoPoint(55.91201, -3.31961), "GRID", "Research building")
         mapView.invalidate()
 
-        /*
+        /* MAP LOADING MESSAGE
         val mapLoadingMessage = getView()?.findViewById<TextView>(R.id.map_loading_message)
 
         val tileStates = mapView.overlayManager.tilesOverlay.tileStates
@@ -107,7 +112,21 @@ class MapFragment : Fragment() {
         Log.d("MAP", "ready")
         */
 
-        var i = 0.0
+        class MyMapEventsReceiver: MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+                InfoWindow.closeAllInfoWindowsOn(mapView)
+                return true
+            }
+
+            override fun longPressHelper(p: GeoPoint?): Boolean {
+                return true
+            }
+        }
+
+        val mapEventsReceiver: MyMapEventsReceiver = MyMapEventsReceiver()
+        val eventsOverlay: MapEventsOverlay = MapEventsOverlay(mapEventsReceiver)
+        mapView.overlays.add(0, eventsOverlay)
+
 
         viewModel.lists.observe(viewLifecycleOwner, Observer { lists ->
             val opps = Utils.getOppsFromLists(lists?.toMutableList())
@@ -117,11 +136,7 @@ class MapFragment : Fragment() {
                 }
             }
         })
-
     }
-
-
-
 
     private fun addMarker(geoPoint: GeoPoint, name: String, information: String) {
         val marker = Marker(mapView)
@@ -129,6 +144,7 @@ class MapFragment : Fragment() {
         marker.title = name
         marker.snippet = information
         marker.infoWindow = MapInfoBox(mapView)
+
         mapView.overlays.add(marker)
     }
 }
