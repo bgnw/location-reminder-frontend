@@ -18,7 +18,6 @@ class ItemOpportunityListAdapter(
 
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        Log.d("IOLA", "running getView")
 
         val inflater: LayoutInflater = LayoutInflater.from(context)
         val view: View = inflater.inflate(R.layout.list_task_item, null)
