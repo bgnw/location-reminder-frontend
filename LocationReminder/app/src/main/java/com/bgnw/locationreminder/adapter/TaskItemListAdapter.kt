@@ -1,6 +1,7 @@
-package com.bgnw.locationreminder.adapter
+package com.bgnw.locationreminder
 
 import android.app.Activity
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,7 @@ class TaskItemListAdapter(
     val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        Log.d("bgnw_TILA", "running getView")
         val inflater: LayoutInflater = LayoutInflater.from(context)
         val view: View = inflater.inflate(R.layout.list_task_item, null)
 

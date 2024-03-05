@@ -106,10 +106,10 @@ class MapFragment : Fragment() {
         // evaluate the tile states
         while (tileStates.total != tileStates.upToDate) {
             Thread.sleep(1000)
-            Log.d("MAP", "not ready")
+            Log.d("bgnw_MAP", "not ready")
         }
         mapLoadingMessage?.visibility = View.GONE
-        Log.d("MAP", "ready")
+        Log.d("bgnw_MAP", "ready")
         */
 
         class MyMapEventsReceiver: MapEventsReceiver {

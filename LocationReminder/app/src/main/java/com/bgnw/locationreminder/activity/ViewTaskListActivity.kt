@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import com.bgnw.locationreminder.R
-import com.bgnw.locationreminder.adapter.TaskItemListAdapter
+import com.bgnw.locationreminder.TaskItemListAdapter
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.databinding.FragmentNearbyBinding
 

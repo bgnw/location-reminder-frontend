@@ -77,7 +77,7 @@ class AccountFragment : Fragment() {
 
 
         viewModel.loggedInUsername.observe(viewLifecycleOwner, Observer { username ->
-            Log.d("OBSERVER", "(in frag) username changed to $username")
+            Log.d("bgnw_OBSERVER", "(in frag) username changed to $username")
             devtextview?.text = username
         })
 

@@ -8,7 +8,7 @@ import org.osmdroid.util.GeoPoint
 
 class Utils {
     companion object Factory {
-        fun getOppsFromLists(lists: MutableList<TaskList>?): MutableList<ItemOpportunity>? {
+        fun getOppsFromLists(lists: List<TaskList>?): MutableList<ItemOpportunity>? {
             if (lists == null) {
                 return null
             }

@@ -70,7 +70,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 
         notifButton = getView()?.findViewById(R.id.button_DEV_test_notif)
         notifButton?.setOnClickListener {
-            Log.d("NOTIF", "notif btn pressed")
+            Log.d("bgnw_NOTIF", "notif btn pressed")
             tvOutput?.text = "notif btn pressed"
             showNotification("Test", "Hello world")
         }
@@ -79,7 +79,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 
         reqButton = getView()?.findViewById(R.id.button_DEV_test_request)
         reqButton?.setOnClickListener {
-            Log.d("BGNW-req", "req btn pressed")
+            Log.d("bgnw_req", "req btn pressed")
             tvOutput?.text = "req btn pressed"
 //            sendRq()
 //            initialiseApi()
@@ -87,7 +87,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
                 getListItemsTest()
             }
 
-            Log.d("BGNW-req", "functions done.")
+            Log.d("bgnw_req", "functions done.")
         }
     }
 
@@ -129,12 +129,12 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //
 //            call.enqueue(object : Callback<AccountFragment> {
 //                override fun onFailure(call: Call<AccountFragment>, t: Throwable) {
-//                    Log.d("DJA API", "ERROR: $t")
+//                    Log.d("bgnw_DJA API", "ERROR: $t")
 //                    tvOutput?.text = "ERROR: $t"
 //                }
 //
 //                override fun onResponse(call: Call<AccountFragment>, response: Response<AccountFragment>) {
-//                    Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
+//                    Log.d("bgnw_DJA API", "RESPONSE: ${response.body().toString()}")
 //                    tvOutput?.text = "RESPONSE: ${response.body().toString()}"
 //                }
 //
@@ -153,12 +153,12 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //
 //            call.enqueue(object : Callback<AccountFragment> {
 //                override fun onFailure(call: Call<AccountFragment>, t: Throwable) {
-//                    Log.d("DJA API", "ERROR: $t")
+//                    Log.d("bgnw_DJA API", "ERROR: $t")
 //                    tvOutput?.text = "ERROR: $t"
 //                }
 //
 //                override fun onResponse(call: Call<AccountFragment>, response: Response<AccountFragment>) {
-//                    Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
+//                    Log.d("bgnw_DJA API", "RESPONSE: ${response.body().toString()}")
 //                    tvOutput?.text = "RESPONSE: ${response.body().toString()}"
 //                }
 //
@@ -175,17 +175,17 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //                sort_by = "name",
 //                visibility = 0
 //            )
-//            Log.d("DJA API", obj.toString())
+//            Log.d("bgnw_DJA API", obj.toString())
 //            var call = tasklApi.createList(obj)
 //
 //            call.enqueue(object : Callback<TaskList> {
 //                override fun onFailure(call: Call<TaskList>, t: Throwable) {
-//                    Log.d("DJA API", "ERROR: $t")
+//                    Log.d("bgnw_DJA API", "ERROR: $t")
 //                    tvOutput?.text = "ERROR: $t"
 //                }
 //
 //                override fun onResponse(call: Call<TaskList>, response: Response<TaskList>) {
-//                    Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
+//                    Log.d("bgnw_DJA API", "RESPONSE: ${response.body().toString()}")
 //                    tvOutput?.text = "RESPONSE: ${response.body().toString()}"
 //                }
 //
@@ -199,7 +199,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 
             call.enqueue(object : Callback<TaskList> {
                 override fun onFailure(call: Call<TaskList>, t: Throwable) {
-                    Log.d("DJA API", "ERROR: $t")
+                    Log.d("bgnw_DJA API", "ERROR: $t")
                     tvOutput?.text = "ERROR: $t"
                 }
 
@@ -207,7 +207,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
                     call: Call<TaskList>,
                     response: Response<TaskList>
                 ) {
-                    Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
+                    Log.d("bgnw_DJA API", "RESPONSE: ${response.body().toString()}")
                     tvOutput?.text = "RESPONSE: ${response.body().toString()}"
                 }
 

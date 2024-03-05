@@ -162,7 +162,7 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginVertical="5dp"
         android:hint="Username"
-        android:text="tmclv"
+        android:text="ba"
         android:maxLength="30"
         android:singleLine="true" />
 
@@ -173,6 +173,7 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginVertical="5dp"
         android:hint="Password"
+        android:text="pwd"
         android:maxLength="200"
         android:singleLine="true"
         android:inputType="textPassword"/>

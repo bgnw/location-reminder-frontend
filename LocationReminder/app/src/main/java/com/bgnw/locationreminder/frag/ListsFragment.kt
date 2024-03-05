@@ -29,10 +29,10 @@ class ListsFragment : Fragment() {
 
     private val itemClickListener = object : TaskListListAdapter.OnItemClickListener {
         override fun onItemClick(position: TaskList) {
-            Log.d("Data: ", position.toString())
+            Log.d("bgnw_Data: ", position.toString())
 
             val intent = Intent(context, ViewTaskListActivity::class.java)
-            Log.d("PASSING LIST:", position.toString())
+            Log.d("bgnw_PASSING LIST:", position.toString())
             intent.putExtra("selected_list", position) // TODO pass whole list obj
             startActivity(intent)
         }

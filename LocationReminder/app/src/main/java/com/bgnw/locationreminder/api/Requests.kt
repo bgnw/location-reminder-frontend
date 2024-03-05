@@ -89,7 +89,7 @@ class Requests {
 
                 call.enqueue(object : Callback<AuthResponse> {
                     override fun onFailure(call: Call<AuthResponse>, t: Throwable) {
-                        Log.d("DJA API", "ERROR: $t")
+                        Log.d("bgnw_DJA API", "ERROR: $t")
                         continuation.resume(null)
                     }
 
@@ -101,7 +101,7 @@ class Requests {
                             val responseBody = response.body()
                             continuation.resume(responseBody)
                         } else {
-                            Log.d("DJA API", "body is null")
+                            Log.d("bgnw_DJA API", "body is null")
                             continuation.resume(null)
                         }
                     }
@@ -130,12 +130,12 @@ class Requests {
                         sort_by = "name",
                         visibility = 0
                     )
-                    Log.d("DJA API", obj.toString())
+                    Log.d("bgnw_DJA API", obj.toString())
                     var call = taskListApi.createList(obj)
 
                     call.enqueue(object : Callback<TaskList> {
                         override fun onFailure(call: Call<TaskList>, t: Throwable) {
-                            Log.d("DJA API", "ERROR: $t")
+                            Log.d("bgnw_DJA API", "ERROR: $t")
                             tv?.text = "ERROR: $t"
                         }
 
@@ -143,7 +143,7 @@ class Requests {
                             call: Call<TaskList>,
                             response: Response<TaskList>
                         ) {
-                            Log.d("DJA API", "RESPONSE: ${response.body().toString()}")
+                            Log.d("bgnw_DJA API", "RESPONSE: ${response.body().toString()}")
                             tv?.text = "RESPONSE: ${response.body().toString()}"
                         }
 
@@ -166,7 +166,7 @@ class Requests {
 
                     call.enqueue(object : Callback<List<TaskItem>> {
                         override fun onFailure(call: Call<List<TaskItem>>, t: Throwable) {
-                            Log.d("DJA API", "ERROR: $t")
+                            Log.d("bgnw_DJA API", "ERROR: $t")
                             continuation.resume(null)
                         }
 
@@ -178,7 +178,7 @@ class Requests {
                                 val responseBody = response.body()
                                 continuation.resume(responseBody)
                             } else {
-                                Log.d("DJA API", "body is null")
+                                Log.d("bgnw_DJA API", "body is null")
                                 continuation.resume(null)
                             }
                         }
@@ -199,7 +199,7 @@ class Requests {
 
                     call.enqueue(object : Callback<MutableList<ItemOpportunity>> {
                         override fun onFailure(call: Call<MutableList<ItemOpportunity>>, t: Throwable) {
-                            Log.d("DJA API", "[opps] ERROR: $t")
+                            Log.d("bgnw_DJA API", "[opps] ERROR: $t")
                             continuation.resume(null)
                         }
 
@@ -211,7 +211,7 @@ class Requests {
                                 val responseBody = response.body()
                                 continuation.resume(responseBody)
                             } else {
-                                Log.d("DJA API", "[opps] body is null")
+                                Log.d("bgnw_DJA API", "[opps] body is null")
                                 continuation.resume(null)
                             }
                         }
@@ -227,7 +227,7 @@ class Requests {
 
                 call.enqueue(object : Callback<List<TaskList>> {
                     override fun onFailure(call: Call<List<TaskList>>, t: Throwable) {
-                        Log.d("DJA API", "ERROR: $t")
+                        Log.d("bgnw_DJA API", "ERROR: $t")
                         continuation.resume(null)
                     }
 
@@ -239,7 +239,7 @@ class Requests {
                             val responseBody = response.body()
                             continuation.resume(responseBody)
                             } else {
-                                Log.d("DJA API", "body is null")
+                                Log.d("bgnw_DJA API", "body is null")
                                 continuation.resume(null)
                             }
                         }
@@ -254,7 +254,7 @@ class Requests {
 
              call.enqueue(object : Callback<List<TaskList>> {
                  override fun onFailure(call: Call<List<TaskList>>, t: Throwable) {
-                     Log.d("DJA API", "ERROR: $t")
+                     Log.d("bgnw_DJA API", "ERROR: $t")
                  }
 
                  override fun onResponse(
@@ -264,7 +264,7 @@ class Requests {
                      val responseBody = response.body()
 
 
-                     Log.d("DJA API", "RESPONSE: ${responseBody.toString()}")
+                     Log.d("bgnw_DJA API", "RESPONSE: ${responseBody.toString()}")
                      GlobalScope.launch(Dispatchers.IO) {
                          if (responseBody != null) {
                              for (list: TaskList in responseBody) {
@@ -273,7 +273,7 @@ class Requests {
                                  list.items = items
                              }
                          } else {
-                             Log.d("DJA API", "body is null")
+                             Log.d("bgnw_DJA API", "body is null")
                          }
                      }
                  }
@@ -290,7 +290,7 @@ class Requests {
 //
 //                    call.enqueue(object : Callback<List<TaskList>> {
 //                        override fun onFailure(call: Call<List<TaskList>>, t: Throwable) {
-//                            Log.d("DJA API", "ERROR: $t")
+//                            Log.d("bgnw_DJA API", "ERROR: $t")
 //                        }
 //
 //                        override fun onResponse(
@@ -300,7 +300,7 @@ class Requests {
 //                            val responseBody = response.body()
 //
 //
-//                            Log.d("DJA API", "RESPONSE: ${responseBody.toString()}")
+//                            Log.d("bgnw_DJA API", "RESPONSE: ${responseBody.toString()}")
 //                            GlobalScope.launch(Dispatchers.IO) {
 //                                if (responseBody != null) {
 //                                    for (list: TaskList in responseBody) {

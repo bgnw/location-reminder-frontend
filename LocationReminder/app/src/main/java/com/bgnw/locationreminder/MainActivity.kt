@@ -84,16 +84,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             navUsername.text = username
             if (username != null) {
                 launch {
-                    Log.d("DJA API", "before**")
+                    Log.d("bgnw_DJA API", "before**")
                     val resultTL = Requests.getTaskListsByUsername(username)
-                    Log.d("DJA API", "after1**")
-                    Log.d("DJA API", "response1: $resultTL")
-                    Log.d("DJA API", "response1x: ${resultTL?.first()?.items.toString()}")
+                    Log.d("bgnw_DJA API", "after1**")
+                    Log.d("bgnw_DJA API", "response1: $resultTL")
+                    Log.d("bgnw_DJA API", "response1x: ${resultTL?.first()?.items.toString()}")
 
 
                     if (resultTL != null) {
                         for (list: TaskList in resultTL) {
-                            Log.d("DJA API", "running loop")
+                            Log.d("bgnw_DJA API", "running loop")
 
                             if (list.list_id == null) continue
                             val items = Requests.getListItemsById(list.list_id, null)
@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                                 for (item: TaskItem in items) {
                                     if (item.item_id != null) {
                                         val results = Requests.getItemOpportunitiesByItemId(item.item_id!!)
-                                        Log.d("DJA API", "[opps] results: $results")
+                                        Log.d("bgnw_DJA API", "[opps] results: $results")
                                         item.opportunities = results
 
                                     }
@@ -111,11 +111,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                             }
                         }
                     } else {
-                        Log.d("DJA API", "body is null")
+                        Log.d("bgnw_DJA API", "body is null")
                     }
-                    Log.d("DJA API", "after2**")
-                    Log.d("DJA API", "response2: $resultTL")
-                    Log.d("DJA API", "response2x: ${resultTL?.first()?.items.toString()}")
+                    Log.d("bgnw_DJA API", "after2**")
+                    Log.d("bgnw_DJA API", "response2: $resultTL")
+                    Log.d("bgnw_DJA API", "response2x: ${resultTL?.first()?.items.toString()}")
 
 
                     viewModel.lists.value = resultTL
@@ -193,22 +193,22 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 // Do your task on permission granted
-                Log.d("NOTIF", "permission already granted") // TEMP
+                Log.d("bgnw_NOTIF", "permission already granted") // TEMP
 
             } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
                 // TODO: display an educational UI explaining to the user the features that will be enabled
                 //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
                 //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
                 //       If the user selects "No thanks," allow the user to continue without notifications.
-                Log.d("NOTIF", "would show rationale then ask for perm") // TEMP
+                Log.d("bgnw_NOTIF", "would show rationale then ask for perm") // TEMP
             } else {
                 // Directly ask for the permission
-                Log.d("NOTIF", "asking for permission") // TEMP
+                Log.d("bgnw_NOTIF", "asking for permission") // TEMP
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
             // Below Android 13 You don't need to ask for notification permission.
-            Log.d("NOTIF", "below android 13, request not needed") // TEMP
+            Log.d("bgnw_NOTIF", "below android 13, request not needed") // TEMP
         }
     }
 
@@ -246,7 +246,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             // Do your task on permission granted
-            Log.d("LOCATION_PERMS", "permission already granted") // TEMP
+            Log.d("bgnw_LOCATION_PERMS", "permission already granted") // TEMP
 
         } else if (SDK_INT >= Build.VERSION_CODES.M
             && shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -255,10 +255,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
             //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
             //       If the user selects "No thanks," allow the user to continue without notifications.
-            Log.d("LOCATION_PERMS", "would show rationale then ask for perm") // TEMP
+            Log.d("bgnw_LOCATION_PERMS", "would show rationale then ask for perm") // TEMP
         } else if (SDK_INT >= Build.VERSION_CODES.M) {
             // Directly ask for the permission
-            Log.d("LOCATION_PERMS", "asking for permission") // TEMP
+            Log.d("bgnw_LOCATION_PERMS", "asking for permission") // TEMP
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
