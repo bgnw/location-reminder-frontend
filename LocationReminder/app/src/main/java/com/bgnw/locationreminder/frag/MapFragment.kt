@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -21,6 +22,11 @@ import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.map_aux.MapInfoBox
+import com.bgnw.locationreminder.overpass_api.OverpassElement
+import com.bgnw.locationreminder.overpass_api.OverpassResp
+import com.bgnw.locationreminder.overpass_api.queryOverpassApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.config.IConfigurationProvider
 import org.osmdroid.events.MapEventsReceiver
@@ -83,6 +89,9 @@ class MapFragment : Fragment() {
         mapView.getLocalVisibleRect(Rect())
         mapView.controller.setZoom(20.0)
 
+        val updateMapButton: Button = requireView().findViewById(R.id.btn_update_map)
+
+
 
         val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), mapView)
         locationOverlay.enableMyLocation()
@@ -136,7 +145,48 @@ class MapFragment : Fragment() {
                 }
             }
         })
+
+
+
+        fun getAsianFood(lat: Double, lon: Double, areaRadius: Double) {
+            GlobalScope.launch {
+                val asianFood = getNearbyNodes(lat, lon, areaRadius, "\"cuisine\"=\"asian\"")
+                if (asianFood != null) {
+                    for (element: OverpassElement in asianFood.elements) {
+                        addMarker(
+                            GeoPoint(element.lat, element.lon),
+                            element.tags.name ?: "<name>",
+                            element.tags.amenity ?: "<amenity/shop>"
+                        )
+                    }
+                }
+            }
+        }
+
+
+        fun updateOnDrag(lat: Double, lon: Double, zoom: Double): Boolean {
+
+            val areaRadius = 300+(20-zoom)*80
+            Log.d("bgnw_update-map", "updating map due to drag (zoom: $zoom, factor:$areaRadius)")
+
+
+            getAsianFood(lat, lon, areaRadius)
+            return true
+        }
+
+
+        updateMapButton.setOnClickListener {
+            updateOnDrag(
+                mapView.boundingBox.centerLatitude,
+                mapView.boundingBox.centerLongitude,
+                mapView.zoomLevelDouble
+            )
+        }
+
+
     }
+
+    
 
     private fun addMarker(geoPoint: GeoPoint, name: String, information: String) {
         val marker = Marker(mapView)
@@ -147,4 +197,28 @@ class MapFragment : Fragment() {
 
         mapView.overlays.add(marker)
     }
+
+
+
+
+
+    private suspend fun getNearbyNodes(lat: Double, lon: Double, areaRadius: Double, conditions: String): OverpassResp? {
+        val overpassQuery = """
+        [out:json][timeout:60];
+        (
+          node(around: $areaRadius, $lat, $lon)[$conditions];
+        );
+        out geom;
+
+    """.trimIndent()
+
+        try {
+            val response = queryOverpassApi(overpassQuery)
+            return response
+        } catch (e: Exception) {
+            Log.d("bgnw_overpass", "Error: ${e.message}")
+            return null
+        }
+    }
+
 }

@@ -10,10 +10,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
-data class OverpassElement(val type: String, val id: Long, val center: Center)
+data class OverpassElement(val type: String, val id: Long, val lat: Double,
+                           val lon: Double, val tags: Tags)
 
 @Serializable
 data class Center(val lat: Double, val lon: Double)
+
+@Serializable
+data class Tags(val name: String? = "", val amenity: String? = "", val shop: String? = "")
 
 @Serializable
 data class OverpassResp(val elements: List<OverpassElement>)
@@ -25,6 +29,7 @@ suspend fun queryOverpassApi(query: String): OverpassResp {
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
+                isLenient = true
             })
         }
     }

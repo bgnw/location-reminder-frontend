@@ -107,9 +107,11 @@ class DeveloperOptions : Fragment(), CoroutineScope {
         val overpassQuery = """
         [out:json];
         (
-          way["building"](around:1000,51.5074,-0.1278);
+          node(around:1000,55.95351, -3.19146)["cuisine"="asian"];
+          
         );
-        out center;
+        out geom;
+
     """.trimIndent()
 
         try {

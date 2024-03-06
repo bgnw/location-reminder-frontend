@@ -11,6 +11,13 @@
         android:layout_height="match_parent">
     </org.osmdroid.views.MapView>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="update"
+        android:id="@+id/btn_update_map"
+        />
+
 <!--    <TextView-->
 <!--        android:id="@+id/map_loading_message"-->
 <!--        android:layout_width="match_parent"-->
