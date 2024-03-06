@@ -20,6 +20,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.data.TaskList
+import com.bgnw.locationreminder.overpass_api.queryOverpassApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -81,13 +82,42 @@ class DeveloperOptions : Fragment(), CoroutineScope {
         reqButton?.setOnClickListener {
             Log.d("bgnw_req", "req btn pressed")
             tvOutput?.text = "req btn pressed"
+
+
 //            sendRq()
 //            initialiseApi()
-            launch {
-                getListItemsTest()
+
+
+
+//            launch {
+//                getListItemsTest()
+//            }
+
+
+            GlobalScope.launch(Dispatchers.IO) {
+                overpassPlayground()
             }
 
             Log.d("bgnw_req", "functions done.")
+        }
+    }
+
+
+    private suspend fun overpassPlayground(){
+        val overpassQuery = """
+        [out:json];
+        (
+          way["building"](around:1000,51.5074,-0.1278);
+        );
+        out center;
+    """.trimIndent()
+
+        try {
+            val response = queryOverpassApi(overpassQuery)
+            Log.d("bgnw_overpass", "$response")
+
+        } catch (e: Exception) {
+            Log.d("bgnw_overpass", "Error: ${e.message}")
         }
     }
 

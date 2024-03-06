@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "LocationReminder"
 include(":app")
+
+//enableFeaturePreview("GRADLE_METADATA") //https://stackoverflow.com/questions/56089071

@@ -2,7 +2,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
+    kotlin("plugin.serialization") version "2.0.0-Beta4"
 }
+
 
 android {
     namespace = "com.bgnw.locationreminder"
@@ -60,8 +62,14 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.4.0")
     implementation("com.squareup.retrofit2:converter-gson:2.4.0")
     implementation("com.google.code.gson:gson:2.10")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-
-
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    implementation("io.ktor:ktor-client-core:2.3.9")
+    implementation("io.ktor:ktor-client-json:2.3.9")
+    implementation("io.ktor:ktor-client-serialization:2.3.9")
+    implementation("io.ktor:ktor-client-okhttp:2.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+    implementation("io.ktor:ktor-features:1.6.8")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.9")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.9")
 }
 
