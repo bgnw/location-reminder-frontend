@@ -319,9 +319,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("MissingPermission")
-
-    private suspend fun checkForReminders() {
+    private suspend fun checkForReminders(debug: Boolean = false) {
 
         var resultsDeferred: Deferred<Pair<OverpassResp?, Pair<Double, Double>>>? = null
 
@@ -369,24 +369,24 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
 
-        Log.d("bgnw", "run remindersPt1()")
+        if (debug) Log.d("bgnw", "run remindersPt1()")
         remindersPt1()
-        Log.d("bgnw", "run remindersPt1() -> done")
+        if (debug) Log.d("bgnw", "run remindersPt1() -> done")
 
 
         while(resultsDeferred == null) {
-            Log.d("bgnw", "wait for pt2 task")
+            if (debug) Log.d("bgnw", "wait for pt2 task")
             sleep(1000)
         }
 
-        Log.d("bgnw", "wait for pt2 task -> done")
+        if (debug) Log.d("bgnw", "wait for pt2 task -> done")
         val res = resultsDeferred!!.await()
         if (res.first != null) {
-            Log.d("bgnw", "run remindersPt3()")
+            if (debug) Log.d("bgnw", "run remindersPt3()")
             remindersPt3(res.first!!, res.second.first, res.second.second)
-            Log.d("bgnw", "run remindersPt3() -> done")
+            if (debug) Log.d("bgnw", "run remindersPt3() -> done")
         } else {
-            Log.d("bgnw", "res empty")
+            if (debug) Log.d("bgnw", "res empty")
         }
 
     }
