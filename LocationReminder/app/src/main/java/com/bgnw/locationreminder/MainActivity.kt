@@ -1,14 +1,16 @@
 package com.bgnw.locationreminder
 
 import android.Manifest
-import android.app.LauncherActivity.ListItem
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
 import android.widget.TextView
@@ -30,11 +32,27 @@ import com.bgnw.locationreminder.frag.MapFragment
 import com.bgnw.locationreminder.frag.NearbyFragment
 import com.bgnw.locationreminder.frag.SettingsFragment
 import com.bgnw.locationreminder.frag.SharingFragment
+import com.bgnw.locationreminder.overpass_api.OverpassResp
+import com.bgnw.locationreminder.overpass_api.queryOverpassApi
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
+import java.lang.Thread.sleep
+import kotlin.concurrent.fixedRateTimer
 import kotlin.coroutines.CoroutineContext
 
 
@@ -51,14 +69,15 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         job.cancel()
     }
 
-
-
     lateinit var toggle: ActionBarDrawerToggle
     lateinit var drawerLayout: DrawerLayout
 
     private val viewModel: ApplicationState by viewModels()
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
 
     // function is run once activity created (i.e. app is loaded in fg)
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         Class.forName("org.postgresql.Driver")
 
@@ -80,21 +99,19 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val navUsername: TextView = navView.getHeaderView(0).findViewById(R.id.nav_user_username)
         val navDisplayName: TextView =
             navView.getHeaderView(0).findViewById(R.id.nav_user_display_name)
+
+
+        // actions to take when user logs in
         viewModel.loggedInUsername.observe(this, Observer { username ->
             navUsername.text = username
+
             if (username != null) {
+
+                // retrieve all task lists, items, etc associated with this user
                 launch {
-                    Log.d("bgnw_DJA API", "before**")
                     val resultTL = Requests.getTaskListsByUsername(username)
-                    Log.d("bgnw_DJA API", "after1**")
-                    Log.d("bgnw_DJA API", "response1: $resultTL")
-                    Log.d("bgnw_DJA API", "response1x: ${resultTL?.first()?.items.toString()}")
-
-
                     if (resultTL != null) {
                         for (list: TaskList in resultTL) {
-                            Log.d("bgnw_DJA API", "running loop")
-
                             if (list.list_id == null) continue
                             val items = Requests.getListItemsById(list.list_id, null)
                             list.items = items
@@ -102,7 +119,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                             if (items != null) {
                                 for (item: TaskItem in items) {
                                     if (item.item_id != null) {
-                                        val results = Requests.getItemOpportunitiesByItemId(item.item_id!!)
+                                        val results =
+                                            Requests.getItemOpportunitiesByItemId(item.item_id!!)
                                         Log.d("bgnw_DJA API", "[opps] results: $results")
                                         item.opportunities = results
 
@@ -110,21 +128,20 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                                 }
                             }
                         }
-                    } else {
-                        Log.d("bgnw_DJA API", "body is null")
                     }
-                    Log.d("bgnw_DJA API", "after2**")
-                    Log.d("bgnw_DJA API", "response2: $resultTL")
-                    Log.d("bgnw_DJA API", "response2x: ${resultTL?.first()?.items.toString()}")
-
-
                     viewModel.lists.value = resultTL
                 }
             }
         })
+
+
+        // When user logs in, update the display name shown
         viewModel.loggedInDisplayName.observe(this, Observer { displayName ->
-            navDisplayName.text = displayName
+            runOnUiThread {
+                navDisplayName.text = displayName
+            }
         })
+
 
         // open default fragment
         changeFragment(ListsFragment(), "Lists")
@@ -151,11 +168,22 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         // TODO check this works on >= android 13
         requestNotifPermission()
 
+        // Request permission to use location, if needed
+        requestLocationPermission()
+
         // Create a general notification channel to send notifications from
         createNotificationChannel()
 
-        requestLocationPermission()
+        // Launch coroutine to check for reminders/notifications to send to user
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        GlobalScope.launch {
+            while (true) {
+                checkForReminders()
+                delay(30000)
+            }
+        }
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (toggle.onOptionsItemSelected(item)) {
@@ -213,19 +241,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun createNotificationChannel() {
-        if (SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Channel Name"
-            val descriptionText = "Channel Description"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel =
-                NotificationChannel(R.string.channel_id.toString(), name, importance).apply {
-                    description = descriptionText
-                }
+        val name = "Channel Name"
+        val descriptionText = "Channel Description"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val channel =
+            NotificationChannel(R.string.channel_id.toString(), name, importance).apply {
+                description = descriptionText
+            }
 
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
 
@@ -261,5 +287,107 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             Log.d("bgnw_LOCATION_PERMS", "asking for permission") // TEMP
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
+    }
+
+
+    private suspend fun getNearbyNodes(
+        lat: Double,
+        lon: Double,
+        areaRadius: Double,
+        conditions: String
+    ): OverpassResp? {
+        Log.d("bgnw", "running getNearbyNodes")
+
+        val overpassQuery = """
+                [out:json][timeout:60];
+                (
+                  node(around: $areaRadius, $lat, $lon)[$conditions];
+                );
+                out geom;
+        
+            """.trimIndent()
+
+        try {
+            val response = queryOverpassApi(overpassQuery)
+            Log.d("bgnw", "running getNearbyNodes -> done.")
+
+            return response
+        } catch (e: Exception) {
+            Log.d("bgnw_overpass", "Error: ${e.message}")
+            return null
+        }
+    }
+
+
+    @SuppressLint("MissingPermission")
+
+    private suspend fun checkForReminders() {
+
+        var resultsDeferred: Deferred<Pair<OverpassResp?, Pair<Double, Double>>>? = null
+
+
+        fun remindersPt3(res: OverpassResp, lat: Double, long: Double) {
+            for (node in res.elements) {
+                val dist = FloatArray(1)
+                Location.distanceBetween(lat, long, node.lat, node.lon, dist)
+                if (dist[0] < 10) { // within 10 metres
+                    Log.d("bgnw", "notifying")
+
+                    NotificationTools.showNotification(
+                        this@MainActivity,
+                        99,
+                        "Nearby task available",
+                        "Bicycle parking is ${dist[0]}m away"
+                    )
+                } else {
+                    Log.d("bgnw", "NOT notifying")
+
+                }
+            }
+        }
+
+
+        suspend fun remindersPt2(lat: Double, long: Double):
+                Pair<OverpassResp?, Pair<Double, Double>>{
+            return Pair(
+                getNearbyNodes(lat, long, 400.0, "'amenity'='bicycle_parking'"),
+                Pair(lat, long)
+            )
+        }
+
+
+        fun remindersPt1() {
+            val cancelToken: CancellationToken = CancellationTokenSource().token
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancelToken).
+                    addOnSuccessListener { loc ->
+                        if (loc != null) {
+                            resultsDeferred = GlobalScope.async {
+                                remindersPt2(loc.latitude, loc.longitude)
+                            }
+                        }
+                    }
+        }
+
+
+        Log.d("bgnw", "run remindersPt1()")
+        remindersPt1()
+        Log.d("bgnw", "run remindersPt1() -> done")
+
+
+        while(resultsDeferred == null) {
+            Log.d("bgnw", "wait for pt2 task")
+            sleep(1000)
+        }
+
+        Log.d("bgnw", "wait for pt2 task -> done")
+        val res = resultsDeferred!!.await()
+        if (res.first != null) {
+            Log.d("bgnw", "run remindersPt3()")
+            remindersPt3(res.first!!, res.second.first, res.second.second)
+            Log.d("bgnw", "run remindersPt3() -> done")
+        } else {
+            Log.d("bgnw", "res empty")
+        }
+
     }
 }
