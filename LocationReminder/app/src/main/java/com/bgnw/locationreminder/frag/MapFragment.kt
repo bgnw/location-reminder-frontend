@@ -34,8 +34,6 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 
-
-
 class MapFragment : Fragment() {
 
     private val viewModel: ApplicationState by activityViewModels()
@@ -57,7 +55,6 @@ class MapFragment : Fragment() {
             context,
             androidx.preference.PreferenceManager.getDefaultSharedPreferences(context as MainActivity)
         )
-//        Configuration.getInstance().load(context as MainActivity, PreferenceManager.getDefaultSharedPreferences(context as MainActivity));
 
         val configuration: IConfigurationProvider = Configuration.getInstance()
         val path = requireContext().filesDir
@@ -84,8 +81,6 @@ class MapFragment : Fragment() {
         mapView.controller.setZoom(20.0)
 
         val updateMapButton: Button = requireView().findViewById(R.id.btn_update_map)
-
-
 
         val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), mapView)
         locationOverlay.enableMyLocation()
@@ -139,8 +134,6 @@ class MapFragment : Fragment() {
                 }
             }
         })
-
-
 
         fun getAsianFood(lat: Double, lon: Double, areaRadius: Double) {
             GlobalScope.launch {
@@ -205,11 +198,7 @@ class MapFragment : Fragment() {
 //                mapView.zoomLevelDouble
 //            )
         }
-
-
     }
-
-    
 
     private fun addMarker(geoPoint: GeoPoint, name: String, information: String) {
         val marker = Marker(mapView)
@@ -220,7 +209,6 @@ class MapFragment : Fragment() {
 
         mapView.overlays.add(marker)
     }
-
 
     private suspend fun getNearbyNodes(lat: Double, lon: Double, areaRadius: Double, conditions: String): OverpassResp? {
         val overpassQuery = """
@@ -297,6 +285,4 @@ class MapFragment : Fragment() {
             return null
         }
     }
-
-
 }

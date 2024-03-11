@@ -91,8 +91,5 @@ class NearbyFragment : Fragment() {
             updateUserLocation()
             updateAdapterData(lists)
         })
-
     }
-
-
 }
