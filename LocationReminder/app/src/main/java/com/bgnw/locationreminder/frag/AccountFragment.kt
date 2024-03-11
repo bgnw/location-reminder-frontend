@@ -121,8 +121,4 @@ class AccountFragment : Fragment() {
             }
         }
     }
-
-    private fun showLogin(){
-
-    }
 }
