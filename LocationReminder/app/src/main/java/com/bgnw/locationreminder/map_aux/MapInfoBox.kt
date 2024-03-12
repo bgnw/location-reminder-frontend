@@ -1,17 +1,14 @@
 package com.bgnw.locationreminder.map_aux
 
-import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import com.bgnw.locationreminder.R
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 
 
-
-class MapInfoBox(mapView: MapView):
+class MapInfoBox(mapView: MapView) :
     InfoWindow(R.layout.bonuspack_bubble, mapView) {
 
 
@@ -23,7 +20,7 @@ class MapInfoBox(mapView: MapView):
         // close any other info windows that may be open
         closeAllInfoWindowsOn(mapView)
 
-        if (item is Marker){
+        if (item is Marker) {
             // make this info window visible
             mView.visibility = View.VISIBLE
 

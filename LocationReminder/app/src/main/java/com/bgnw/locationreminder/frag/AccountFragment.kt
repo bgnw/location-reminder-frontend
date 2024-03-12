@@ -50,7 +50,8 @@ class AccountFragment : Fragment() {
 
         val toggleCreate = getView()?.findViewById<Button>(R.id.account_create_mode_toggle)
         val toggleLogin = getView()?.findViewById<Button>(R.id.account_login_mode_toggle)
-        val wrapperCreate = getView()?.findViewById<LinearLayout>(R.id.create_account_dialog_wrapper)
+        val wrapperCreate =
+            getView()?.findViewById<LinearLayout>(R.id.create_account_dialog_wrapper)
         val wrapperLogin = getView()?.findViewById<LinearLayout>(R.id.login_dialog_wrapper)
 
         val loginResultText = getView()?.findViewById<TextView>(R.id.login_result_text)
@@ -61,7 +62,7 @@ class AccountFragment : Fragment() {
         toggleLogin?.backgroundTintList = ColorStateList.valueOf(blue)
 
         toggleCreate?.setOnClickListener {
-            toggleCreate?.backgroundTintList = ColorStateList.valueOf(blue)
+            toggleCreate.backgroundTintList = ColorStateList.valueOf(blue)
             toggleLogin?.backgroundTintList = ColorStateList.valueOf(grey)
             wrapperCreate?.visibility = View.VISIBLE
             wrapperLogin?.visibility = View.GONE
@@ -69,7 +70,7 @@ class AccountFragment : Fragment() {
 
         toggleLogin?.setOnClickListener {
             toggleCreate?.backgroundTintList = ColorStateList.valueOf(grey)
-            toggleLogin?.backgroundTintList = ColorStateList.valueOf(blue)
+            toggleLogin.backgroundTintList = ColorStateList.valueOf(blue)
             wrapperCreate?.visibility = View.GONE
             wrapperLogin?.visibility = View.VISIBLE
         }
@@ -81,7 +82,9 @@ class AccountFragment : Fragment() {
             devtextview?.text = username
         })
 
-        fun clearLoginResult() { loginResultText?.text = "" }
+        fun clearLoginResult() {
+            loginResultText?.text = ""
+        }
 
         loginUsername?.setOnFocusChangeListener { _, _ -> clearLoginResult() }
         loginPassword?.setOnFocusChangeListener { _, _ -> clearLoginResult() }
@@ -103,7 +106,8 @@ class AccountFragment : Fragment() {
                 try {
                     val authSuccess: AuthResponse? = Requests.authenticateUser(username, password)
                     if (authSuccess?.authentication_success != null
-                            && authSuccess.authentication_success) {
+                        && authSuccess.authentication_success
+                    ) {
                         loginResultText?.text = "Success: you're now logged in as $username."
                         val accountData = Requests.lookupUser(username)
                         viewModel.loggedInUsername.value = accountData.username
@@ -111,7 +115,6 @@ class AccountFragment : Fragment() {
                     } else {
                         loginResultText?.text = "Error: You could not be authenticated."
                     }
-
 
 
                 } catch (e: Exception) {

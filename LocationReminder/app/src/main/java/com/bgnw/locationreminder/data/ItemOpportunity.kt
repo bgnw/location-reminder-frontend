@@ -13,7 +13,7 @@ data class ItemOpportunity(
     val lati: Double,
     val longi: Double,
     var alti: Double,
-): Parcelable {
+) : Parcelable {
     override fun toString(): String {
         return """
             {

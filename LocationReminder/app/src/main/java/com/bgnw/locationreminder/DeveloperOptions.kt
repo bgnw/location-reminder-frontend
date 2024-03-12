@@ -92,7 +92,6 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //            initialiseApi()
 
 
-
 //            launch {
 //                getListItemsTest()
 //            }
@@ -103,8 +102,10 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //            }
 
 
-            val keysOI = listOf("amenity", "shop", "place", "leisure", "education", "tourism",
-                "public_transport", "building", "sport", "product", "vending", "cuisine")
+            val keysOI = listOf(
+                "amenity", "shop", "place", "leisure", "education", "tourism",
+                "public_transport", "building", "sport", "product", "vending", "cuisine"
+            )
 
             var res: TagInfoResponse? = null
             val resTask = GlobalScope.async {
@@ -117,8 +118,8 @@ class DeveloperOptions : Fragment(), CoroutineScope {
                 sleep(1000)
             }
 
-            res!!.data = res!!.data.filter {
-                el -> (el.count_all > 1000) and (el.key in keysOI)
+            res!!.data = res!!.data.filter { el ->
+                (el.count_all > 1000) and (el.key in keysOI)
             }
             tvOutput?.text = res.toString()
 
@@ -127,7 +128,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
     }
 
 
-    private suspend fun overpassPlayground(){
+    private suspend fun overpassPlayground() {
         val overpassQuery = """
         [out:json];
         (

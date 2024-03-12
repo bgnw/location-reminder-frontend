@@ -12,8 +12,6 @@ import android.widget.EditText
 import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import com.bgnw.locationreminder.ApplicationState
@@ -68,7 +66,8 @@ class ListsFragment : Fragment() {
 
         val context = context as MainActivity
         val lv = context.findViewById(R.id.lv_tasklist_list) as ListView
-        val adapter = viewModel.lists.value?.let { TaskListListAdapter(context, it, itemClickListener) }
+        val adapter =
+            viewModel.lists.value?.let { TaskListListAdapter(context, it, itemClickListener) }
         lv.adapter = adapter
 
 
@@ -77,7 +76,7 @@ class ListsFragment : Fragment() {
         })
 
         val addListButton: FloatingActionButton? = context.findViewById(R.id.fab_add_list)
-        addListButton?.setOnClickListener{ _ -> // https://www.digitalocean.com/community/tutorials/android-alert-dialog-using-kotlin
+        addListButton?.setOnClickListener { _ -> // https://www.digitalocean.com/community/tutorials/android-alert-dialog-using-kotlin
             val editText = EditText(context)
             editText.hint = "Provide a list name"
 
@@ -98,7 +97,7 @@ class ListsFragment : Fragment() {
                             viewModel.changeNeeded.value = true
                         }
 
-                        newList.observe(viewLifecycleOwner) {newList ->
+                        newList.observe(viewLifecycleOwner) { newList ->
                             if (newList != null) {
                                 Log.d("bgnw", "newlist is not null")
 
@@ -110,8 +109,10 @@ class ListsFragment : Fragment() {
                         }
 
                         val reqResult = CoroutineScope(Dispatchers.IO).async {
-                            Requests.createList(title, null, username,
-                                "created_at", 0, null)
+                            Requests.createList(
+                                title, null, username,
+                                "created_at", 0, null
+                            )
                         }
 
                         CoroutineScope(Dispatchers.IO).launch {
@@ -140,11 +141,11 @@ class ListsFragment : Fragment() {
 
 
 
-        context.findViewById<Button>(R.id.changefalse).setOnClickListener{
-            viewModel.changeNeeded.value=false
+        context.findViewById<Button>(R.id.changefalse).setOnClickListener {
+            viewModel.changeNeeded.value = false
         }
-        context.findViewById<Button>(R.id.changetrue).setOnClickListener{
-            viewModel.changeNeeded.value=true
+        context.findViewById<Button>(R.id.changetrue).setOnClickListener {
+            viewModel.changeNeeded.value = true
         }
 
 

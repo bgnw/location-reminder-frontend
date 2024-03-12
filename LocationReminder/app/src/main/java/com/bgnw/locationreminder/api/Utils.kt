@@ -1,10 +1,8 @@
 package com.bgnw.locationreminder.api
 
-import android.util.Log
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
-import org.osmdroid.util.GeoPoint
 
 class Utils {
     companion object Factory {
@@ -13,7 +11,7 @@ class Utils {
                 return null
             }
 
-            val opps: MutableList<ItemOpportunity> = mutableListOf();
+            val opps: MutableList<ItemOpportunity> = mutableListOf()
 
             for (list: TaskList in lists) {
                 if (list.items == null) {

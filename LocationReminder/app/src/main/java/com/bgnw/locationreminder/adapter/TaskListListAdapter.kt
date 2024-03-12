@@ -16,7 +16,7 @@ class TaskListListAdapter(
     private val onItemClickListener: OnItemClickListener
 ) : ArrayAdapter<TaskList>(context, R.layout.list_tasklist_item, taskLists) {
 
-     val dtFormatterDateOnly: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM")
+    val dtFormatterDateOnly: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM")
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -32,7 +32,11 @@ class TaskListListAdapter(
 
         ltiName.text = taskList.title
         ltiDescription.text =
-            "${taskList.items?.size ?: 0} items • Created ${taskList.created_at.format(dtFormatterDateOnly)}"
+            "${taskList.items?.size ?: 0} items • Created ${
+                taskList.created_at.format(
+                    dtFormatterDateOnly
+                )
+            }"
 
         return view
     }

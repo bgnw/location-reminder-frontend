@@ -110,7 +110,7 @@ class MapFragment : Fragment() {
         Log.d("bgnw_MAP", "ready")
         */
 
-        class MyMapEventsReceiver: MapEventsReceiver {
+        class MyMapEventsReceiver : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                 InfoWindow.closeAllInfoWindowsOn(mapView)
                 return true
@@ -129,7 +129,7 @@ class MapFragment : Fragment() {
         viewModel.lists.observe(viewLifecycleOwner, Observer { lists ->
             val opps = Utils.getOppsFromLists(lists?.toMutableList())
             if (opps != null) {
-                for (opp: ItemOpportunity in opps){
+                for (opp: ItemOpportunity in opps) {
                     addMarker(GeoPoint(opp.lati, opp.longi), opp.place_name, opp.category)
                 }
             }
@@ -180,7 +180,7 @@ class MapFragment : Fragment() {
         }
 
         fun updateOnDrag(lat: Double, lon: Double, zoom: Double): Boolean {
-            val areaRadius = 300+(20-zoom)*80
+            val areaRadius = 300 + (20 - zoom) * 80
             Log.d("bgnw_update-map", "updating map due to drag (zoom: $zoom, factor:$areaRadius)")
             // getAsianFood(lat, lon, areaRadius)
             getPOI(lat, lon, areaRadius)
@@ -210,7 +210,12 @@ class MapFragment : Fragment() {
         mapView.overlays.add(marker)
     }
 
-    private suspend fun getNearbyNodes(lat: Double, lon: Double, areaRadius: Double, conditions: String): OverpassResp? {
+    private suspend fun getNearbyNodes(
+        lat: Double,
+        lon: Double,
+        areaRadius: Double,
+        conditions: String
+    ): OverpassResp? {
         val overpassQuery = """
         [out:json][timeout:60];
         (
@@ -229,7 +234,11 @@ class MapFragment : Fragment() {
         }
     }
 
-    private suspend fun getAllNearbyPOI(lat: Double, lon: Double, areaRadius: Double): OverpassResp? {
+    private suspend fun getAllNearbyPOI(
+        lat: Double,
+        lon: Double,
+        areaRadius: Double
+    ): OverpassResp? {
         val overpassQuery = """
         [out:json][timeout:60];
         (

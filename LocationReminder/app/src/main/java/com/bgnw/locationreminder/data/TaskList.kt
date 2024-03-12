@@ -15,7 +15,7 @@ data class TaskList(
     val sort_by: String?,
     val visibility: Int,
     var items: List<TaskItem>? = null
-): Parcelable {
+) : Parcelable {
     override fun toString(): String {
 
         var dateFormatZulu: DateTimeFormatter =

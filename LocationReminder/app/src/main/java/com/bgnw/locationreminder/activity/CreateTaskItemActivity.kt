@@ -1,9 +1,7 @@
 package com.bgnw.locationreminder.activity
 
 import android.app.Activity
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,19 +11,12 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.RadioGroup
-import android.widget.Spinner
 import android.widget.TextView
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.R
-import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.taginfo_api.TagInfoElement
 import com.bgnw.locationreminder.taginfo_api.TagInfoResponse
 import com.bgnw.locationreminder.taginfo_api.procGetSuggestionsFromKeyword
@@ -40,9 +31,9 @@ class CreateTaskItemActivity : AppCompatActivity() {
     class CategoryAdapter(
         private val context: Activity,
         private val elements: List<TagInfoElement>
-    ): ArrayAdapter<TagInfoElement>(context, R.layout.list_categories_checkbox, elements) {
+    ) : ArrayAdapter<TagInfoElement>(context, R.layout.list_categories_checkbox, elements) {
 
-        private val vowels = listOf('a','e','i','o','u')
+        private val vowels = listOf('a', 'e', 'i', 'o', 'u')
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -73,8 +64,10 @@ class CreateTaskItemActivity : AppCompatActivity() {
 
     }
 
-    private val keysOI = listOf("amenity", "shop", "place", "leisure", "education", "tourism",
-        "public_transport", "building", "sport", "product", "vending", "cuisine")
+    private val keysOI = listOf(
+        "amenity", "shop", "place", "leisure", "education", "tourism",
+        "public_transport", "building", "sport", "product", "vending", "cuisine"
+    )
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,7 +89,7 @@ class CreateTaskItemActivity : AppCompatActivity() {
             categoryLayout?.visibility = View.GONE
 
             if (group.checkedRadioButtonId == R.id.cti_radio_opt_category) {
-               categoryLayout?.visibility = View.VISIBLE
+                categoryLayout?.visibility = View.VISIBLE
             }
         }
 
@@ -115,10 +108,10 @@ class CreateTaskItemActivity : AppCompatActivity() {
 
 
             val resTask = GlobalScope.async {
-                procGetSuggestionsFromKeyword(keywordBox!!.text.toString())
+                procGetSuggestionsFromKeyword(keywordBox.text.toString())
             }
 
-            fun displayError(){
+            fun displayError() {
                 outputTextView?.text = "Something went wrong while fetching results."
             }
 
@@ -135,12 +128,13 @@ class CreateTaskItemActivity : AppCompatActivity() {
                     return@launch displayError()
                 }
 
-                res!!.data = res!!.data.filter {
-                        el -> (el.count_all > 1000) and (el.key in keysOI)
+                res!!.data = res!!.data.filter { el ->
+                    (el.count_all > 1000) and (el.key in keysOI)
                 }
 
                 if (res!!.data.isEmpty()) {
-                    outputTextView?.text = "No results found for this keyword, please try similar terms."
+                    outputTextView?.text =
+                        "No results found for this keyword, please try similar terms."
                 } else {
                     val resultMsg = buildSpannedString {
                         bold { append(res!!.data.size.toString()) }

@@ -30,12 +30,17 @@ class ViewTaskListActivity : AppCompatActivity() {
 
         val lv = this.findViewById(R.id.lv_viewing_list) as ListView
         val adapter =
-            list!!.items?.let { TaskItemListAdapter(this, it) } // TODO better approach than non-null guarantee?
+            list!!.items?.let {
+                TaskItemListAdapter(
+                    this,
+                    it
+                )
+            } // TODO better approach than non-null guarantee?
         lv.adapter = adapter
 
 
         val addTaskButton: FloatingActionButton? = this.findViewById(R.id.fab_add_task)
-        addTaskButton?.setOnClickListener{ _ ->
+        addTaskButton?.setOnClickListener { _ ->
             val intent = Intent(this, CreateTaskItemActivity::class.java)
             intent.putExtra("listID", 6)
             startActivity(intent)

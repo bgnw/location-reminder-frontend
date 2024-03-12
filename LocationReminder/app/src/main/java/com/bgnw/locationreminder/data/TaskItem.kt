@@ -16,7 +16,7 @@ data class TaskItem(
     var is_sub_task: Boolean,
     var parent_task: Int?,
     var opportunities: MutableList<ItemOpportunity>? = mutableListOf(),
-): Parcelable {
+) : Parcelable {
     override fun toString(): String {
         return """
             {

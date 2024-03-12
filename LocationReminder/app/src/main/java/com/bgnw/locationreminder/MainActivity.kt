@@ -10,7 +10,6 @@ import android.location.Location
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
 import android.widget.TextView
@@ -40,7 +39,6 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.navigation.NavigationView
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -48,11 +46,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 import java.lang.Thread.sleep
-import kotlin.concurrent.fixedRateTimer
 import kotlin.coroutines.CoroutineContext
 
 
@@ -101,7 +96,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val navUsername: TextView = navView.getHeaderView(0).findViewById(R.id.nav_user_username)
         val navDisplayName: TextView =
             navView.getHeaderView(0).findViewById(R.id.nav_user_display_name)
-
 
 
         fun updateTLs(username: String?) {
@@ -155,14 +149,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         })
 
-        viewModel.changeNeeded.observe(this, Observer {changeNeeded ->
+        viewModel.changeNeeded.observe(this, Observer { changeNeeded ->
             if (changeNeeded) {
                 Log.d("bgnw", "running changes")
                 updateTLs(viewModel.loggedInUsername.value)
                 viewModel.changeNeeded.value = false
             }
         })
-
 
 
         // open default fragment
@@ -178,7 +171,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 R.id.sharing -> changeFragment(SharingFragment(), it.title.toString())
                 R.id.account -> changeFragment(AccountFragment(), it.title.toString())
                 R.id.settings -> changeFragment(SettingsFragment(), it.title.toString())
-                R.id.sign_out -> Toast.makeText(this, "Clicked sign out ${viewModel.lists.value?.size ?: "null"}", Toast.LENGTH_SHORT).show()
+                R.id.sign_out -> Toast.makeText(
+                    this,
+                    "Clicked sign out ${viewModel.lists.value?.size ?: "null"}",
+                    Toast.LENGTH_SHORT
+                ).show()
                 // DEVELOPER MENU:
                 R.id.DEV_MENU -> changeFragment(DeveloperOptions(), it.title.toString())
                 R.id.DEV_MAP -> changeFragment(MapFragment(), it.title.toString())
@@ -330,7 +327,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             """.trimIndent()
 
         try {
-            val response =queryOverpassApi(overpassQuery)
+            val response = queryOverpassApi(overpassQuery)
             Log.d("bgnw", "running getNearbyNodes -> done.")
 
             return response
@@ -370,7 +367,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
         suspend fun remindersPt2(lat: Double, long: Double):
-                Pair<OverpassResp?, Pair<Double, Double>>{
+                Pair<OverpassResp?, Pair<Double, Double>> {
             return Pair(
                 getNearbyNodes(lat, long, 400.0, "'amenity'='bicycle_parking'"),
                 Pair(lat, long)
@@ -380,14 +377,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         fun remindersPt1() {
             val cancelToken: CancellationToken = CancellationTokenSource().token
-            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancelToken).
-                    addOnSuccessListener { loc ->
-                        if (loc != null) {
-                            resultsDeferred = GlobalScope.async {
-                                remindersPt2(loc.latitude, loc.longitude)
-                            }
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancelToken)
+                .addOnSuccessListener { loc ->
+                    if (loc != null) {
+                        resultsDeferred = GlobalScope.async {
+                            remindersPt2(loc.latitude, loc.longitude)
                         }
                     }
+                }
         }
 
 
@@ -396,7 +393,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         if (debug) Log.d("bgnw", "run remindersPt1() -> done")
 
 
-        while(resultsDeferred == null) {
+        while (resultsDeferred == null) {
             if (debug) Log.d("bgnw", "wait for pt2 task")
             sleep(1000)
         }

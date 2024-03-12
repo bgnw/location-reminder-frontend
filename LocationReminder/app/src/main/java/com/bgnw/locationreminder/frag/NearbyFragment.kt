@@ -3,14 +3,12 @@ package com.bgnw.locationreminder.frag
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
@@ -51,10 +49,10 @@ class NearbyFragment : Fragment() {
         val userToPointDist = FloatArray(1)
 
         @SuppressLint("MissingPermission")
-        fun updateUserLocation(){
+        fun updateUserLocation() {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    userLat =  location?.latitude
+                    userLat = location?.latitude
                     userLong = location?.longitude
                 }
         }
@@ -75,7 +73,13 @@ class NearbyFragment : Fragment() {
                 for (opp: ItemOpportunity in allOpps!!) {
                     if (userLat != null && userLong != null) {
                         userToPointDist[0] = -1.0F
-                        Location.distanceBetween(opp.lati, opp.longi, userLat!!, userLong!!, userToPointDist)
+                        Location.distanceBetween(
+                            opp.lati,
+                            opp.longi,
+                            userLat!!,
+                            userLong!!,
+                            userToPointDist
+                        )
                         if (userToPointDist[0] <= distanceConditionMetres) { // if opp is "nearby", add it to nearby list
                             nearbyOpps.add(opp)
                         }
