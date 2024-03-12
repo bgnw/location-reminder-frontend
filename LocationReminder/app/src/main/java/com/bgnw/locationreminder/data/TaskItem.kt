@@ -7,8 +7,11 @@ import kotlinx.parcelize.Parcelize
 data class TaskItem(
     var item_id: Int?,
     var list: Int,
+    var owner: String,
+    var title: String,
     var body_text: String,
     var remind_method: String?,
+    var poi_filters: String?,
     var attachment_img_path: String?,
     var snooze_until: String?,
     var completed: Boolean,
@@ -22,8 +25,11 @@ data class TaskItem(
             {
                 "item_id": "$item_id",
                 "list": "$list",
+                "owner": "$owner",
+                "title": "$title",
                 "body_text": "$body_text",
                 "remind_method": "$remind_method",
+                "poi_filters": "$poi_filters",
                 "attachment_img_path": "$attachment_img_path",
                 "snooze_until": "$snooze_until",
                 "completed": "$completed",
