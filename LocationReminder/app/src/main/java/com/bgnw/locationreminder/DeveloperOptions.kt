@@ -21,17 +21,21 @@ import com.android.volley.toolbox.Volley
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.overpass_api.queryOverpassApi
+import com.bgnw.locationreminder.taginfo_api.TagInfoResponse
+import com.bgnw.locationreminder.taginfo_api.procGetSuggestionsFromKeyword
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.lang.Thread.sleep
 import kotlin.coroutines.CoroutineContext
 
 
@@ -94,9 +98,29 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //            }
 
 
-            GlobalScope.launch(Dispatchers.IO) {
-                overpassPlayground()
+//            val resTask = GlobalScope.async {
+//                overpassPlayground()
+//            }
+
+
+            val keysOI = listOf("amenity", "shop", "place", "leisure", "education", "tourism",
+                "public_transport", "building", "sport", "product", "vending", "cuisine")
+
+            var res: TagInfoResponse? = null
+            val resTask = GlobalScope.async {
+                procGetSuggestionsFromKeyword("chicken")
             }
+            GlobalScope.launch {
+                res = resTask.await()
+            }
+            while (res == null) {
+                sleep(1000)
+            }
+
+            res!!.data = res!!.data.filter {
+                el -> (el.count_all > 1000) and (el.key in keysOI)
+            }
+            tvOutput?.text = res.toString()
 
             Log.d("bgnw_req", "functions done.")
         }

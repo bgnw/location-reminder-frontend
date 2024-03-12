@@ -5,6 +5,9 @@ import TaskItemApi
 import TaskListApi
 import android.util.Log
 import android.widget.TextView
+import androidx.activity.viewModels
+import androidx.fragment.app.activityViewModels
+import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.data.Account
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
@@ -20,6 +23,8 @@ import retrofit2.HttpException
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -117,18 +122,22 @@ class Requests {
             sort_by: String,
             visibility: Int,
             tv: TextView?
-        ): Account {
+        ): TaskList {
             // *************** CREATE TASK LIST  *************************
             return suspendCoroutine { continuation ->
+
+                var dateFormatZulu: DateTimeFormatter =
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+
                 GlobalScope.launch(Dispatchers.IO) {
                     val obj = TaskList(
-                        list_id = 4, // TODO real data
-                        title = "test3",
-                        icon_name = "none",
-                        created_at = "xx TODO",
-                        owner = "sim",
-                        sort_by = "name",
-                        visibility = 0
+                        list_id = null,
+                        title = title,
+                        icon_name = icon_name,
+                        created_at = (LocalDateTime.now().format(dateFormatZulu).toString()),
+                        owner = owner_username,
+                        sort_by = sort_by,
+                        visibility = visibility
                     )
                     Log.d("bgnw_DJA API", obj.toString())
                     var call = taskListApi.createList(obj)
@@ -137,15 +146,25 @@ class Requests {
                         override fun onFailure(call: Call<TaskList>, t: Throwable) {
                             Log.d("bgnw_DJA API", "ERROR: $t")
                             tv?.text = "ERROR: $t"
+                            continuation.resumeWith(Result.failure(Exception("Django REST API call failed")))
                         }
 
                         override fun onResponse(
                             call: Call<TaskList>,
                             response: Response<TaskList>
                         ) {
+
                             Log.d("bgnw_DJA API", "RESPONSE: ${response.body().toString()}")
                             tv?.text = "RESPONSE: ${response.body().toString()}"
+
+                            if (response.body() == null) {
+                                continuation.resumeWith(Result.failure(Exception("Null TaskList object found when looking at Django REST API response")))
+                            } else {
+                                continuation.resumeWith(Result.success(response.body()!!))
+
+                            }
                         }
+
 
                     })
                 }

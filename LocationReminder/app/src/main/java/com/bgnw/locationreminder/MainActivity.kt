@@ -87,6 +87,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         // set main content view
         setContentView(R.layout.activity_main)
 
+        viewModel.changeNeeded.value = false
+
         // initialise navigation drawer
         drawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
@@ -101,11 +103,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             navView.getHeaderView(0).findViewById(R.id.nav_user_display_name)
 
 
-        // actions to take when user logs in
-        viewModel.loggedInUsername.observe(this, Observer { username ->
-            navUsername.text = username
 
+        fun updateTLs(username: String?) {
             if (username != null) {
+                navUsername.text = username
 
                 // retrieve all task lists, items, etc associated with this user
                 launch {
@@ -129,9 +130,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                             }
                         }
                     }
-                    viewModel.lists.value = resultTL
+                    viewModel.lists.value = resultTL?.toMutableList()
+                    Log.d("bgnw_DJA API", "resultTL is")
+                    Log.d("bgnw_DJA API", resultTL.toString())
                 }
             }
+        }
+
+        // actions to take when user logs in
+        viewModel.loggedInUsername.observe(this, Observer { username ->
+            updateTLs(username)
         })
 
 
@@ -141,6 +149,20 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 navDisplayName.text = displayName
             }
         })
+
+        viewModel.lists.observe(this, Observer {
+            Log.d("bgnw", "Lists, running changes")
+
+        })
+
+        viewModel.changeNeeded.observe(this, Observer {changeNeeded ->
+            if (changeNeeded) {
+                Log.d("bgnw", "running changes")
+                updateTLs(viewModel.loggedInUsername.value)
+                viewModel.changeNeeded.value = false
+            }
+        })
+
 
 
         // open default fragment
@@ -156,7 +178,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 R.id.sharing -> changeFragment(SharingFragment(), it.title.toString())
                 R.id.account -> changeFragment(AccountFragment(), it.title.toString())
                 R.id.settings -> changeFragment(SettingsFragment(), it.title.toString())
-                R.id.sign_out -> Toast.makeText(this, "Clicked sign out", Toast.LENGTH_SHORT).show()
+                R.id.sign_out -> Toast.makeText(this, "Clicked sign out ${viewModel.lists.value?.size ?: "null"}", Toast.LENGTH_SHORT).show()
                 // DEVELOPER MENU:
                 R.id.DEV_MENU -> changeFragment(DeveloperOptions(), it.title.toString())
                 R.id.DEV_MAP -> changeFragment(MapFragment(), it.title.toString())
@@ -176,12 +198,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         // Launch coroutine to check for reminders/notifications to send to user
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        GlobalScope.launch {
-            while (true) {
-                checkForReminders()
-                delay(30000)
-            }
-        }
+//        GlobalScope.launch {
+//            while (true) {
+//                checkForReminders()
+//                delay(30000)
+//            }
+//        }
     }
 
 
@@ -308,7 +330,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             """.trimIndent()
 
         try {
-            val response = queryOverpassApi(overpassQuery)
+            val response =queryOverpassApi(overpassQuery)
             Log.d("bgnw", "running getNearbyNodes -> done.")
 
             return response

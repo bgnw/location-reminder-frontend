@@ -11,7 +11,10 @@ class ApplicationState : ViewModel() {
     val loggedInDisplayName: MutableLiveData<String?> by lazy {
         MutableLiveData<String?>()
     }
-    val lists: MutableLiveData<List<TaskList>?> by lazy {
-        MutableLiveData<List<TaskList>?>()
+    val lists: MutableLiveData<MutableList<TaskList>?> by lazy {
+        MutableLiveData<MutableList<TaskList>?>()
+    }
+    val changeNeeded: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
     }
 }

@@ -17,4 +17,5 @@
         <item>item5</item>
         <item>item6</item>
     </string-array>
+    <string name="title_activity_create_task_item">CreateTaskItemActivity</string>
 </resources>

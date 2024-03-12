@@ -21,12 +21,15 @@ data class TaskList(
         var dateFormatZulu: DateTimeFormatter =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
         val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+
+//        "created_at": "${dateFormatZulu.parse(created_at)}",
+
         return """
             {
                 "list_id": $list_id,
                 "title": "$title",
                 "icon_name": "$icon_name",
-                "created_at": "${dateFormatZulu.parse(created_at)}",
+                "created_at": "$created_at",
                 "owner": "$owner",
                 "sort_by": "$sort_by",
                 "visibility": $visibility
