@@ -169,6 +169,66 @@ class Requests {
         }
 
 
+
+        @OptIn(DelicateCoroutinesApi::class)
+        suspend fun createItem(
+            list: Int,
+            owner: String,
+            title: String,
+            body_text: String,
+            remind_method: String?,
+            poi_filters: String?,
+            attachment_img_path: String?,
+            snooze_until: String?,
+            completed: Boolean,
+            due_at: String?,
+            is_sub_task: Boolean,
+            parent_task: Int?,
+        ): TaskItem {
+            // *************** CREATE TASK ITEM  *************************
+            return suspendCoroutine { continuation ->
+                GlobalScope.launch(Dispatchers.IO) {
+                    val obj = TaskItem(
+                        item_id = null,
+                        list = list,
+                        owner = owner,
+                        title = title,
+                        body_text = body_text,
+                        remind_method = remind_method,
+                        poi_filters = poi_filters,
+                        attachment_img_path = attachment_img_path,
+                        is_sub_task = is_sub_task,
+                        parent_task = parent_task,
+                        completed = completed,
+                        snooze_until = snooze_until,
+                        due_at = due_at
+                    )
+                    var call = taskItemApi.createItem(obj)
+
+                    call.enqueue(object : Callback<TaskItem> {
+                        override fun onFailure(call: Call<TaskItem>, t: Throwable) {
+                            continuation.resumeWith(Result.failure(Exception("Django REST API call failed")))
+                        }
+
+                        override fun onResponse(
+                            call: Call<TaskItem>,
+                            response: Response<TaskItem>
+                        ) {
+                            if (response.body() == null) {
+                                continuation.resumeWith(Result.failure(Exception("Null TaskList object found when looking at Django REST API response")))
+                            } else {
+                                continuation.resumeWith(Result.success(response.body()!!))
+                            }
+                        }
+                    })
+                }
+            }
+        }
+
+
+
+
+
         @OptIn(DelicateCoroutinesApi::class)
         suspend fun getListItemsById(
             listId: Int,
