@@ -71,9 +71,9 @@ class ListsFragment : Fragment() {
         lv.adapter = adapter
 
 
-        viewModel.lists.observe(viewLifecycleOwner, {
+        viewModel.lists.observe(viewLifecycleOwner) {
             adapter?.notifyDataSetInvalidated()
-        })
+        }
 
         val addListButton: FloatingActionButton? = context.findViewById(R.id.fab_add_list)
         addListButton?.setOnClickListener { _ -> // https://www.digitalocean.com/community/tutorials/android-alert-dialog-using-kotlin
