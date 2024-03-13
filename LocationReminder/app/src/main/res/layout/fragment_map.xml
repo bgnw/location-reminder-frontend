@@ -11,12 +11,24 @@
         android:layout_height="match_parent">
     </org.osmdroid.views.MapView>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="update"
         android:id="@+id/btn_update_map"
         />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="override"
+        android:id="@+id/btn_override"
+        />
+    </LinearLayout>
 
 <!--    <TextView-->
 <!--        android:id="@+id/map_loading_message"-->

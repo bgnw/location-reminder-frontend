@@ -19,6 +19,8 @@ import com.bgnw.locationreminder.map_aux.MapInfoBox
 import com.bgnw.locationreminder.overpass_api.OverpassElement
 import com.bgnw.locationreminder.overpass_api.OverpassResp
 import com.bgnw.locationreminder.overpass_api.queryOverpassApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
@@ -26,6 +28,7 @@ import org.osmdroid.config.IConfigurationProvider
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
@@ -33,6 +36,7 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
+import java.lang.Thread.sleep
 
 class MapFragment : Fragment() {
 
@@ -78,9 +82,15 @@ class MapFragment : Fragment() {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.mapCenter
         mapView.getLocalVisibleRect(Rect())
-        mapView.controller.setZoom(20.0)
+
+        mapView.minZoomLevel = 16.0
+        mapView.maxZoomLevel = 19.0
+        mapView.controller.setZoom(19.0)
+
+        mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.ALWAYS)
 
         val updateMapButton: Button = requireView().findViewById(R.id.btn_update_map)
+        val overrideButton: Button = requireView().findViewById(R.id.btn_override)
 
         val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), mapView)
         locationOverlay.enableMyLocation()
@@ -189,14 +199,18 @@ class MapFragment : Fragment() {
 
         updateMapButton.setOnClickListener {
             GlobalScope.launch {
-                val resp = getNearbyNodes(55.9086, -3.3187, 400.0, "'amenity'='bicycle_parking'")
+                val resp = getNearbyNodes(mapView.boundingBox.centerLatitude, mapView.boundingBox.centerLongitude, 400.0, "'amenity'='bicycle_parking'")
                 Log.d("bgnw", resp.toString())
             }
-//            updateOnDrag(
-//                mapView.boundingBox.centerLatitude,
-//                mapView.boundingBox.centerLongitude,
-//                mapView.zoomLevelDouble
-//            )
+            updateOnDrag(
+                mapView.boundingBox.centerLatitude,
+                mapView.boundingBox.centerLongitude,
+                mapView.zoomLevelDouble
+            )
+        }
+
+        overrideButton.setOnClickListener {
+            mapView.maxZoomLevel = 25.0
         }
     }
 
