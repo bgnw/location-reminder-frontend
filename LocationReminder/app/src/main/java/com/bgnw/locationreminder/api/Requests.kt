@@ -4,7 +4,6 @@ import AccountApi
 import TaskItemApi
 import TaskListApi
 import android.util.Log
-import android.widget.TextView
 import com.bgnw.locationreminder.data.Account
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
@@ -118,7 +117,6 @@ class Requests {
             owner_username: String,
             sort_by: String,
             visibility: Int,
-            tv: TextView?
         ): TaskList {
             // *************** CREATE TASK LIST  *************************
             return suspendCoroutine { continuation ->
@@ -141,8 +139,6 @@ class Requests {
 
                     call.enqueue(object : Callback<TaskList> {
                         override fun onFailure(call: Call<TaskList>, t: Throwable) {
-                            Log.d("bgnw_DJA API", "ERROR: $t")
-                            tv?.text = "ERROR: $t"
                             continuation.resumeWith(Result.failure(Exception("Django REST API call failed")))
                         }
 
@@ -150,10 +146,6 @@ class Requests {
                             call: Call<TaskList>,
                             response: Response<TaskList>
                         ) {
-
-                            Log.d("bgnw_DJA API", "RESPONSE: ${response.body().toString()}")
-                            tv?.text = "RESPONSE: ${response.body().toString()}"
-
                             if (response.body() == null) {
                                 continuation.resumeWith(Result.failure(Exception("Null TaskList object found when looking at Django REST API response")))
                             } else {
@@ -232,7 +224,6 @@ class Requests {
         @OptIn(DelicateCoroutinesApi::class)
         suspend fun getListItemsById(
             listId: Int,
-            tv: TextView?
         ): List<TaskItem>? = withContext(Dispatchers.IO) {
             // *************** LOOKUP LIST ITEMS  *************************
             return@withContext suspendCoroutine { continuation ->
@@ -242,7 +233,6 @@ class Requests {
 
                     call.enqueue(object : Callback<List<TaskItem>> {
                         override fun onFailure(call: Call<List<TaskItem>>, t: Throwable) {
-                            Log.d("bgnw_DJA API", "ERROR: $t")
                             continuation.resume(null)
                         }
 
@@ -254,7 +244,6 @@ class Requests {
                                 val responseBody = response.body()
                                 continuation.resume(responseBody)
                             } else {
-                                Log.d("bgnw_DJA API", "body is null")
                                 continuation.resume(null)
                             }
                         }
@@ -278,7 +267,6 @@ class Requests {
                             call: Call<MutableList<ItemOpportunity>>,
                             t: Throwable
                         ) {
-                            Log.d("bgnw_DJA API", "[opps] ERROR: $t")
                             continuation.resume(null)
                         }
 
@@ -290,7 +278,6 @@ class Requests {
                                 val responseBody = response.body()
                                 continuation.resume(responseBody)
                             } else {
-                                Log.d("bgnw_DJA API", "[opps] body is null")
                                 continuation.resume(null)
                             }
                         }
@@ -307,7 +294,6 @@ class Requests {
 
                     call.enqueue(object : Callback<List<TaskList>> {
                         override fun onFailure(call: Call<List<TaskList>>, t: Throwable) {
-                            Log.d("bgnw_DJA API", "ERROR: $t")
                             continuation.resume(null)
                         }
 
@@ -319,7 +305,6 @@ class Requests {
                                 val responseBody = response.body()
                                 continuation.resume(responseBody)
                             } else {
-                                Log.d("bgnw_DJA API", "body is null")
                                 continuation.resume(null)
                             }
                         }
@@ -334,7 +319,6 @@ class Requests {
 
              call.enqueue(object : Callback<List<TaskList>> {
                  override fun onFailure(call: Call<List<TaskList>>, t: Throwable) {
-                     Log.d("bgnw_DJA API", "ERROR: $t")
                  }
 
                  override fun onResponse(
@@ -344,7 +328,6 @@ class Requests {
                      val responseBody = response.body()
 
 
-                     Log.d("bgnw_DJA API", "RESPONSE: ${responseBody.toString()}")
                      GlobalScope.launch(Dispatchers.IO) {
                          if (responseBody != null) {
                              for (list: TaskList in responseBody) {
@@ -353,7 +336,6 @@ class Requests {
                                  list.items = items
                              }
                          } else {
-                             Log.d("bgnw_DJA API", "body is null")
                          }
                      }
                  }
@@ -369,7 +351,6 @@ class Requests {
 //
 //                    call.enqueue(object : Callback<List<TaskList>> {
 //                        override fun onFailure(call: Call<List<TaskList>>, t: Throwable) {
-//                            Log.d("bgnw_DJA API", "ERROR: $t")
 //                        }
 //
 //                        override fun onResponse(
@@ -379,7 +360,6 @@ class Requests {
 //                            val responseBody = response.body()
 //
 //
-//                            Log.d("bgnw_DJA API", "RESPONSE: ${responseBody.toString()}")
 //                            GlobalScope.launch(Dispatchers.IO) {
 //                                if (responseBody != null) {
 //                                    for (list: TaskList in responseBody) {
