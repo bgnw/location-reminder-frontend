@@ -1,6 +1,7 @@
 package com.bgnw.locationreminder.activity
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,6 +22,7 @@ import androidx.core.text.buildSpannedString
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.bgnw.locationreminder.ApplicationState
+import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.data.TaskItem
@@ -88,6 +90,13 @@ class CreateTaskItemActivity : AppCompatActivity() {
         "public_transport", "building", "sport", "product", "vending", "cuisine"
     )
 
+
+    private fun closeActivityWithResult(item: TaskItem){
+        val resultIntent = Intent()
+        resultIntent.putExtra("NEW_ITEM", item)
+        setResult(RESULT_OK, resultIntent)
+        finish()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -194,24 +203,24 @@ class CreateTaskItemActivity : AppCompatActivity() {
             categories.forEach { el ->
                 categoriesKV.add("\'${el.key}\'=\'${el.value}\'")
             }
-
-            val reqIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
-            val newItem: MutableLiveData<TaskItem> = MutableLiveData()
-
-            reqIsDone.observe(this) {
-                Log.d("bgnw", "donEEEE!!!!!!!!!!")
-                viewModel.changeNeeded.value = true
-            }
-
-            newItem.observe(this) { newItem ->
-                if (newItem != null) {
-                    Log.d("bgnw", "newlist is not null")
-//                    viewModel.lists.value?.get(listID)?.items?.add(newItem)
-                } else {
-                    Log.d("bgnw", "newlist IS null")
-
-                }
-            }
+//
+//            val reqIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
+//            val newItem: MutableLiveData<TaskItem> = MutableLiveData()
+////
+//            reqIsDone.observe(this) {
+//                Log.d("bgnw", "donEEEE!!!!!!!!!!")
+////                viewModel.changeNeeded.postValue(true)
+//            }
+//
+//            newItem.observe(this) { newItem ->
+//                if (newItem != null) {
+//                    Log.d("bgnw", "newlist is not null")
+////                    viewModel.lists.value?.get(listID)?.items?.add(newItem)
+//                } else {
+//                    Log.d("bgnw", "newlist IS null")
+//
+//                }
+//            }
 
             val reqResult = CoroutineScope(Dispatchers.IO).async {
                 Requests.createItem(
@@ -236,14 +245,10 @@ class CreateTaskItemActivity : AppCompatActivity() {
                 // Process the result
                 Log.d("bgnw", "Async operation result: $itemResult")
 
-                newItem.postValue(itemResult)
-                reqIsDone.postValue(true)
+                closeActivityWithResult(itemResult)
+//                newItem.postValue(itemResult)
+//                reqIsDone.postValue(true)
             }
-
-
         }
-
-
-
     }
 }

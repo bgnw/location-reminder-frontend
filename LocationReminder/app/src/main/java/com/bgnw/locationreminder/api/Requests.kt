@@ -290,7 +290,7 @@ class Requests {
         }
 
         @OptIn(DelicateCoroutinesApi::class)
-        suspend fun getTaskListsByUsername(username: String): List<TaskList>? =
+        suspend fun getTaskListsByUsername(username: String): MutableList<TaskList>? =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
                     val call = taskListApi.getOwnedLists(username, "json")
@@ -306,7 +306,9 @@ class Requests {
                         ) {
                             if (response.isSuccessful) {
                                 val responseBody = response.body()
-                                continuation.resume(responseBody)
+                                continuation.resume(
+                                    responseBody?.toMutableList() ?: mutableListOf()
+                                )
                             } else {
                                 continuation.resume(null)
                             }

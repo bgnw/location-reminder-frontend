@@ -7,10 +7,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
@@ -39,6 +40,25 @@ class ListsFragment : Fragment() {
     private val dtFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
 
+    private var adapter: TaskListListAdapter? = null
+    private val request = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == AppCompatActivity.RESULT_OK) {
+            val data = it.data
+            // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            val mutatedList: TaskList? = data?.extras?.getParcelable<TaskList>("MUTATED_LIST")
+
+            if (mutatedList != null ) {
+
+                viewModel.lists.value?.removeIf { list -> list.list_id == mutatedList.list_id }
+                viewModel.lists.value?.add(mutatedList)
+                viewModel.lists.value?.sortBy { list -> list.title }
+
+                adapter?.notifyDataSetChanged()
+                adapter?.notifyDataSetInvalidated()
+            }
+        }
+    }
+
     private val itemClickListener = object : TaskListListAdapter.OnItemClickListener {
         override fun onItemClick(position: TaskList) {
             Log.d("bgnw_Data: ", position.toString())
@@ -47,9 +67,10 @@ class ListsFragment : Fragment() {
             Log.d("bgnw_PASSING LIST:", position.toString())
             intent.putExtra("selected_list", position) // TODO pass whole list obj
             intent.putExtra("username", viewModel.loggedInUsername.value)
-            startActivity(intent)
+            request.launch(intent)
         }
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,8 +88,7 @@ class ListsFragment : Fragment() {
 
         val context = context as MainActivity
         val lv = context.findViewById(R.id.lv_tasklist_list) as ListView
-        val adapter =
-            viewModel.lists.value?.let { TaskListListAdapter(context, it, itemClickListener) }
+        adapter = viewModel.lists.value?.let { TaskListListAdapter(context, it, itemClickListener) }
         lv.adapter = adapter
 
 
@@ -95,7 +115,9 @@ class ListsFragment : Fragment() {
 
                         reqIsDone.observe(viewLifecycleOwner) {
                             Log.d("bgnw", "donEEEE!!!!!!!!!!")
-                            viewModel.changeNeeded.value = true
+                            // updateTLs(username)
+                            (requireActivity() as MainActivity).updateTLs(username)
+//                            viewModel.changesMade.postValue(true)
                         }
 
                         newList.observe(viewLifecycleOwner) { newList ->
@@ -103,6 +125,10 @@ class ListsFragment : Fragment() {
                                 Log.d("bgnw", "newlist is not null")
 
                                 adapter?.add(newList)
+                                viewModel.lists.value?.sortBy { list -> list.title }
+                                adapter?.notifyDataSetChanged()
+                                adapter?.notifyDataSetInvalidated()
+
                             } else {
                                 Log.d("bgnw", "newlist IS null")
 
@@ -136,20 +162,52 @@ class ListsFragment : Fragment() {
         }
 
 
-        viewModel.changeNeeded.observe(viewLifecycleOwner) {
-            Log.d("bgnw", "change needed run")
-        }
 
 
 
-        context.findViewById<Button>(R.id.changefalse).setOnClickListener {
-            viewModel.changeNeeded.value = false
-        }
-        context.findViewById<Button>(R.id.changetrue).setOnClickListener {
-            viewModel.changeNeeded.value = true
-        }
+//        context.findViewById<Button>(R.id.changefalse).setOnClickListener {
+//            viewModel.changeNeeded.value = false
+//        }
+//        context.findViewById<Button>(R.id.changetrue).setOnClickListener {
+//            viewModel.changeNeeded.value = true
+//        }
+
+    }
 
 
+    override fun onResume() {
+        super.onResume()
+
+        Log.d("bgnw_updates", "onresume")
+
+//        // NOTE: this gets called very frequently
+//        if (viewModel.lastUpdate.value == null
+//            ||
+//            (
+//                viewModel.lastUpdate.value != null
+//                        && viewModel.lastUpdate.value!!.isBefore((Instant.now()).minusSeconds(60))
+//                )
+//        ) {
+//            viewModel.changesMade.value = false
+//            viewModel.lastUpdate.postValue(Instant.now())
+//            Log.d("bgnw_updates", "updating")
+//
+//
+//            AccountDeviceTools.retrieveUsername(requireContext())?.let {
+//                (requireActivity() as MainActivity).updateTLs(it)
+//            }
+//
+//
+//        }
+
+
+
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+//        viewModel.changeNeeded.removeObservers(viewLifecycleOwner)
+        viewModel.lists.removeObservers(viewLifecycleOwner)
     }
 
 }

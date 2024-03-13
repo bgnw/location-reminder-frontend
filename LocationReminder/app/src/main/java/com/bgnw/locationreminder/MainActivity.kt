@@ -21,12 +21,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import com.bgnw.locationreminder.api.AccountDeviceTools
 import com.bgnw.locationreminder.api.Requests
-import com.bgnw.locationreminder.data.TaskItem
-import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.frag.AccountFragment
 import com.bgnw.locationreminder.frag.ListsFragment
 import com.bgnw.locationreminder.frag.MapFragment
@@ -48,9 +46,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
 import kotlin.coroutines.CoroutineContext
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveUsername
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDisplayName
+import com.bgnw.locationreminder.api.Utils
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import java.time.Instant
 
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
@@ -73,18 +76,40 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
 
-    // function is run once activity created (i.e. app is loaded in fg)
-    @OptIn(DelicateCoroutinesApi::class)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        Class.forName("org.postgresql.Driver")
+    public fun updateTLs(username: String) {
+        Log.d("bgnw", "updating TLs in MainActivity")
+        val taskIsDone = MutableLiveData<Boolean>(false)
+        val task = Utils.getUpdatedTLs(username)
 
+        CoroutineScope(Dispatchers.IO).launch {
+            task.await()
+            taskIsDone.postValue(true)
+        }
+
+        taskIsDone.observe(this) {done ->
+            if (done && task.isCompleted) {
+                viewModel.lists.value = task.getCompleted()?.toMutableList() ?: mutableListOf()
+            }
+        }
+    }
+
+    // function is run once activity created (i.e. app is loaded in fg)
+    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
         // call default onCreate function
         super.onCreate(savedInstanceState)
+
+
+        Class.forName("org.postgresql.Driver")
+
+
+        Requests.initialiseApi()
+
 
         // set main content view
         setContentView(R.layout.activity_main)
 
-        viewModel.changeNeeded.value = false
+//        viewModel.changeNeeded.value = false
 
         // initialise navigation drawer
         drawerLayout = findViewById(R.id.drawer_layout)
@@ -100,42 +125,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             navView.getHeaderView(0).findViewById(R.id.nav_user_display_name)
 
 
-        fun updateTLs(username: String?) {
-            if (username != null) {
-                navUsername.text = username
 
-                // retrieve all task lists, items, etc associated with this user
-                launch {
-                    val resultTL = Requests.getTaskListsByUsername(username)
-                    if (resultTL != null) {
-                        for (list: TaskList in resultTL) {
-                            if (list.list_id == null) continue
-                            val items = Requests.getListItemsById(list.list_id)
-                            list.items = items
 
-                            if (items != null) {
-                                for (item: TaskItem in items) {
-                                    if (item.item_id != null) {
-                                        val results =
-                                            Requests.getItemOpportunitiesByItemId(item.item_id!!)
-                                        Log.d("bgnw_DJA API", "[opps] results: $results")
-                                        item.opportunities = results
 
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    viewModel.lists.value = resultTL?.toMutableList()
-                    Log.d("bgnw_DJA API", "resultTL is")
-                    Log.d("bgnw_DJA API", resultTL.toString())
-                }
-            }
-        }
+
 
         // actions to take when user logs in
         viewModel.loggedInUsername.observe(this, Observer { username ->
-            updateTLs(username)
+            navUsername.text = username
+            if (username != null) {
+                updateTLs(username)
+            }
         })
 
 
@@ -146,25 +146,39 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         })
 
-        viewModel.lists.observe(this, Observer {
-            Log.d("bgnw", "Lists, running changes")
+//        viewModel.changeNeeded.observe(this, Observer { changeNeeded ->
+//            if (changeNeeded) {
+//                Log.d("bgnw", "running changes")
+//                val username = viewModel.loggedInUsername.value
+//                if (username != null) {
+////                    updateTLs(username)
+//                }
+//                viewModel.changeNeeded.value = false
+//            }
+//        })
+//
+//
+//
+//        viewModel.changesMade.observe(this) {changesMade ->
+//            if (changesMade == null || changesMade == true) {
+//                viewModel.changesMade.value = false
+//                retrieveUsername(this)?.let { updateTLs(it) }
+//            }
+//        }
+//
+//        viewModel.changesMade.value = true
 
-        })
 
-        viewModel.changeNeeded.observe(this, Observer { changeNeeded ->
-            if (changeNeeded) {
-                Log.d("bgnw", "running changes")
-                updateTLs(viewModel.loggedInUsername.value)
-                viewModel.changeNeeded.value = false
-            }
-        })
+
+
+        var currentFragId: Int = R.id.lists
+        val listFrag = ListsFragment()
 
 
         // open default fragment
-        changeFragment(ListsFragment(), "Lists")
+        changeFragment(listFrag, "Lists")
         navView.setCheckedItem(R.id.lists)
 
-        var currentFragId: Int = R.id.lists
 
         // nav menu click handler
         navView.setNavigationItemSelectedListener {
@@ -180,7 +194,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 }
                 R.id.lists -> {
                     currentFragId = R.id.lists
-                    changeFragment(ListsFragment(), it.title.toString())
+                    changeFragment(listFrag, it.title.toString())
                 }
                 R.id.sharing -> {
                     currentFragId = R.id.sharing
@@ -215,6 +229,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             true
         }
 
+        viewModel.lists.observe(this, Observer {
+            Log.d("bgnw", "Lists, running changes")
+            if (currentFragId == R.id.lists) {
+                reloadListsFragment()
+            }
+        })
+
         // Check and (if needed) request permission from the user to send notifications
         // TODO check this works on >= android 13
         requestNotifPermission()
@@ -233,6 +254,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 //                delay(30000)
 //            }
 //        }
+
+
+        val savedUser = retrieveUsername(this)
+        if (savedUser != null && viewModel.loggedInUsername.value != savedUser) {
+            viewModel.loggedInUsername.value = savedUser
+            viewModel.loggedInDisplayName.value = retrieveDisplayName(this)
+        }
 
 //        var x = MutableLiveData<Boolean>(false)
 //        GlobalScope.launch {
@@ -263,6 +291,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         fragmentTransaction.commit()
         setTitle(title)
         drawerLayout.closeDrawers()
+    }
+
+    private fun reloadListsFragment() {
+        val fragmentManager = supportFragmentManager
+        val trans1 = fragmentManager.beginTransaction()
+        trans1.replace(R.id.frame_layout, Fragment())
+        trans1.commit()
+
+        val trans2 = fragmentManager.beginTransaction()
+        trans2.replace(R.id.frame_layout, ListsFragment())
+        trans2.commit()
     }
 
     private fun requestNotifPermission() {

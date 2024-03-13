@@ -14,8 +14,19 @@ data class TaskList(
     val owner: String,
     val sort_by: String?,
     val visibility: Int,
-    var items: List<TaskItem>? = null
+    var items: MutableList<TaskItem>? = null
 ) : Parcelable {
+    constructor(list: TaskList) : this(
+        list_id = list.list_id,
+        title = list.title,
+        icon_name = list.icon_name,
+        created_at = list.created_at,
+        owner = list.owner,
+        sort_by = list.sort_by,
+        visibility = list.visibility,
+        items = list.items,
+    )
+
     override fun toString(): String {
 
         var dateFormatZulu: DateTimeFormatter =

@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.api.AccountDeviceTools
 import com.bgnw.locationreminder.api.AuthResponse
 import com.bgnw.locationreminder.api.Requests
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -29,7 +30,6 @@ class AccountFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Requests.initialiseApi()
     }
 
     override fun onCreateView(
@@ -76,10 +76,22 @@ class AccountFragment : Fragment() {
         }
 
 
-
         viewModel.loggedInUsername.observe(viewLifecycleOwner, Observer { username ->
-            Log.d("bgnw_OBSERVER", "(in frag) username changed to $username")
-            devtextview?.text = username
+            if (username != null) {
+                AccountDeviceTools.saveUsername(
+                    context = requireContext(),
+                    username = username,
+                )
+            }
+        })
+
+        viewModel.loggedInDisplayName.observe(viewLifecycleOwner, Observer { displayName ->
+            if (displayName != null) {
+                AccountDeviceTools.saveDisplayName(
+                    context = requireContext(),
+                    displayName = displayName,
+                )
+            }
         })
 
         fun clearLoginResult() {
@@ -118,8 +130,8 @@ class AccountFragment : Fragment() {
 
 
                 } catch (e: Exception) {
+                    throw e // TEMP
                     // Handle exception
-                    Log.e("DJA API", "Error: $e \n${e.printStackTrace()}")
                 }
             }
         }
