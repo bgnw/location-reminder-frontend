@@ -53,6 +53,7 @@ import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveUsername
 import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDisplayName
 import com.bgnw.locationreminder.api.Utils
 import com.bgnw.locationreminder.location.LocationLiveData
+import com.bgnw.locationreminder.location.LocationModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -251,9 +252,33 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
         val locationData = LocationLiveData(this)
+
+        var lastLocation: LocationModel? = null
         fun getLocationData() = locationData
         getLocationData().observe(this) {loc ->
-            Log.d("bgnw_LOCATIONPROVIDER", "loc: ${loc.latitude}, ${loc.longitude}")
+
+
+            val diff = floatArrayOf(99f)
+
+            Location.distanceBetween(
+                lastLocation?.latitude ?: loc.latitude,
+                lastLocation?.longitude ?: loc.longitude,
+                loc.latitude,
+                loc.longitude,
+                diff
+            )
+
+            lastLocation = loc
+
+            if (diff[0] > 4) {
+                val msg = "loc: ${loc.latitude}, ${loc.longitude} (diff: ${diff[0]})"
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                Log.d("bgnw_LOCATIONPROVIDER", msg)
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    checkForReminders()
+                }
+            }
         }
 
 
