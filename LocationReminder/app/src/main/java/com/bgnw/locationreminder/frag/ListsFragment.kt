@@ -112,7 +112,7 @@ class ListsFragment : Fragment() {
                         val reqResult = CoroutineScope(Dispatchers.IO).async {
                             Requests.createList(
                                 title, null, username,
-                                "created_at", 0, null
+                                "created_at", 0
                             )
                         }
 
