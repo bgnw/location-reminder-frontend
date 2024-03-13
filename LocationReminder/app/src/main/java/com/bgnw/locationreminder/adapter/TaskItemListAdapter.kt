@@ -27,7 +27,8 @@ class TaskItemListAdapter(
         val liTitle: TextView = view.findViewById(R.id.li_title)
         val liSubtitle: TextView = view.findViewById(R.id.li_subtitle)
 
-        liTitle.text = taskItems[position].body_text
+        liTitle.text = taskItems[position].title
+        liSubtitle.text = taskItems[position].body_text
 //        liSubtitle.text = "${task.distance}m away${
 //            if (task.due_at != null) ", due " + task.due_at?.format(dtFormatter) else ""
 //        }"
