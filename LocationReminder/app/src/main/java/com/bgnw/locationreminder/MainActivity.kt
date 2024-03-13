@@ -21,6 +21,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.data.TaskItem
@@ -199,6 +201,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 //            while (true) {
 //                checkForReminders()
 //                delay(30000)
+//            }
+//        }
+
+//        var x = MutableLiveData<Boolean>(false)
+//        GlobalScope.launch {
+//            sleep(3000)
+//            x.postValue(true)
+//        }
+//        x.observe(this) {x ->
+//            if (x) {
+//                viewModel.loggedInUsername.value = "ba"
+//                viewModel.loggedInDisplayName.value = "bgnw"
 //            }
 //        }
     }

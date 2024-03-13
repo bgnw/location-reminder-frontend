@@ -197,6 +197,9 @@ class Requests {
                     )
                     var call = taskItemApi.createItem(obj)
 
+                    Log.d("bgnw", "createitem call:")
+                    Log.d("bgnw", call.request().body.toString())
+
                     call.enqueue(object : Callback<TaskItem> {
                         override fun onFailure(call: Call<TaskItem>, t: Throwable) {
                             continuation.resumeWith(Result.failure(Exception("Django REST API call failed")))
@@ -207,7 +210,7 @@ class Requests {
                             response: Response<TaskItem>
                         ) {
                             if (response.body() == null) {
-                                continuation.resumeWith(Result.failure(Exception("Null TaskList object found when looking at Django REST API response")))
+                                continuation.resumeWith(Result.failure(Exception("Null TaskItem object found when looking at Django REST API response")))
                             } else {
                                 continuation.resumeWith(Result.success(response.body()!!))
                             }

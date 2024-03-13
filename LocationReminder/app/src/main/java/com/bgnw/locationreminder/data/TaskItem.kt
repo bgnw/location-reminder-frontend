@@ -23,19 +23,19 @@ data class TaskItem(
     override fun toString(): String {
         return """
             {
-                "item_id": "$item_id",
+                "item_id": $item_id,
                 "list": "$list",
                 "owner": "$owner",
                 "title": "$title",
-                "body_text": "$body_text",
-                "remind_method": "$remind_method",
-                "poi_filters": "$poi_filters",
-                "attachment_img_path": "$attachment_img_path",
-                "snooze_until": "$snooze_until",
-                "completed": "$completed",
-                "due_at": "$due_at",
-                "is_sub_task": "$is_sub_task",
-                "parent_task": "$parent_task",
+                "body_text": ${if (body_text == null) "null" else "\"$body_text\""},
+                "remind_method": ${if (remind_method == null) "null" else "\"$remind_method\""},
+                "poi_filters": ${if (poi_filters == null) "null" else "\"$poi_filters\""},
+                "attachment_img_path": ${if (attachment_img_path == null) "null" else "\"$attachment_img_path\""},
+                "snooze_until": ${if (snooze_until == null) "null" else "\"$snooze_until\""},
+                "completed": $completed,
+                "due_at": ${if (due_at == null) "null" else "\"$due_at\""},
+                "is_sub_task": $is_sub_task,
+                "parent_task": $parent_task
             }
         """.trimIndent()
     }

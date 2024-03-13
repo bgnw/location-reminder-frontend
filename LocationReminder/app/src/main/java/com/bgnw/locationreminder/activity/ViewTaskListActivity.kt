@@ -14,6 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 @Suppress("DEPRECATION") // suppress deprecation warning for getParcelableExtra, handled.
 class ViewTaskListActivity : AppCompatActivity() {
     private lateinit var binding: FragmentNearbyBinding
+    private lateinit var username: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +26,12 @@ class ViewTaskListActivity : AppCompatActivity() {
             intent.getParcelableExtra<TaskList>("selected_list")
         }
         title = list?.title
+
+        val unpackedUsername = intent.getStringExtra("username")
+        if (unpackedUsername.isNullOrBlank()) {
+            throw Exception("username cannot be blank here")
+        }
+        username = unpackedUsername
 
         binding = FragmentNearbyBinding.inflate(layoutInflater)
 
@@ -43,6 +50,7 @@ class ViewTaskListActivity : AppCompatActivity() {
         addTaskButton?.setOnClickListener { _ ->
             val intent = Intent(this, CreateTaskItemActivity::class.java)
             intent.putExtra("listID", list.list_id)
+            intent.putExtra("username", username)
             startActivity(intent)
         }
     }

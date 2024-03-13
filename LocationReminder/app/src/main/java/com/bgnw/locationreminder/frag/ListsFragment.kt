@@ -46,6 +46,7 @@ class ListsFragment : Fragment() {
             val intent = Intent(context, ViewTaskListActivity::class.java)
             Log.d("bgnw_PASSING LIST:", position.toString())
             intent.putExtra("selected_list", position) // TODO pass whole list obj
+            intent.putExtra("username", viewModel.loggedInUsername.value)
             startActivity(intent)
         }
     }
