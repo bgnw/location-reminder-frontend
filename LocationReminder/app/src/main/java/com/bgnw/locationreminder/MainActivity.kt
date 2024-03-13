@@ -164,23 +164,53 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         changeFragment(ListsFragment(), "Lists")
         navView.setCheckedItem(R.id.lists)
 
+        var currentFragId: Int = R.id.lists
+
         // nav menu click handler
         navView.setNavigationItemSelectedListener {
+
+            // if the fragment is the same as the currently displayed one, do nothing
+            if (currentFragId == it.itemId) { return@setNavigationItemSelectedListener true }
+
             it.isChecked = true
             when (it.itemId) {
-                R.id.nearby -> changeFragment(NearbyFragment(), it.title.toString())
-                R.id.lists -> changeFragment(ListsFragment(), it.title.toString())
-                R.id.sharing -> changeFragment(SharingFragment(), it.title.toString())
-                R.id.account -> changeFragment(AccountFragment(), it.title.toString())
-                R.id.settings -> changeFragment(SettingsFragment(), it.title.toString())
-                R.id.sign_out -> Toast.makeText(
-                    this,
-                    "Clicked sign out ${viewModel.lists.value?.size ?: "null"}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                R.id.nearby -> {
+                    currentFragId = R.id.nearby
+                    changeFragment(NearbyFragment(), it.title.toString())
+                }
+                R.id.lists -> {
+                    currentFragId = R.id.lists
+                    changeFragment(ListsFragment(), it.title.toString())
+                }
+                R.id.sharing -> {
+                    currentFragId = R.id.sharing
+                    changeFragment(SharingFragment(), it.title.toString())
+                }
+                R.id.account -> {
+                    currentFragId = R.id.account
+                    changeFragment(AccountFragment(), it.title.toString())
+                }
+                R.id.settings -> {
+                    currentFragId = R.id.settings
+                    changeFragment(SettingsFragment(), it.title.toString())
+                }
+                R.id.sign_out -> {
+                    // update ID here if needed
+                    Toast.makeText(
+                        this,
+                        "Clicked sign out ${viewModel.lists.value?.size ?: "null"}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 // DEVELOPER MENU:
-                R.id.DEV_MENU -> changeFragment(DeveloperOptions(), it.title.toString())
-                R.id.DEV_MAP -> changeFragment(MapFragment(), it.title.toString())
+                R.id.DEV_MENU -> {
+                    currentFragId = R.id.DEV_MENU
+                    changeFragment(DeveloperOptions(), it.title.toString())
+                }
+                R.id.DEV_MAP -> {
+                    currentFragId = R.id.DEV_MAP
+                    changeFragment(MapFragment(), it.title.toString())
+                }
             }
             true
         }
