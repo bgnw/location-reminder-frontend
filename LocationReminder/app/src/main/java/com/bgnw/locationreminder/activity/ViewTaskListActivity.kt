@@ -42,7 +42,7 @@ class ViewTaskListActivity : AppCompatActivity() {
         val addTaskButton: FloatingActionButton? = this.findViewById(R.id.fab_add_task)
         addTaskButton?.setOnClickListener { _ ->
             val intent = Intent(this, CreateTaskItemActivity::class.java)
-            intent.putExtra("listID", 6)
+            intent.putExtra("listID", list.list_id)
             startActivity(intent)
         }
     }
