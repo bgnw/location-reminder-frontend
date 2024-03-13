@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     if (resultTL != null) {
                         for (list: TaskList in resultTL) {
                             if (list.list_id == null) continue
-                            val items = Requests.getListItemsById(list.list_id, null)
+                            val items = Requests.getListItemsById(list.list_id)
                             list.items = items
 
                             if (items != null) {

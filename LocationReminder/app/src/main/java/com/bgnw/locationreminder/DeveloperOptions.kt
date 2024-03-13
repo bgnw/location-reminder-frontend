@@ -275,8 +275,4 @@ class DeveloperOptions : Fragment(), CoroutineScope {
     }
 
 
-    private suspend fun getListItemsTest() {
-        Requests.initialiseApi()
-        Requests.getListItemsById(3, tvOutput)
-    }
 }
