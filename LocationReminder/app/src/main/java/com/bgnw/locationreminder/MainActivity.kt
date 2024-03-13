@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.api.AccountDeviceTools
@@ -51,6 +52,7 @@ import kotlin.coroutines.CoroutineContext
 import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveUsername
 import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDisplayName
 import com.bgnw.locationreminder.api.Utils
+import com.bgnw.locationreminder.location.LocationLiveData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -73,8 +75,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     lateinit var drawerLayout: DrawerLayout
 
     private val viewModel: ApplicationState by viewModels()
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     public fun updateTLs(username: String) {
         Log.d("bgnw", "updating TLs in MainActivity")
@@ -98,6 +100,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         // call default onCreate function
         super.onCreate(savedInstanceState)
+
 
 
         Class.forName("org.postgresql.Driver")
@@ -246,14 +249,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         // Create a general notification channel to send notifications from
         createNotificationChannel()
 
+
+        val locationData = LocationLiveData(this)
+        fun getLocationData() = locationData
+        getLocationData().observe(this) {loc ->
+            Log.d("bgnw_LOCATIONPROVIDER", "loc: ${loc.latitude}, ${loc.longitude}")
+        }
+
+
         // Launch coroutine to check for reminders/notifications to send to user
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-//        GlobalScope.launch {
-//            while (true) {
-//                checkForReminders()
-//                delay(30000)
-//            }
-//        }
 
 
         val savedUser = retrieveUsername(this)
@@ -261,18 +266,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             viewModel.loggedInUsername.value = savedUser
             viewModel.loggedInDisplayName.value = retrieveDisplayName(this)
         }
-
-//        var x = MutableLiveData<Boolean>(false)
-//        GlobalScope.launch {
-//            sleep(3000)
-//            x.postValue(true)
-//        }
-//        x.observe(this) {x ->
-//            if (x) {
-//                viewModel.loggedInUsername.value = "ba"
-//                viewModel.loggedInDisplayName.value = "bgnw"
-//            }
-//        }
     }
 
 
