@@ -18,7 +18,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
-import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.overpass_api.queryOverpassApi
 import com.bgnw.locationreminder.taginfo_api.TagInfoResponse
@@ -102,9 +101,23 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 //            }
 
 
-            val keysOI = listOf(
-                "amenity", "shop", "place", "leisure", "education", "tourism",
-                "public_transport", "building", "sport", "product", "vending", "cuisine"
+             val tagsOfInterest = listOf(
+                "amenity",
+                "shop",
+                "leisure",
+                "education",
+                "tourism",
+                "public_transport",
+                "building",
+                "sport",
+                "product",
+                "vending",
+                "cuisine",
+                "landuse",
+                "healthcare",
+                "place_of_worship",
+                "restaurant",
+                "beauty"
             )
 
             var res: TagInfoResponse? = null
@@ -119,7 +132,7 @@ class DeveloperOptions : Fragment(), CoroutineScope {
             }
 
             res!!.data = res!!.data.filter { el ->
-                (el.count_all > 1000) and (el.key in keysOI)
+                (el.count_all > 1000) and (el.key in tagsOfInterest)
             }
             tvOutput?.text = res.toString()
 

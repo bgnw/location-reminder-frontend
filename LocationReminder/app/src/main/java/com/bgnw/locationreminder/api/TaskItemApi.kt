@@ -1,9 +1,11 @@
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -35,4 +37,10 @@ interface TaskItemApi {
     fun createItemOpp(
         @Body body: ItemOpportunity
     ): Call<MutableList<ItemOpportunity>>
+
+    @GET("prod-taski/filters-foruser/{username}")
+    fun getFiltersForUser(
+        @Path("username") username: String,
+        @Query("format") format: String,
+    ): Call<List<Map<String, String>>?>
 }

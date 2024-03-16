@@ -21,7 +21,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.api.AccountDeviceTools
@@ -36,9 +35,6 @@ import com.bgnw.locationreminder.overpass_api.OverpassResp
 import com.bgnw.locationreminder.overpass_api.queryOverpassApi
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationToken
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -56,7 +52,7 @@ import com.bgnw.locationreminder.location.LocationLiveData
 import com.bgnw.locationreminder.location.LocationModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import java.time.Instant
+import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
@@ -79,7 +75,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    public fun updateTLs(username: String) {
+    fun updateTLs(username: String) {
         Log.d("bgnw", "updating TLs in MainActivity")
         val taskIsDone = MutableLiveData<Boolean>(false)
         val task = Utils.getUpdatedTLs(username)
@@ -94,6 +90,30 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 viewModel.lists.value = task.getCompleted()?.toMutableList() ?: mutableListOf()
             }
         }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun updateFilters(username: String) {
+        val taskIsDone = MutableLiveData<Boolean>(false)
+        val task = Utils.getFiltersForUserDeferred(username)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            task.await()
+            taskIsDone.postValue(true)
+        }
+
+        taskIsDone.observe(this) {done ->
+            if (done && task.isCompleted) {
+                viewModel.filters.value = task.getCompleted() ?: listOf()
+            }
+        }
+    }
+
+    private fun signOut() {
+        AccountDeviceTools.eraseData(this)
+        viewModel.lists.value = null
+        viewModel.loggedInUsername.value = null
+        viewModel.loggedInDisplayName.value = null
     }
 
     // function is run once activity created (i.e. app is loaded in fg)
@@ -139,6 +159,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             navUsername.text = username
             if (username != null) {
                 updateTLs(username)
+                updateFilters(username)
             }
         })
 
@@ -213,12 +234,15 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     changeFragment(SettingsFragment(), it.title.toString())
                 }
                 R.id.sign_out -> {
-                    // update ID here if needed
-                    Toast.makeText(
-                        this,
-                        "Clicked sign out ${viewModel.lists.value?.size ?: "null"}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    val text = if (viewModel.loggedInUsername.value != null) {
+                        "You're logged out"
+                    } else {
+                        "Logged out of ${viewModel.loggedInDisplayName}'s account"
+                    }
+
+                    signOut()
+
+                    Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
                 }
                 // DEVELOPER MENU:
                 R.id.DEV_MENU -> {
@@ -253,32 +277,40 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         val locationData = LocationLiveData(this)
 
+        var lastUpdateHadContent: MutableLiveData<Boolean> = MutableLiveData(false)
         var lastLocation: LocationModel? = null
         fun getLocationData() = locationData
         getLocationData().observe(this) {loc ->
 
+            Log.d("bgnw", "got location update")
 
             val diff = floatArrayOf(99f)
 
-            Location.distanceBetween(
-                lastLocation?.latitude ?: loc.latitude,
-                lastLocation?.longitude ?: loc.longitude,
-                loc.latitude,
-                loc.longitude,
-                diff
-            )
+            if (lastLocation != null) {
+                Location.distanceBetween(
+                    lastLocation!!.latitude,
+                    lastLocation!!.longitude,
+                    loc.latitude,
+                    loc.longitude,
+                    diff
+                )
+            }
 
             lastLocation = loc
 
-            if (diff[0] > 4) {
+            if (lastUpdateHadContent.value == false || diff[0] > 4 || lastLocation == null) {
                 val msg = "loc: ${loc.latitude}, ${loc.longitude} (diff: ${diff[0]})"
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 Log.d("bgnw_LOCATIONPROVIDER", msg)
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    checkForReminders()
+                    lastUpdateHadContent.postValue(
+                        checkForReminders(debug = true)
+                    )
                 }
             }
+
+            viewModel.userLocation.postValue(Pair(loc, diff[0]))
         }
 
 
@@ -414,18 +446,21 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         lat: Double,
         lon: Double,
         areaRadius: Double,
-        conditions: String
+        filters: List<String>?
     ): OverpassResp? {
         Log.d("bgnw", "running getNearbyNodes")
 
-        val overpassQuery = """
-                [out:json][timeout:60];
-                (
-                  node(around: $areaRadius, $lat, $lon)[$conditions];
-                );
-                out geom;
-        
-            """.trimIndent()
+
+        if (filters == null) { return null }
+
+        val overpassQuery = buildString {
+            append("[out:json][timeout:60]; (")
+            filters.forEach { filter ->
+                append("nw(around: $areaRadius, $lat, $lon)[$filter];")
+            }
+            append("); out center;")
+        }
+
 
         try {
             val response = queryOverpassApi(overpassQuery)
@@ -441,26 +476,27 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("MissingPermission")
-    private suspend fun checkForReminders(debug: Boolean = false) {
+    private suspend fun checkForReminders(debug: Boolean = false): Boolean {
 
         var resultsDeferred: Deferred<Pair<OverpassResp?, Pair<Double, Double>>>? = null
+        var userLoc: LocationModel? = null
 
-
-        fun remindersPt3(res: OverpassResp, lat: Double, long: Double) {
+        fun remindersPt3(res: OverpassResp) {
             for (node in res.elements) {
                 val dist = FloatArray(1)
-                Location.distanceBetween(lat, long, node.lat, node.lon, dist)
-                if (dist[0] < 10) { // within 10 metres
+                Location.distanceBetween(userLoc!!.latitude, userLoc!!.longitude, node.lat, node.lon, dist)
+                if (dist[0] < 500) { // within 300 metres
                     Log.d("bgnw", "notifying")
+
+
 
                     NotificationTools.showNotification(
                         this@MainActivity,
-                        99,
                         "Nearby task available",
-                        "Bicycle parking is ${dist[0]}m away"
+                        "${node.toString().substring(0,20)} is ${dist[0].roundToInt()}m away"
                     )
                 } else {
-                    Log.d("bgnw", "NOT notifying")
+                    Log.d("bgnw", "NOT notifying, dist is ${dist[0]}")
 
                 }
             }
@@ -470,13 +506,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         suspend fun remindersPt2(lat: Double, long: Double):
                 Pair<OverpassResp?, Pair<Double, Double>> {
             return Pair(
-                getNearbyNodes(lat, long, 400.0, "'amenity'='bicycle_parking'"),
+                getNearbyNodes(lat, long, 400.0, viewModel.filters.value),
                 Pair(lat, long)
             )
         }
 
 
         fun remindersPt1() {
+            resultsDeferred = GlobalScope.async {
+                remindersPt2(userLoc!!.latitude, userLoc!!.longitude)
+            }
+
+            /*
             val cancelToken: CancellationToken = CancellationTokenSource().token
             fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancelToken)
                 .addOnSuccessListener { loc ->
@@ -486,8 +527,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         }
                     }
                 }
+             */
         }
 
+
+        userLoc = viewModel.userLocation.value?.first
+        if (userLoc == null) { return false }
 
         if (debug) Log.d("bgnw", "run remindersPt1()")
         remindersPt1()
@@ -503,10 +548,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val res = resultsDeferred!!.await()
         if (res.first != null) {
             if (debug) Log.d("bgnw", "run remindersPt3()")
-            remindersPt3(res.first!!, res.second.first, res.second.second)
-            if (debug) Log.d("bgnw", "run remindersPt3() -> done")
+            remindersPt3(res.first!!)
+            if (debug) Log.d("bgnw", "run remindersPt3() -> done (data is ${res.first.toString()})")
+            return true
         } else {
             if (debug) Log.d("bgnw", "res empty")
+            return false
         }
 
     }

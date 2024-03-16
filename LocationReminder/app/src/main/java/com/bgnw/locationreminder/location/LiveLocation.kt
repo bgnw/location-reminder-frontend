@@ -15,8 +15,8 @@ import com.google.android.gms.location.Priority
 
 
 data class LocationModel(
-    val longitude: Double,
-    val latitude: Double
+    val latitude: Double,
+    val longitude: Double
 )
 
 // https://proandroiddev.com/android-tutorial-on-location-update-with-livedata-774f8fcc9f15
@@ -27,8 +27,8 @@ class LocationLiveData(context: Context) : LiveData<LocationModel>() {
 
     private fun setLocationData(location: Location) {
         value = LocationModel(
-            longitude = location.longitude,
-            latitude = location.latitude
+            latitude = location.latitude,
+            longitude = location.longitude
         )
     }
 

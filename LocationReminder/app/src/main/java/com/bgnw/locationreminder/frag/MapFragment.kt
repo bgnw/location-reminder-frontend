@@ -1,12 +1,16 @@
 package com.bgnw.locationreminder.frag
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -34,6 +38,7 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.IMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 import java.lang.Thread.sleep
@@ -43,6 +48,22 @@ class MapFragment : Fragment() {
     private val viewModel: ApplicationState by activityViewModels()
 
     private lateinit var mapView: MapView
+    private lateinit var redMarkerDrawable: BitmapDrawable
+    private lateinit var userLocationMarkerDrawable: BitmapDrawable
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        redMarkerDrawable =
+            BitmapDrawable(resources, BitmapFactory.decodeResource(resources, R.drawable.marker_red).let {
+                Bitmap.createScaledBitmap(it, 74, 120, false)
+            })
+
+        userLocationMarkerDrawable =
+            BitmapDrawable(resources, BitmapFactory.decodeResource(resources, R.drawable.user_location_marker).let {
+                Bitmap.createScaledBitmap(it, 85, 85, false)
+            })
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -91,21 +112,59 @@ class MapFragment : Fragment() {
 
         val updateMapButton: Button = requireView().findViewById(R.id.btn_update_map)
         val overrideButton: Button = requireView().findViewById(R.id.btn_override)
+        val centerButton: Button = requireView().findViewById(R.id.btn_center_map)
 
-        val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), mapView)
-        locationOverlay.enableMyLocation()
-        locationOverlay.enableFollowLocation()
-//        locationOverlay.isDrawAccuracyEnabled = true
-        locationOverlay.runOnFirstFix {
-            requireActivity().runOnUiThread {
-                mapView.controller.setCenter(locationOverlay.myLocation)
-                mapView.controller.animateTo(locationOverlay.myLocation)
-            }
+
+//        val locationOverlay: MyLocationNewOverlay
+        val sharedUserLocation = viewModel.userLocation.value
+//        if (sharedUserLocation != null) {
+//            locationOverlay = MyLocationNewOverlay(, mapView)
+//        }
+//        else {
+//            locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), mapView)
+//        }
+
+//        locationOverlay.enableMyLocation()
+//        locationOverlay.enableFollowLocation()
+////        locationOverlay.isDrawAccuracyEnabled = true
+//        locationOverlay.runOnFirstFix {
+//            requireActivity().runOnUiThread {
+//                mapView.controller.setCenter(locationOverlay.myLocation)
+//                mapView.controller.animateTo(locationOverlay.myLocation)
+//            }
+//        }
+//        mapView.overlays.add(locationOverlay)
+
+        val userLocationMarker = Marker(mapView)
+        userLocationMarker.icon = userLocationMarkerDrawable
+
+        if (sharedUserLocation != null) {
+            val point = GeoPoint(
+                sharedUserLocation.first.latitude, sharedUserLocation.first.longitude
+            )
+            userLocationMarker.position = point
+            mapView.overlays.add(userLocationMarker)
+            mapView.controller.setCenter(point)
+            mapView.controller.animateTo(point)
+
+        } else {
+            Toast.makeText(context, "Location services are not available - try again later", Toast.LENGTH_LONG).show()
         }
-        mapView.overlays.add(locationOverlay)
 
         addMarker(GeoPoint(55.91201, -3.31961), "GRID", "Research building")
         mapView.invalidate()
+
+        viewModel.userLocation.observe(viewLifecycleOwner) {pair ->
+            if (pair != null) {
+                val loc = pair.first
+                val diff = pair.second
+
+                if (diff > 0.5) {
+                    userLocationMarker.position = GeoPoint(loc.latitude, loc.longitude)
+                    mapView.invalidate()
+                }
+            }
+        }
 
         /* MAP LOADING MESSAGE
         val mapLoadingMessage = getView()?.findViewById<TextView>(R.id.map_loading_message)
@@ -167,22 +226,24 @@ class MapFragment : Fragment() {
                     for (element: OverpassElement in nodes.elements) {
                         addMarker(
                             GeoPoint(element.lat, element.lon),
-                            element.tags?.name ?: "<name>",
+                            element.tags?.name ?: element.tags?.official_name ?: "(no name)",
                             element.tags?.amenity
                                 ?: element.tags?.shop
-                                ?: element.tags?.place
                                 ?: element.tags?.leisure
-                                ?: element.tags?.office
                                 ?: element.tags?.education
                                 ?: element.tags?.tourism
                                 ?: element.tags?.public_transport
-                                ?: element.tags?.craft
                                 ?: element.tags?.building
-                                ?: element.tags?.man_made
-                                ?: element.tags?.emergency
-                                ?: element.tags?.healthcare
                                 ?: element.tags?.sport
-                                ?: "<amenity/shop>"
+                                ?: element.tags?.product
+                                ?: element.tags?.vending
+                                ?: element.tags?.cuisine
+                                ?: element.tags?.landuse
+                                ?: element.tags?.healthcare
+                                ?: element.tags?.place_of_worship
+                                ?: element.tags?.restaurant
+                                ?: element.tags?.beauty
+                                ?: "(no info)"
                         )
                     }
                 }
@@ -212,6 +273,10 @@ class MapFragment : Fragment() {
         overrideButton.setOnClickListener {
             mapView.maxZoomLevel = 25.0
         }
+
+        centerButton.setOnClickListener {
+            mapView.controller.setCenter(userLocationMarker.position)
+        }
     }
 
     private fun addMarker(geoPoint: GeoPoint, name: String, information: String) {
@@ -220,6 +285,7 @@ class MapFragment : Fragment() {
         marker.title = name
         marker.snippet = information
         marker.infoWindow = MapInfoBox(mapView)
+        marker.icon = redMarkerDrawable
 
         mapView.overlays.add(marker)
     }

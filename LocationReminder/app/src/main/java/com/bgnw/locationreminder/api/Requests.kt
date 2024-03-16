@@ -4,6 +4,7 @@ import AccountApi
 import TaskItemApi
 import TaskListApi
 import android.util.Log
+import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import com.bgnw.locationreminder.data.Account
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
@@ -169,13 +170,13 @@ class Requests {
             title: String,
             body_text: String,
             remind_method: String?,
-            poi_filters: String?,
             attachment_img_path: String?,
             snooze_until: String?,
             completed: Boolean,
             due_at: String?,
             is_sub_task: Boolean,
             parent_task: Int?,
+            filters: Collection<CreateTaskItemActivity.TagValuePair>,
         ): TaskItem {
             // *************** CREATE TASK ITEM  *************************
             return suspendCoroutine { continuation ->
@@ -187,15 +188,17 @@ class Requests {
                         title = title,
                         body_text = body_text,
                         remind_method = remind_method,
-                        poi_filters = poi_filters,
                         attachment_img_path = attachment_img_path,
                         is_sub_task = is_sub_task,
                         parent_task = parent_task,
                         completed = completed,
                         snooze_until = snooze_until,
-                        due_at = due_at
+                        due_at = due_at,
+                        filters = TaskItem.convertFiltersToMap(filters)
                     )
                     var call = taskItemApi.createItem(obj)
+
+                    call.request().body
 
                     Log.d("bgnw", "createitem call:")
                     Log.d("bgnw", call.request().body.toString())
@@ -316,6 +319,45 @@ class Requests {
                     })
                 }
             }
+
+
+        @OptIn(DelicateCoroutinesApi::class)
+        suspend fun getFiltersForUser(username: String): List<String>? =
+            withContext(Dispatchers.IO) {
+                return@withContext suspendCoroutine { continuation ->
+                    val call = taskItemApi.getFiltersForUser(username, "json")
+
+                    call.enqueue(object : Callback<List<Map<String, String>>?> {
+                        override fun onFailure(call: Call<List<Map<String, String>>?>, t: Throwable) {
+                            continuation.resume(null)
+                        }
+
+                        override fun onResponse(
+                            call: Call<List<Map<String, String>>?>,
+                            response: Response<List<Map<String, String>>?>
+                        ) {
+                            if (response.isSuccessful) {
+                                val responseBody = response.body()
+
+                                val filtersAsStrings: MutableList<String> = mutableListOf()
+
+                                if (responseBody != null) {
+                                    responseBody.forEach { el ->
+                                        el.get("filters")?.let { filtersAsStrings.add(it) }
+                                    }
+                                    continuation.resume(filtersAsStrings)
+                                }
+                                else {
+                                    continuation.resume(null)
+                                }
+                            } else {
+                                continuation.resume(null)
+                            }
+                        }
+                    })
+                }
+            }
+
 
 
         /* @OptIn(DelicateCoroutinesApi::class)

@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -41,23 +42,8 @@ class ListsFragment : Fragment() {
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
 
     private var adapter: TaskListListAdapter? = null
-    private val request = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == AppCompatActivity.RESULT_OK) {
-            val data = it.data
-            // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            val mutatedList: TaskList? = data?.extras?.getParcelable<TaskList>("MUTATED_LIST")
+    private var request: ActivityResultLauncher<Intent>? = null
 
-            if (mutatedList != null ) {
-
-                viewModel.lists.value?.removeIf { list -> list.list_id == mutatedList.list_id }
-                viewModel.lists.value?.add(mutatedList)
-                viewModel.lists.value?.sortBy { list -> list.title }
-
-                adapter?.notifyDataSetChanged()
-                adapter?.notifyDataSetInvalidated()
-            }
-        }
-    }
 
     private val itemClickListener = object : TaskListListAdapter.OnItemClickListener {
         override fun onItemClick(position: TaskList) {
@@ -67,8 +53,38 @@ class ListsFragment : Fragment() {
             Log.d("bgnw_PASSING LIST:", position.toString())
             intent.putExtra("selected_list", position) // TODO pass whole list obj
             intent.putExtra("username", viewModel.loggedInUsername.value)
-            request.launch(intent)
+            if (request != null) {
+                request!!.launch(intent)
+            } else {
+                Toast.makeText(context, "Please try again later or force close the app", Toast.LENGTH_LONG).show()
+            }
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        request = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == AppCompatActivity.RESULT_OK) {
+                val data = it.data
+                // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                val mutatedList: TaskList? = data?.extras?.getParcelable<TaskList>("MUTATED_LIST")
+
+                if (mutatedList != null ) {
+
+                    viewModel.lists.value?.removeIf { list -> list.list_id == mutatedList.list_id }
+                    viewModel.lists.value?.add(mutatedList)
+                    viewModel.lists.value?.sortBy { list -> list.title }
+
+                    adapter?.notifyDataSetChanged()
+                    adapter?.notifyDataSetInvalidated()
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        request = null
     }
 
 

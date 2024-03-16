@@ -11,9 +11,9 @@ import androidx.core.app.NotificationManagerCompat
 class NotificationTools {
 
     companion object {
+        var notifID = 1
         fun showNotification(
             context: Context,
-            notifID: Int,
             title: String,
             body: String,
         ) {
@@ -36,6 +36,8 @@ class NotificationTools {
                     // for ActivityCompat#requestPermissions for more details.
                     return
                 }
+                if (notifID + 1 < Int.MAX_VALUE) { ++notifID }
+                else { notifID = 1 }
                 notify(notifID, builder.build())
             }
         }

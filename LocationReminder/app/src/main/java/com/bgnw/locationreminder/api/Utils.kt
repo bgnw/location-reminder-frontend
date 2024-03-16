@@ -66,5 +66,14 @@ class Utils {
 
             return opps
         }
+
+        fun getFiltersForUserDeferred(username: String): Deferred<List<String>?> {
+            // retrieve all task lists, items, etc associated with this user
+            val resultsDeferred = CoroutineScope(Dispatchers.IO).async {
+                val results = Requests.getFiltersForUser(username)
+                return@async results
+            }
+            return resultsDeferred
+        }
     }
 }

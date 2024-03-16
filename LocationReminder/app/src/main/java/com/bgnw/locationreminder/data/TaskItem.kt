@@ -1,7 +1,9 @@
 package com.bgnw.locationreminder.data
 
 import android.os.Parcelable
+import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import kotlinx.parcelize.Parcelize
+import java.util.Dictionary
 
 @Parcelize
 data class TaskItem(
@@ -11,7 +13,6 @@ data class TaskItem(
     var title: String,
     var body_text: String,
     var remind_method: String?,
-    var poi_filters: String?,
     var attachment_img_path: String?,
     var snooze_until: String?,
     var completed: Boolean,
@@ -19,8 +20,10 @@ data class TaskItem(
     var is_sub_task: Boolean,
     var parent_task: Int?,
     var opportunities: MutableList<ItemOpportunity>? = mutableListOf(),
+    var filters: List<Map<String, String>>?
 ) : Parcelable {
     override fun toString(): String {
+
         return """
             {
                 "item_id": $item_id,
@@ -29,16 +32,21 @@ data class TaskItem(
                 "title": "$title",
                 "body_text": ${if (body_text == null) "null" else "\"$body_text\""},
                 "remind_method": ${if (remind_method == null) "null" else "\"$remind_method\""},
-                "poi_filters": ${if (poi_filters == null) "null" else "\"$poi_filters\""},
                 "attachment_img_path": ${if (attachment_img_path == null) "null" else "\"$attachment_img_path\""},
                 "snooze_until": ${if (snooze_until == null) "null" else "\"$snooze_until\""},
                 "completed": $completed,
                 "due_at": ${if (due_at == null) "null" else "\"$due_at\""},
                 "is_sub_task": $is_sub_task,
-                "parent_task": $parent_task
+                "parent_task": $parent_task,
+                "filters": $filters
             }
         """.trimIndent()
     }
+
+
+//    "filters": ${if (filters == null) "null" else "$filters"},
+
+
 
     /*
     fun getHumanDuration(): String {
@@ -84,4 +92,37 @@ data class TaskItem(
             "$durationUntilDue ago"
     }
      */
+    companion object {
+        fun convertFiltersToString(filters: Collection<String>): String {
+            if (filters.isEmpty()) { return "[]" }
+
+            val filterString = buildString {
+                append("[")
+                filters?.forEach { filter -> append("{\"filters\": \"$filter\"},") }
+            }
+
+            return filterString.dropLast(1) + "]"
+        }
+
+
+        fun convertFiltersToMap(filters: Collection<CreateTaskItemActivity.TagValuePair>): List<Map<String, String>> {
+            if (filters.isEmpty()) { return listOf() }
+
+            val list = mutableListOf<Map<String, String>>()
+            filters.forEach { filter ->
+                val map = mutableMapOf<String, String>()
+
+                if (filter.value == null) {
+                    map.put("filters", filter.tag)
+                }
+                else {
+                    map.put("filters", "${filter.tag}=\"${filter.value}\"")
+                }
+
+                list.add(map)
+            }
+
+            return list.toList()
+        }
+    }
 }

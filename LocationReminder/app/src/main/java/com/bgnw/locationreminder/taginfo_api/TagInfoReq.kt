@@ -33,6 +33,6 @@ suspend fun queryTagInfoApi(query: String): TagInfoResponse? {
 }
 
 suspend fun procGetSuggestionsFromKeyword(keyword: String): TagInfoResponse? {
-    val query = "query=$keyword&page=1&rp=10&sortname=count_all&sortorder=desc"
+    val query = "query=$keyword&page=1&rp=20&sortname=count_all&sortorder=desc"
     return queryTagInfoApi(query)
 }
