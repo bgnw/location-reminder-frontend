@@ -43,4 +43,10 @@ interface TaskItemApi {
         @Path("username") username: String,
         @Query("format") format: String,
     ): Call<List<Map<String, String>>?>
+
+    @GET("prod-taski/filters-foritem/{item_id}")
+    fun getFiltersForItem(
+        @Path("item_id") item_id: Int,
+        @Query("format") format: String,
+    ): Call<List<Map<String, String>>?>
 }

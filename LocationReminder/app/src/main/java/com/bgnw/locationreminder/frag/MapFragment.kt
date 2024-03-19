@@ -13,15 +13,15 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.MutableLiveData
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
-import com.bgnw.locationreminder.api.Utils
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.map_aux.MapInfoBox
 import com.bgnw.locationreminder.overpass_api.OverpassElement
 import com.bgnw.locationreminder.overpass_api.OverpassResp
+import com.bgnw.locationreminder.overpass_api.getCoordinatesForElement
 import com.bgnw.locationreminder.overpass_api.queryOverpassApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,9 +37,6 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.infowindow.InfoWindow
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
-import org.osmdroid.views.overlay.mylocation.IMyLocationProvider
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 import java.lang.Thread.sleep
 
@@ -50,6 +47,9 @@ class MapFragment : Fragment() {
     private lateinit var mapView: MapView
     private lateinit var redMarkerDrawable: BitmapDrawable
     private lateinit var userLocationMarkerDrawable: BitmapDrawable
+
+    private var markers = mutableSetOf<Marker>()
+    private var markerSetLocked = MutableLiveData<Boolean>(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,6 +114,9 @@ class MapFragment : Fragment() {
         val overrideButton: Button = requireView().findViewById(R.id.btn_override)
         val centerButton: Button = requireView().findViewById(R.id.btn_center_map)
 
+        val addMkrBtn: Button = requireView().findViewById(R.id.btn_mkr_add)
+        val delMkrBtn: Button = requireView().findViewById(R.id.btn_mkr_del)
+
 
 //        val locationOverlay: MyLocationNewOverlay
         val sharedUserLocation = viewModel.userLocation.value
@@ -137,6 +140,7 @@ class MapFragment : Fragment() {
 
         val userLocationMarker = Marker(mapView)
         userLocationMarker.icon = userLocationMarkerDrawable
+        userLocationMarker.id = "USER_CURRENT_LOC_MARKER"
 
         if (sharedUserLocation != null) {
             val point = GeoPoint(
@@ -165,6 +169,8 @@ class MapFragment : Fragment() {
                 }
             }
         }
+
+        viewModel.reminders.value?.let { updateMarkers(it) }
 
         /* MAP LOADING MESSAGE
         val mapLoadingMessage = getView()?.findViewById<TextView>(R.id.map_loading_message)
@@ -195,37 +201,43 @@ class MapFragment : Fragment() {
         mapView.overlays.add(0, eventsOverlay)
 
 
-        viewModel.lists.observe(viewLifecycleOwner, Observer { lists ->
-            val opps = Utils.getOppsFromLists(lists?.toMutableList())
-            if (opps != null) {
-                for (opp: ItemOpportunity in opps) {
-                    addMarker(GeoPoint(opp.lati, opp.longi), opp.place_name, opp.category)
-                }
-            }
-        })
-
-        fun getAsianFood(lat: Double, lon: Double, areaRadius: Double) {
-            GlobalScope.launch {
-                val asianFood = getNearbyNodes(lat, lon, areaRadius, "\"cuisine\"=\"asian\"")
-                if (asianFood != null) {
-                    for (element: OverpassElement in asianFood.elements) {
-                        addMarker(
-                            GeoPoint(element.lat, element.lon),
-                            element.tags?.name ?: "<name>",
-                            element.tags?.amenity ?: "<amenity/shop>"
-                        )
-                    }
-                }
-            }
+        viewModel.reminders.observe(viewLifecycleOwner) { reminders ->
+            updateMarkers(reminders)
         }
 
+//
+//        viewModel.lists.observe(viewLifecycleOwner, Observer { lists ->
+//            val opps = Utils.getOppsFromLists(lists?.toMutableList())
+//            if (opps != null) {
+//                for (opp: ItemOpportunity in opps) {
+//                    addMarker(GeoPoint(opp.lati, opp.longi), opp.place_name, opp.category)
+//                }
+//            }
+//        })
+
+//        fun getAsianFood(lat: Double, lon: Double, areaRadius: Double) {
+//            GlobalScope.launch {
+//                val asianFood = getNearbyNodes(lat, lon, areaRadius, "\"cuisine\"=\"asian\"")
+//                if (asianFood != null) {
+//                    for (element: OverpassElement in asianFood.elements) {
+//                        addMarker(
+//                            GeoPoint(element.lat, element.lon),
+//                            element.tags?.name ?: "<name>",
+//                            element.tags?.amenity ?: "<amenity/shop>"
+//                        )
+//                    }
+//                }
+//            }
+//        }
+
         fun getPOI(lat: Double, lon: Double, areaRadius: Double) {
-            GlobalScope.launch {
+            CoroutineScope(Dispatchers.IO).launch {
                 val nodes = getAllNearbyPOI(lat, lon, areaRadius)
                 if (nodes != null) {
                     for (element: OverpassElement in nodes.elements) {
+
                         addMarker(
-                            GeoPoint(element.lat, element.lon),
+                            getCoordinatesForElement(element),
                             element.tags?.name ?: element.tags?.official_name ?: "(no name)",
                             element.tags?.amenity
                                 ?: element.tags?.shop
@@ -272,22 +284,77 @@ class MapFragment : Fragment() {
 
         overrideButton.setOnClickListener {
             mapView.maxZoomLevel = 25.0
+            mapView.minZoomLevel = 0.0
         }
 
         centerButton.setOnClickListener {
             mapView.controller.setCenter(userLocationMarker.position)
         }
+
+
+
+
+//
+//        var themarker: Marker? = null
+//        addMkrBtn.setOnClickListener {
+//           themarker = addMarker(GeoPoint(55.90001, -3.30061), "test", "test2")
+//        }
+//
+//        delMkrBtn.setOnClickListener {
+//            removeMarker(themarker!!)
+//
+//            for(marker in markers.toList()) {
+//                removeMarker(marker)
+//            }
+//        }
+
     }
 
-    private fun addMarker(geoPoint: GeoPoint, name: String, information: String) {
+    private fun addMarker(geoPoint: GeoPoint, name: String, information: String, shouldInvalidate: Boolean = true): Marker {
         val marker = Marker(mapView)
         marker.position = geoPoint
         marker.title = name
         marker.snippet = information
         marker.infoWindow = MapInfoBox(mapView)
         marker.icon = redMarkerDrawable
+        marker.id = "${geoPoint.latitude}x${geoPoint.longitude}"
 
-        mapView.overlays.add(marker)
+
+        Log.d("bgnw", "adding marker: $name, $information")
+
+        mapView.overlays.add(marker) // add marker to map
+
+        if (shouldInvalidate)
+            mapView.invalidate() // force map update
+
+        markers.add(marker) // keep record of what markers are on the map
+        return marker
+    }
+
+    private fun removeMarker(marker: Marker, shouldInvalidate: Boolean = true) {
+        mapView.overlays.remove(marker) // remove marker from map
+
+        if (shouldInvalidate)
+            mapView.invalidate() // force map update
+
+        markers.remove(marker) // remove marker from the list of current markers
+    }
+
+    private fun updateMarkers(reminders: MutableList<ItemOpportunity>) {
+        for(marker in markers.toList()) {
+            removeMarker(marker = marker, shouldInvalidate = false)
+        }
+
+        for (reminder in reminders.toList()) {
+            addMarker(
+                geoPoint = GeoPoint(reminder.lati, reminder.longi),
+                name = reminder.category,
+                information = "Matches ${reminder.matchingItemCount} ${if (reminder.matchingItemCount == 1) "item" else "items"}",
+                shouldInvalidate = false
+            )
+        }
+
+        mapView.invalidate() // update map to show updated markers
     }
 
     private suspend fun getNearbyNodes(

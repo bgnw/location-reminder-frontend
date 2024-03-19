@@ -14,7 +14,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,6 +34,20 @@
         android:layout_height="wrap_content"
         android:text="center"
         android:id="@+id/btn_center_map"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="add"
+        android:id="@+id/btn_mkr_add"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="delete"
+        android:id="@+id/btn_mkr_del"
         />
     </LinearLayout>
 

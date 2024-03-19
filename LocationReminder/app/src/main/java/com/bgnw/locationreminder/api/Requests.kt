@@ -359,6 +359,44 @@ class Requests {
             }
 
 
+        @OptIn(DelicateCoroutinesApi::class)
+        suspend fun getFiltersForItem(itemId: Int): List<String>? =
+            withContext(Dispatchers.IO) {
+                return@withContext suspendCoroutine { continuation ->
+                    val call = taskItemApi.getFiltersForItem(itemId, "json")
+
+                    call.enqueue(object : Callback<List<Map<String, String>>?> {
+                        override fun onFailure(call: Call<List<Map<String, String>>?>, t: Throwable) {
+                            continuation.resume(null)
+                        }
+
+                        override fun onResponse(
+                            call: Call<List<Map<String, String>>?>,
+                            response: Response<List<Map<String, String>>?>
+                        ) {
+                            if (response.isSuccessful) {
+                                val responseBody = response.body()
+
+                                val filtersAsStrings: MutableList<String> = mutableListOf()
+
+                                if (responseBody != null) {
+                                    responseBody.forEach { el ->
+                                        el.get("filters")?.let { filtersAsStrings.add(it) }
+                                    }
+                                    continuation.resume(filtersAsStrings)
+                                }
+                                else {
+                                    continuation.resume(null)
+                                }
+                            } else {
+                                continuation.resume(null)
+                            }
+                        }
+                    })
+                }
+            }
+
+
 
         /* @OptIn(DelicateCoroutinesApi::class)
          suspend fun getTaskListsByUsername(username: String): List<TaskList>? = withContext(Dispatchers.IO) {

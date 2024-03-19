@@ -6,10 +6,13 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class ItemOpportunity(
     val opp_id: Int,
-    val item_id: Int,
+//    val item_id: Int,
+    val matchingItems: List<TaskItem>?,
     val suppressed: Boolean,
-    val place_name: String,
+    val place_name: String?,
     val category: String,
+    val metresFromUser: Int?,
+    val matchingItemCount: Int?,
     val lati: Double,
     val longi: Double,
     var alti: Double,
@@ -18,7 +21,7 @@ data class ItemOpportunity(
         return """
             {
                 "opp_id": $opp_id
-                "item_id": $item_id
+                "matchingItems": $matchingItems
                 "suppressed": $suppressed
                 "place_name": $place_name
                 "category": $category

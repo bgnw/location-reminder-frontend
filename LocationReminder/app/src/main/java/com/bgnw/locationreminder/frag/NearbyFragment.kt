@@ -39,6 +39,30 @@ class NearbyFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+        // **** TODO: update this fragment when the reminders change!
+
+
+        super.onViewCreated(view, savedInstanceState)
+
+        val context = context as MainActivity
+
+        var list = viewModel.reminders.value
+
+        val lv = context.findViewById(R.id.lv_nearby_tasks) as ListView
+        val adapter = ItemOpportunityListAdapter(context, list!!)
+        lv.adapter = adapter
+
+        viewModel.reminders.observe(viewLifecycleOwner) {
+            list = viewModel.reminders.value
+            adapter.notifyDataSetInvalidated()
+        }
+    }
+
+
+
+    /*
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentNearbyBinding.inflate(layoutInflater)
@@ -96,4 +120,5 @@ class NearbyFragment : Fragment() {
             updateAdapterData(lists)
         })
     }
+     */
 }

@@ -2,6 +2,7 @@ package com.bgnw.locationreminder.data
 
 import android.os.Parcelable
 import com.bgnw.locationreminder.activity.CreateTaskItemActivity
+import com.google.gson.annotations.Expose
 import kotlinx.parcelize.Parcelize
 import java.util.Dictionary
 
@@ -20,7 +21,10 @@ data class TaskItem(
     var is_sub_task: Boolean,
     var parent_task: Int?,
     var opportunities: MutableList<ItemOpportunity>? = mutableListOf(),
-    var filters: List<Map<String, String>>?
+    var filters: List<Map<String, String>>?,
+    // @Transient // https://stackoverflow.com/questions/49791539
+    @Expose(serialize = false, deserialize = true)
+    var applicable_filters: List<Map<String, String>>? = null
 ) : Parcelable {
     override fun toString(): String {
 
@@ -42,6 +46,9 @@ data class TaskItem(
             }
         """.trimIndent()
     }
+
+
+
 
 
 //    "filters": ${if (filters == null) "null" else "$filters"},
@@ -123,6 +130,21 @@ data class TaskItem(
             }
 
             return list.toList()
+        }
+
+        fun findItemsFromFilters(items: List<TaskItem>, filters: List<Map<String, String>>): List<TaskItem> {
+            var matches = mutableListOf<TaskItem>()
+
+            for (item in items) {
+                for (filter in filters) {
+                    if (item.filters?.contains(filter) == true) {
+                        matches.add(item)
+                        continue
+                    }
+                }
+            }
+
+            return matches.toList()
         }
     }
 }

@@ -23,6 +23,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import com.bgnw.locationreminder.api.AccountDeviceTools
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.frag.AccountFragment
@@ -48,10 +49,16 @@ import kotlin.coroutines.CoroutineContext
 import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveUsername
 import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDisplayName
 import com.bgnw.locationreminder.api.Utils
+import com.bgnw.locationreminder.data.ItemOpportunity
+import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.location.LocationLiveData
 import com.bgnw.locationreminder.location.LocationModel
+import com.bgnw.locationreminder.overpass_api.getCoordinatesForElement
+import com.bgnw.locationreminder.overpass_api.tagsClassToPairs
+import com.bgnw.locationreminder.overpass_api.tagsStringMapToPairs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import org.osmdroid.util.GeoPoint
 import kotlin.math.roundToInt
 
 
@@ -151,6 +158,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
 
+
+        viewModel.reminders.value = mutableListOf()
 
 
 
@@ -261,8 +270,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             Log.d("bgnw", "Lists, running changes")
             if (currentFragId == R.id.lists) {
                 reloadListsFragment()
+            } else if (currentFragId == R.id.nearby) {
+                reloadNearbyFragment()
             }
         })
+
+
 
         // Check and (if needed) request permission from the user to send notifications
         // TODO check this works on >= android 13
@@ -282,7 +295,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         fun getLocationData() = locationData
         getLocationData().observe(this) {loc ->
 
-            Log.d("bgnw", "got location update")
 
             val diff = floatArrayOf(99f)
 
@@ -295,6 +307,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     diff
                 )
             }
+            Log.d("bgnw", "got location update, diff: ${diff[0]}")
 
             lastLocation = loc
 
@@ -323,7 +336,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             viewModel.loggedInUsername.value = savedUser
             viewModel.loggedInDisplayName.value = retrieveDisplayName(this)
         }
+
+        viewModel.reminders.observe(this) {_ ->
+            Log.d("bgnw", "reminders, running changes")
+            if (currentFragId == R.id.nearby) {
+                Log.d("bgnw", "going to reload nearby frag")
+                reloadNearbyFragment()
+            }
+        }
     }
+
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -351,6 +373,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         val trans2 = fragmentManager.beginTransaction()
         trans2.replace(R.id.frame_layout, ListsFragment())
+        trans2.commit()
+    }
+
+    private fun reloadNearbyFragment() {
+        val fragmentManager = supportFragmentManager
+        val trans1 = fragmentManager.beginTransaction()
+        trans1.replace(R.id.frame_layout, Fragment())
+        trans1.commit()
+
+        val trans2 = fragmentManager.beginTransaction()
+        trans2.replace(R.id.frame_layout, NearbyFragment())
         trans2.commit()
     }
 
@@ -468,7 +501,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
             return response
         } catch (e: Exception) {
-            Log.d("bgnw_overpass", "Error: ${e.message}")
+            Log.d("bgnw_overpass", "Error in main: ${e.message}")
+            lat; lon; overpassQuery
             return null
         }
     }
@@ -482,24 +516,101 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         var userLoc: LocationModel? = null
 
         fun remindersPt3(res: OverpassResp) {
-            for (node in res.elements) {
+            val lists = viewModel.lists.value
+            if (lists == null) { return }
+            val items = mutableListOf<TaskItem>()
+            lists.forEach { list -> items.addAll(list.items ?: listOf()) }
+
+            for (element in res.elements) {
+
+                val coords: GeoPoint = getCoordinatesForElement(element)
                 val dist = FloatArray(1)
-                Location.distanceBetween(userLoc!!.latitude, userLoc!!.longitude, node.lat, node.lon, dist)
+                Location.distanceBetween(userLoc!!.latitude, userLoc!!.longitude, coords.latitude, coords.longitude, dist)
                 if (dist[0] < 500) { // within 300 metres
                     Log.d("bgnw", "notifying")
 
+                    val matchingItems = mutableListOf<TaskItem>()
+                    val matchingTags = mutableListOf<CreateTaskItemActivity.TagValuePair>()
+                    var names = mutableListOf<CreateTaskItemActivity.TagValuePair>()
 
+                    val tagsForThisElement: List<CreateTaskItemActivity.TagValuePair>? =
+                        tagsClassToPairs(element.tags)?.toList()
+
+
+                    for (item in items) {
+                        if (item.applicable_filters == null) { continue }
+
+                        val tagsForThisItem: List<CreateTaskItemActivity.TagValuePair>? =
+                            tagsStringMapToPairs(item.applicable_filters!!)?.toList()
+
+                        if (tagsForThisElement != null && tagsForThisItem != null) {
+                            for (tagOption in tagsForThisItem) {
+                                if (tagsForThisElement.contains(tagOption)) {
+                                    matchingItems.add(item)
+                                    matchingTags.add(tagOption)
+                                    break
+                                }
+                                 names.addAll(
+                                    tagsForThisElement.filter { pair -> pair.tag in listOf("name", "official_name") }
+                                 )
+                            }
+                        }
+                    }
+
+
+
+                    var placeName =
+                        matchingTags.first().value
+                        ?: matchingTags.first().tag
+
+                    // put tag name in place name
+                    placeName = placeName[0].uppercase() + placeName.removeRange(0,1).replace('_', ' ')
+
+
+                    // if place has an actual name, include it
+                    names = names.filter { pair -> (pair.value != null) && (pair.value!!.isNotBlank()) }.toMutableList()
+                    if (names.isNotEmpty()) {
+                        placeName += " (${names.first().value})"
+                    }
+
+                    viewModel.reminders.value!!.add(
+                        ItemOpportunity(
+                            -1,
+//                            -1,
+                            matchingItems,
+                            false,
+                            null,
+                            placeName,
+                            dist[0].roundToInt(),
+                            matchingItems.size,
+                            coords.latitude,
+                            coords.longitude,
+                            0.0
+                        )
+                    )
 
                     NotificationTools.showNotification(
                         this@MainActivity,
-                        "Nearby task available",
-                        "${node.toString().substring(0,20)} is ${dist[0].roundToInt()}m away"
+                        "$placeName found ${dist[0].roundToInt()}m away",
+                        "Matches ${matchingItems.size} ${if (matchingItems.size == 1) "item" else "items"}",
                     )
+
+                    val y = viewModel.reminders.value
+                    y;
                 } else {
                     Log.d("bgnw", "NOT notifying, dist is ${dist[0]}")
 
                 }
+
+
+                viewModel.reminders.value?.sortBy { reminder -> reminder.metresFromUser } // sort in asc order of distance away
+                viewModel.reminders.postValue(viewModel.reminders.value) // trigger observers
+
+
             }
+
+            val x = viewModel.reminders.value
+            x;
         }
 
 
@@ -547,6 +658,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         if (debug) Log.d("bgnw", "wait for pt2 task -> done")
         val res = resultsDeferred!!.await()
         if (res.first != null) {
+            viewModel.reminders.value?.clear() // clear out old reminders
+
             if (debug) Log.d("bgnw", "run remindersPt3()")
             remindersPt3(res.first!!)
             if (debug) Log.d("bgnw", "run remindersPt3() -> done (data is ${res.first.toString()})")

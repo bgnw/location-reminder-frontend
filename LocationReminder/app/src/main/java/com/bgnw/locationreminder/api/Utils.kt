@@ -43,29 +43,29 @@ class Utils {
         }
 
 
-        fun getOppsFromLists(lists: List<TaskList>?): MutableList<ItemOpportunity>? {
-            if (lists == null) {
-                return null
-            }
-
-            val opps: MutableList<ItemOpportunity> = mutableListOf()
-
-            for (list: TaskList in lists) {
-                if (list.items == null) {
-                    return null
-                }
-                for (item: TaskItem in list.items!!) {
-                    if (item.opportunities == null) {
-                        return null
-                    }
-                    for (opp: ItemOpportunity in item.opportunities!!) {
-                        opps.add(opp)
-                    }
-                }
-            }
-
-            return opps
-        }
+//        fun getOppsFromLists(lists: List<TaskList>?): MutableList<ItemOpportunity>? {
+//            if (lists == null) {
+//                return null
+//            }
+//
+//            val opps: MutableList<ItemOpportunity> = mutableListOf()
+//
+//            for (list: TaskList in lists) {
+//                if (list.items == null) {
+//                    return null
+//                }
+//                for (item: TaskItem in list.items!!) {
+//                    if (item.opportunities == null) {
+//                        return null
+//                    }
+//                    for (opp: ItemOpportunity in item.opportunities!!) {
+//                        opps.add(opp)
+//                    }
+//                }
+//            }
+//
+//            return opps
+//        }
 
         fun getFiltersForUserDeferred(username: String): Deferred<List<String>?> {
             // retrieve all task lists, items, etc associated with this user

@@ -11,7 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 class NotificationTools {
 
     companion object {
-        var notifID = 1
+        private var notifID = 1
         fun showNotification(
             context: Context,
             title: String,

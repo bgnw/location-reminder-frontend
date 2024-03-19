@@ -21,6 +21,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.R
@@ -307,19 +308,24 @@ class CreateTaskItemActivity : AppCompatActivity() {
 //                }
 //            }
 //
-//            val reqIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
-//            val newItem: MutableLiveData<TaskItem> = MutableLiveData()
+            val newItem: MutableLiveData<TaskItem> = MutableLiveData()
 ////
 //            reqIsDone.observe(this) {
 //                Log.d("bgnw", "donEEEE!!!!!!!!!!")
 ////                viewModel.changeNeeded.postValue(true)
 //            }
 //
-//            newItem.observe(this) { newItem ->
-//                if (newItem != null) {
-//                    Log.d("bgnw", "newlist is not null")
-////                    viewModel.lists.value?.get(listID)?.items?.add(newItem)
-//                } else {
+            newItem.observe(this) { newItem ->
+                if (newItem != null) {
+                    Log.d("bgnw-viewresume", "viewModel.lists.value ${viewModel.lists.value}")
+
+                    viewModel.lists.value?.get(listID)?.items?.add(newItem)
+                }
+                else {
+                    throw Exception("item should not be null once observer gets activated here")
+                }
+            }
+//                else {
 //                    Log.d("bgnw", "newlist IS null")
 //
 //                }
@@ -349,7 +355,7 @@ class CreateTaskItemActivity : AppCompatActivity() {
                 Log.d("bgnw", "Async operation result: $itemResult")
 
                 closeActivityWithResult(itemResult)
-//                newItem.postValue(itemResult)
+                newItem.postValue(itemResult)
 //                reqIsDone.postValue(true)
             }
         }

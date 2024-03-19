@@ -75,9 +75,13 @@ class ListsFragment : Fragment() {
                     viewModel.lists.value?.add(mutatedList)
                     viewModel.lists.value?.sortBy { list -> list.title }
 
+
                     adapter?.notifyDataSetChanged()
                     adapter?.notifyDataSetInvalidated()
                 }
+
+                viewModel.lists.postValue(viewModel.lists.value)
+
             }
         }
     }
@@ -140,7 +144,12 @@ class ListsFragment : Fragment() {
                             if (newList != null) {
                                 Log.d("bgnw", "newlist is not null")
 
-                                adapter?.add(newList)
+//                                adapter?.add(newList)
+                                if (viewModel.lists.value != null) {
+                                    viewModel.lists.value!!.add(newList)
+                                } else {
+                                    viewModel.lists.value = mutableListOf(newList)
+                                }
                                 viewModel.lists.value?.sortBy { list -> list.title }
                                 adapter?.notifyDataSetChanged()
                                 adapter?.notifyDataSetInvalidated()

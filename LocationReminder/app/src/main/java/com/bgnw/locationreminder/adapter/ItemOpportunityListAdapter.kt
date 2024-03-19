@@ -6,12 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import androidx.lifecycle.MutableLiveData
 import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.data.ItemOpportunity
 
 class ItemOpportunityListAdapter(
     private val context: Activity,
-    private val opps: List<ItemOpportunity>
+    private val opps: MutableList<ItemOpportunity>
 ) : ArrayAdapter<ItemOpportunity>(context, R.layout.list_task_item, opps) {
 
 
@@ -24,8 +25,8 @@ class ItemOpportunityListAdapter(
         val liTitle: TextView = view.findViewById(R.id.li_title)
         val liSubtitle: TextView = view.findViewById(R.id.li_subtitle)
 
-        liTitle.text = opp.place_name
-        liSubtitle.text = opp.category
+        liTitle.text = opp.place_name ?: opp.category
+        liSubtitle.text = "Matches ${opp.matchingItemCount} ${if (opp.matchingItemCount == 1) "item" else "items"}, ${opp.metresFromUser}m away"
 
         return view
     }

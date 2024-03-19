@@ -1,5 +1,6 @@
 package com.bgnw.locationreminder.overpass_api
 
+import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -7,11 +8,16 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.osmdroid.util.GeoPoint
 
 @Serializable
 data class OverpassElement(
-    val type: String, val id: Long, val lat: Double,
-    val lon: Double, val tags: Tags? = null
+    val type: String,
+    val id: Long,
+    val lat: Double? = null, // if node
+    val lon: Double? = null, // if node
+    val center: Center? = null, // if center of way
+    val tags: Tags? = null
 ) {
     override fun toString(): String {
         return "OverpassElement(type='$type', id=$id, lat=$lat, lon=$lon, tags=${tags.toString()})"
@@ -76,6 +82,7 @@ data class Tags(
 
         return sb.toString()
     }
+
 }
 
 @Serializable
@@ -98,4 +105,84 @@ suspend fun queryOverpassApi(query: String): OverpassResp {
     }
 
     return client.get("https://overpass-api.de/api/interpreter?data=$query").body()
+}
+
+fun getCoordinatesForElement(element: OverpassElement): GeoPoint {
+    return when (element.type) {
+        "node" -> {
+            GeoPoint(element.lat!!, element.lon!!)
+        }
+        "way" -> {
+            GeoPoint(element.center!!.lat, element.center.lon)
+        }
+        else -> {
+            throw Exception("Overpass element isn't a node nor a way -- don't know how to get coords")
+        }
+    }
+}
+
+
+fun tagsClassToPairs(tags: Tags?): MutableList<CreateTaskItemActivity.TagValuePair>? {
+    if (tags == null) { return null }
+    val tagPairs = mutableListOf<CreateTaskItemActivity.TagValuePair>()
+    if (tags.name != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("name", tags.name))
+    if (tags.official_name != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("official_name", tags.official_name))
+    if (tags.amenity != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("amenity", tags.amenity))
+    if (tags.shop != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("shop", tags.shop))
+    if (tags.leisure != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("leisure", tags.leisure))
+    if (tags.education != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("education", tags.education))
+    if (tags.tourism != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("tourism", tags.tourism))
+    if (tags.public_transport != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("public_transport", tags.public_transport))
+    if (tags.building != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("building", tags.building))
+    if (tags.sport != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("sport", tags.sport))
+    if (tags.product != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("product", tags.product))
+    if (tags.vending != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("vending", tags.vending))
+    if (tags.cuisine != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("cuisine", tags.cuisine))
+    if (tags.landuse != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("landuse", tags.landuse))
+    if (tags.healthcare != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("healthcare", tags.healthcare))
+    if (tags.place_of_worship != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("place_of_worship", tags.place_of_worship))
+    if (tags.restaurant != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("restaurant", tags.restaurant))
+    if (tags.beauty != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("beauty", tags.beauty))
+    return tagPairs
+}
+
+fun tagsStringMapToPairs(tagList: List<Map<String, String>>): MutableList<CreateTaskItemActivity.TagValuePair>? {
+
+    val pattern = """([a-zA-Z_]+)=\"([a-zA-Z_]*)\"""".toRegex()
+
+
+    val tagPairs = mutableListOf<CreateTaskItemActivity.TagValuePair>()
+
+    val tagsOfInterest = listOf(
+        "amenity",
+        "shop",
+        "leisure",
+        "education",
+        "tourism",
+        "public_transport",
+        "building",
+        "sport",
+        "product",
+        "vending",
+        "cuisine",
+        "landuse",
+        "healthcare",
+        "place_of_worship",
+        "restaurant",
+        "beauty"
+    )
+
+    for (tagMap in tagList) {
+        var attr = tagMap["filters"]
+        val matchResult = pattern.find(attr!!)
+        var (osmTag, osmValue: String?) = matchResult!!.destructured
+        tagPairs.add(
+            CreateTaskItemActivity.TagValuePair(
+                osmTag,
+                osmValue.ifBlank { null }
+            )
+        )
+}
+
+    return tagPairs
 }
