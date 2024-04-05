@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".frag.CreateTaskItemFragment">
+    >
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activity.CreateTaskItemActivity"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Task name:" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:id="@+id/cti_task_name" />
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Notes:" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:lines="3"
+            android:id="@+id/cti_body_text" />
+
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Reminder type:" />
+
+
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cti_radio_group"
+            android:orientation="vertical"
+            android:layout_marginStart="20dp">
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/cti_radio_opt_category"
+                android:text="Near a type/category of location" />
+
+            <!--        <RadioButton-->
+            <!--            android:layout_width="wrap_content"-->
+            <!--            android:layout_height="wrap_content"-->
+            <!--            android:id="@+id/cti_radio_opt_business"-->
+            <!--            android:text="Near a specific business" />-->
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/cti_radio_opt_person"
+                android:text="Nearby to a person" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/cti_radio_opt_locationpoint"
+                android:text="Near a specific location point" />
+
+            <!--        <RadioButton-->
+            <!--            android:layout_width="wrap_content"-->
+            <!--            android:layout_height="wrap_content"-->
+            <!--            android:id="@+id/cti_radio_opt_datetime"-->
+            <!--            android:text="At some date and time" />-->
+        </RadioGroup>
+
+
+        <LinearLayout
+            android:id="@+id/cti_category_selection_layout"
+            android:layout_width="match_parent"
+            android:layout_height="310dp"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/item_back_rounded"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Category Selection"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Please enter a keyword below:" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/cti_category_search_keyword_edittext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@+id/cti_keyword_search_btn"
+                    android:inputType="text" />
+
+                <Button
+                    android:id="@+id/cti_keyword_search_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="Search" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/cti_reminder_type_extra"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ListView
+                android:id="@+id/cti_list_categories"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:choiceMode="multipleChoice"
+                android:nestedScrollingEnabled="true"/>
+
+
+        </LinearLayout>
+
+
+
+
+
+
+        <LinearLayout
+            android:id="@+id/cti_user_selection_layout"
+            android:layout_width="match_parent"
+            android:layout_height="310dp"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/item_back_rounded"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="User Selection"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Please select a user below:" />
+
+            <ListView
+                android:id="@+id/cti_list_usernames"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:choiceMode="singleChoice"
+                android:nestedScrollingEnabled="true"/>
+
+
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:id="@+id/cti_coordinate_selection_layout"
+            android:layout_width="match_parent"
+            android:layout_height="310dp"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/item_back_rounded"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Location Point Selection"
+                android:textStyle="bold"
+
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tap a location below:"
+                android:paddingBottom="20px"
+                android:maxWidth="400px"/>
+
+
+            <org.osmdroid.views.MapView
+                android:id="@+id/osm_map_point_selection"
+                android:layout_width="match_parent"
+                android:layout_height="1200px">
+            </org.osmdroid.views.MapView>
+
+
+
+        </LinearLayout>
+
+
+
+
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cti_create_task_btn"
+            android:text="Create task"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center"/>
+
+
+
+    </LinearLayout>
+</ScrollView>

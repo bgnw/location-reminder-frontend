@@ -85,6 +85,8 @@ class AccountFragment : Fragment() {
             }
         })
 
+        Log.d("bgnw", "in accountsfr ${viewModel.loggedInUsername.value}")
+
         viewModel.loggedInDisplayName.observe(viewLifecycleOwner, Observer { displayName ->
             if (displayName != null) {
                 AccountDeviceTools.saveDisplayName(

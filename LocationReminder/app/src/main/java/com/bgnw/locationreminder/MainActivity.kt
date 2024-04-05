@@ -23,7 +23,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import com.bgnw.locationreminder.api.AccountDeviceTools
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.frag.AccountFragment
@@ -48,7 +47,9 @@ import java.lang.Thread.sleep
 import kotlin.coroutines.CoroutineContext
 import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveUsername
 import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDisplayName
+import com.bgnw.locationreminder.api.TagValuePair
 import com.bgnw.locationreminder.api.Utils
+import com.bgnw.locationreminder.data.AccountPartialForLocation
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.location.LocationLiveData
@@ -118,7 +119,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private fun signOut() {
         AccountDeviceTools.eraseData(this)
-        viewModel.lists.value = null
+        viewModel.lists.value = mutableListOf()
         viewModel.loggedInUsername.value = null
         viewModel.loggedInDisplayName.value = null
     }
@@ -133,9 +134,15 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         Class.forName("org.postgresql.Driver")
 
-
         Requests.initialiseApi()
 
+        CoroutineScope(Dispatchers.IO).launch {
+            Requests.addLog(
+                0.0,
+                0.0,
+                "${Build.MODEL}: ** RESTARTED APP **"
+            )
+        }
 
         // set main content view
         setContentView(R.layout.activity_main)
@@ -158,19 +165,19 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
 
-
+        viewModel.lists.value = mutableListOf()
         viewModel.reminders.value = mutableListOf()
 
 
 
         // actions to take when user logs in
-        viewModel.loggedInUsername.observe(this, Observer { username ->
+        viewModel.loggedInUsername.observe(this) { username ->
             navUsername.text = username
             if (username != null) {
                 updateTLs(username)
                 updateFilters(username)
             }
-        })
+        }
 
 
         // When user logs in, update the display name shown
@@ -291,6 +298,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val locationData = LocationLiveData(this)
 
         var lastUpdateHadContent: MutableLiveData<Boolean> = MutableLiveData(false)
+
+        viewModel.loggedInUsername.observe(this) {
+            lastUpdateHadContent.postValue(false)
+        }
+
         var lastLocation: LocationModel? = null
         fun getLocationData() = locationData
         getLocationData().observe(this) {loc ->
@@ -309,6 +321,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
             Log.d("bgnw", "got location update, diff: ${diff[0]}")
 
+            // ** FOR LOCATION LOGGING **
+//            CoroutineScope(Dispatchers.IO).launch {
+//                Log.d("bgnw", "sending log")
+//                Requests.addLog(
+//                    loc.latitude,
+//                    loc.longitude,
+//                    "${Build.MODEL}: Got location update (significant? ${lastUpdateHadContent.value == false || diff[0] > 4 || lastLocation == null})"
+//                )
+//            }
+
             lastLocation = loc
 
             if (lastUpdateHadContent.value == false || diff[0] > 4 || lastLocation == null) {
@@ -317,9 +339,55 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 Log.d("bgnw_LOCATIONPROVIDER", msg)
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    lastUpdateHadContent.postValue(
-                        checkForReminders(debug = true)
-                    )
+                    val locCatReminders = checkForLocationReminders(debug = false)
+                    val locUserReminders = checkForUserReminders(lat = loc.latitude, lon = loc.longitude)
+                    val locPointReminders = checkForLocationPointReminders(lat = loc.latitude, lon = loc.longitude)
+
+                    lastUpdateHadContent.postValue(!locCatReminders.isNullOrEmpty())
+
+                    val locCatRemindersSize = locCatReminders?.size ?: 0
+                    val locUserRemindersSize = locUserReminders.size
+                    val locPointRemindersSize = locPointReminders?.size ?: 0
+
+                    val allRemindersCount = locCatRemindersSize + locUserRemindersSize + locPointRemindersSize
+
+                    var body = ""
+                    if (locCatReminders != null) {
+                        for (reminder in locCatReminders) {
+                            body += "(Category) ${reminder.title}\n"
+                        }
+                    }
+                    for (reminder in locUserReminders) {
+                        body += "(User, ${reminder.user_peer}) ${reminder.title}\n"
+                    }
+                    if (locPointReminders != null) {
+                        for (reminder in locPointReminders) {
+                            body += "(Location) ${reminder.title}\n"
+                        }
+                    }
+
+
+                    if (allRemindersCount > 0) {
+                        NotificationTools.showNotification(
+                            this@MainActivity,
+                            "$allRemindersCount tasks can be completed nearby",
+                            body
+                        )
+                    }
+
+
+                    if (viewModel.loggedInUsername.value != null) {
+                        Log.d("bgnw", "updating user location")
+                        Requests.updateLocation(
+                            AccountPartialForLocation(
+                                username = viewModel.loggedInUsername.value!!,
+                                lati = loc.latitude,
+                                longi = loc.longitude
+                            )
+                        )
+                    }
+
+
                 }
             }
 
@@ -508,18 +576,105 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
 
+
+    private suspend fun checkForUserReminders(lat: Double, lon: Double): MutableList<TaskItem> {
+        val lists = viewModel.lists.value
+        var userLocations = mutableMapOf<String, GeoPoint>()
+        var relevantItems = mutableListOf<TaskItem>()
+        var itemsToRemind = mutableListOf<TaskItem>()
+        lists?.forEach { list ->
+            list.items?.forEach { item ->
+                if (item.remind_method == "PEER_USER" && item.user_peer != null) {
+                    relevantItems.add(item)
+                }
+            }
+        }
+
+        // get locations for each relevant user
+        relevantItems.forEach { item ->
+            if (item.user_peer != null && !userLocations.containsKey(item.user_peer)){
+                val result = Requests.lookupUser(item.user_peer!!)
+                if (result.lati != null && result.longi != null) {
+                    userLocations.put(item.user_peer!!, GeoPoint(result.lati!!, result.longi!!))
+                }
+            }
+
+            val thisUserLocation = userLocations.get(item.user_peer)
+            if (thisUserLocation != null) {
+                val diff = floatArrayOf(99f)
+                Location.distanceBetween(
+                    lat, lon,
+                    thisUserLocation.latitude, thisUserLocation.longitude,
+                    diff
+                )
+
+                if (diff[0] <= 30) {
+                    itemsToRemind.add(item)
+//                    NotificationTools.showNotification(
+//                        this@MainActivity,
+//                        "${item.user_peer} is nearby",
+//                        "",
+//                    )
+                }
+            }
+        }
+        return itemsToRemind
+    }
+
+
+    private fun checkForLocationPointReminders(lat: Double, lon: Double): MutableList<TaskItem>? {
+        val lists = viewModel.lists.value
+        var nearbyItems = mutableListOf<TaskItem>()
+        var locationPointItems = mutableListOf<TaskItem>()
+
+        if (viewModel.lists.value.isNullOrEmpty()) {
+            return null
+        }
+
+        lists?.forEach { list ->
+            list.items?.forEach { item ->
+                if (item.remind_method == "LOCATION_POINT") {
+                    locationPointItems.add(item)
+                }
+            }
+        }
+
+        locationPointItems.forEach { item ->
+            if (item.lati != null && item.longi != null) {
+                val diff = floatArrayOf(99f)
+                Location.distanceBetween(
+                    lat, lon,
+                    item.lati!!, item.longi!!,
+                    diff
+                )
+                nearbyItems.add(item)
+            }
+        }
+
+//        NotificationTools.showNotification(
+//            this@MainActivity,
+//            "${nearbyItems.size} *location point* items can be completed nearby",
+//            nearbyItems.joinToString(", ") { item -> item.title },
+//        )
+        return nearbyItems
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("MissingPermission")
-    private suspend fun checkForReminders(debug: Boolean = false): Boolean {
+    private suspend fun checkForLocationReminders(debug: Boolean = false): MutableList<TaskItem>? {
 
         var resultsDeferred: Deferred<Pair<OverpassResp?, Pair<Double, Double>>>? = null
         var userLoc: LocationModel? = null
+        var matchingTasks = mutableSetOf<TaskItem>()
 
         fun remindersPt3(res: OverpassResp) {
             val lists = viewModel.lists.value
-            if (lists == null) { return }
+            if (lists.isNullOrEmpty()) { return }
             val items = mutableListOf<TaskItem>()
             lists.forEach { list -> items.addAll(list.items ?: listOf()) }
+
+            var message = ""
+            var places = mutableSetOf<String>()
 
             for (element in res.elements) {
 
@@ -530,17 +685,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     Log.d("bgnw", "notifying")
 
                     val matchingItems = mutableListOf<TaskItem>()
-                    val matchingTags = mutableListOf<CreateTaskItemActivity.TagValuePair>()
-                    var names = mutableListOf<CreateTaskItemActivity.TagValuePair>()
+                    val matchingTags = mutableListOf<TagValuePair>()
+                    var names = mutableListOf<TagValuePair>()
 
-                    val tagsForThisElement: List<CreateTaskItemActivity.TagValuePair>? =
+                    val tagsForThisElement: List<TagValuePair>? =
                         tagsClassToPairs(element.tags)?.toList()
 
 
                     for (item in items) {
                         if (item.applicable_filters == null) { continue }
 
-                        val tagsForThisItem: List<CreateTaskItemActivity.TagValuePair>? =
+                        val tagsForThisItem: List<TagValuePair>? =
                             tagsStringMapToPairs(item.applicable_filters!!)?.toList()
 
                         if (tagsForThisElement != null && tagsForThisItem != null) {
@@ -576,7 +731,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     viewModel.reminders.value!!.add(
                         ItemOpportunity(
                             -1,
-//                            -1,
                             matchingItems,
                             false,
                             null,
@@ -589,11 +743,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         )
                     )
 
-                    NotificationTools.showNotification(
-                        this@MainActivity,
-                        "$placeName found ${dist[0].roundToInt()}m away",
-                        "Matches ${matchingItems.size} ${if (matchingItems.size == 1) "item" else "items"}",
-                    )
+
+                    message += placeName + ", "
+                    matchingTasks.addAll(matchingItems)
+                    places.add(placeName)
 
                     val y = viewModel.reminders.value
                     y;
@@ -602,12 +755,23 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
                 }
 
-
-                viewModel.reminders.value?.sortBy { reminder -> reminder.metresFromUser } // sort in asc order of distance away
+//                viewModel.reminders.value?.sortBy { reminder -> reminder?.metresFromUser ?: -1 } // sort in asc order of distance away
                 viewModel.reminders.postValue(viewModel.reminders.value) // trigger observers
-
-
             }
+
+
+            val first3Places = places.take(3)
+            val remainingPlacesCount = places.size - first3Places.size
+            var finalMessage = first3Places.joinToString(", ")
+            if (remainingPlacesCount > 0) {
+                finalMessage += " ($remainingPlacesCount more)..."
+            }
+
+//            NotificationTools.showNotification(
+//                this@MainActivity,
+//                "${matchingTasks.size} tasks can be completed nearby",
+//                "Places nearby: $finalMessage",
+//            )
 
             val x = viewModel.reminders.value
             x;
@@ -643,7 +807,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
         userLoc = viewModel.userLocation.value?.first
-        if (userLoc == null) { return false }
+        if (userLoc == null) { return null }
 
         if (debug) Log.d("bgnw", "run remindersPt1()")
         remindersPt1()
@@ -663,11 +827,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             if (debug) Log.d("bgnw", "run remindersPt3()")
             remindersPt3(res.first!!)
             if (debug) Log.d("bgnw", "run remindersPt3() -> done (data is ${res.first.toString()})")
-            return true
+            return matchingTasks.toMutableList()
         } else {
             if (debug) Log.d("bgnw", "res empty")
-            return false
+            return null
         }
-
     }
 }

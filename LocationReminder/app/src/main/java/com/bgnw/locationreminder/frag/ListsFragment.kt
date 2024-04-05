@@ -19,7 +19,6 @@ import androidx.lifecycle.MutableLiveData
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
-import com.bgnw.locationreminder.activity.ViewTaskListActivity
 import com.bgnw.locationreminder.adapter.TaskListListAdapter
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.data.TaskList
@@ -45,28 +44,49 @@ class ListsFragment : Fragment() {
     private var request: ActivityResultLauncher<Intent>? = null
 
 
+
     private val itemClickListener = object : TaskListListAdapter.OnItemClickListener {
         override fun onItemClick(position: TaskList) {
-            Log.d("bgnw_Data: ", position.toString())
 
-            val intent = Intent(context, ViewTaskListActivity::class.java)
-            Log.d("bgnw_PASSING LIST:", position.toString())
-            intent.putExtra("selected_list", position) // TODO pass whole list obj
-            intent.putExtra("username", viewModel.loggedInUsername.value)
-            if (request != null) {
-                request!!.launch(intent)
-            } else {
-                Toast.makeText(context, "Please try again later or force close the app", Toast.LENGTH_LONG).show()
-            }
+            // TEMP: --------------------------------------------------------
+            val viewTaskListFragment = ViewTaskListFragment()
+            val bundle = Bundle()
+            bundle.putInt("LIST_ID", position.list_id!!)
+            viewTaskListFragment.arguments = bundle
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, viewTaskListFragment)
+                .addToBackStack(null)
+                .commit()
+            return
+            // ----------------------------------------
+
+//            Log.d("bgnw_Data: ", position.toString())
+//
+//            val intent = Intent(context, ViewTaskListActivity::class.java)
+//            Log.d("bgnw_PASSING LIST:", position.toString())
+//            intent.putExtra("selected_list", position) // TODO pass whole list obj
+//            intent.putExtra("username", viewModel.loggedInUsername.value)
+//            if (request != null) {
+//                request!!.launch(intent)
+//            } else {
+//                Toast.makeText(context, "Please try again later or force close the app", Toast.LENGTH_LONG).show()
+//            }
         }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+//        viewModel = ViewModelProvider(requireActivity()).get(ApplicationState::class.java)
+        viewModel.lists.value
+        val x = viewModel.loggedInUsername.value
+        Log.d("bgnw", "from listsfr ${x.toString()}")
+
         request = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
                 val data = it.data
-                // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 val mutatedList: TaskList? = data?.extras?.getParcelable<TaskList>("MUTATED_LIST")
 
                 if (mutatedList != null ) {
@@ -104,6 +124,8 @@ class ListsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 //        makeSamples()
 
+        Log.d("bgnw-create", "creating lists frg")
+
         binding = FragmentListsBinding.inflate(layoutInflater)
 
         val context = context as MainActivity
@@ -112,12 +134,20 @@ class ListsFragment : Fragment() {
         lv.adapter = adapter
 
 
+        if (viewModel.listIdToOpen.value != null && viewModel.lists.value != null) {
+            val id = viewModel.listIdToOpen.value!!
+            val list = viewModel.lists.value!!.find { list -> list.list_id ==  id }
+            list?.let { itemClickListener.onItemClick(it) }
+            viewModel.listIdToOpen.postValue(null)
+        }
+
         viewModel.lists.observe(viewLifecycleOwner) {
             adapter?.notifyDataSetInvalidated()
         }
 
         val addListButton: FloatingActionButton? = context.findViewById(R.id.fab_add_list)
         addListButton?.setOnClickListener { _ -> // https://www.digitalocean.com/community/tutorials/android-alert-dialog-using-kotlin
+
             val editText = EditText(context)
             editText.hint = "Provide a list name"
 

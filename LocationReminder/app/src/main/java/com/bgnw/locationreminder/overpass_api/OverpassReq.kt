@@ -1,6 +1,7 @@
 package com.bgnw.locationreminder.overpass_api
 
 import com.bgnw.locationreminder.activity.CreateTaskItemActivity
+import com.bgnw.locationreminder.api.TagValuePair
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -122,36 +123,36 @@ fun getCoordinatesForElement(element: OverpassElement): GeoPoint {
 }
 
 
-fun tagsClassToPairs(tags: Tags?): MutableList<CreateTaskItemActivity.TagValuePair>? {
+fun tagsClassToPairs(tags: Tags?): MutableList<TagValuePair>? {
     if (tags == null) { return null }
-    val tagPairs = mutableListOf<CreateTaskItemActivity.TagValuePair>()
-    if (tags.name != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("name", tags.name))
-    if (tags.official_name != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("official_name", tags.official_name))
-    if (tags.amenity != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("amenity", tags.amenity))
-    if (tags.shop != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("shop", tags.shop))
-    if (tags.leisure != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("leisure", tags.leisure))
-    if (tags.education != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("education", tags.education))
-    if (tags.tourism != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("tourism", tags.tourism))
-    if (tags.public_transport != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("public_transport", tags.public_transport))
-    if (tags.building != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("building", tags.building))
-    if (tags.sport != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("sport", tags.sport))
-    if (tags.product != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("product", tags.product))
-    if (tags.vending != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("vending", tags.vending))
-    if (tags.cuisine != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("cuisine", tags.cuisine))
-    if (tags.landuse != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("landuse", tags.landuse))
-    if (tags.healthcare != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("healthcare", tags.healthcare))
-    if (tags.place_of_worship != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("place_of_worship", tags.place_of_worship))
-    if (tags.restaurant != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("restaurant", tags.restaurant))
-    if (tags.beauty != null) tagPairs.add(CreateTaskItemActivity.TagValuePair("beauty", tags.beauty))
+    val tagPairs = mutableListOf<TagValuePair>()
+    if (tags.name != null) tagPairs.add(TagValuePair("name", tags.name))
+    if (tags.official_name != null) tagPairs.add(TagValuePair("official_name", tags.official_name))
+    if (tags.amenity != null) tagPairs.add(TagValuePair("amenity", tags.amenity))
+    if (tags.shop != null) tagPairs.add(TagValuePair("shop", tags.shop))
+    if (tags.leisure != null) tagPairs.add(TagValuePair("leisure", tags.leisure))
+    if (tags.education != null) tagPairs.add(TagValuePair("education", tags.education))
+    if (tags.tourism != null) tagPairs.add(TagValuePair("tourism", tags.tourism))
+    if (tags.public_transport != null) tagPairs.add(TagValuePair("public_transport", tags.public_transport))
+    if (tags.building != null) tagPairs.add(TagValuePair("building", tags.building))
+    if (tags.sport != null) tagPairs.add(TagValuePair("sport", tags.sport))
+    if (tags.product != null) tagPairs.add(TagValuePair("product", tags.product))
+    if (tags.vending != null) tagPairs.add(TagValuePair("vending", tags.vending))
+    if (tags.cuisine != null) tagPairs.add(TagValuePair("cuisine", tags.cuisine))
+    if (tags.landuse != null) tagPairs.add(TagValuePair("landuse", tags.landuse))
+    if (tags.healthcare != null) tagPairs.add(TagValuePair("healthcare", tags.healthcare))
+    if (tags.place_of_worship != null) tagPairs.add(TagValuePair("place_of_worship", tags.place_of_worship))
+    if (tags.restaurant != null) tagPairs.add(TagValuePair("restaurant", tags.restaurant))
+    if (tags.beauty != null) tagPairs.add(TagValuePair("beauty", tags.beauty))
     return tagPairs
 }
 
-fun tagsStringMapToPairs(tagList: List<Map<String, String>>): MutableList<CreateTaskItemActivity.TagValuePair>? {
+fun tagsStringMapToPairs(tagList: List<Map<String, String>>): MutableList<TagValuePair>? {
 
     val pattern = """([a-zA-Z_]+)=\"([a-zA-Z_]*)\"""".toRegex()
 
 
-    val tagPairs = mutableListOf<CreateTaskItemActivity.TagValuePair>()
+    val tagPairs = mutableListOf<TagValuePair>()
 
     val tagsOfInterest = listOf(
         "amenity",
@@ -177,7 +178,7 @@ fun tagsStringMapToPairs(tagList: List<Map<String, String>>): MutableList<Create
         val matchResult = pattern.find(attr!!)
         var (osmTag, osmValue: String?) = matchResult!!.destructured
         tagPairs.add(
-            CreateTaskItemActivity.TagValuePair(
+            TagValuePair(
                 osmTag,
                 osmValue.ifBlank { null }
             )

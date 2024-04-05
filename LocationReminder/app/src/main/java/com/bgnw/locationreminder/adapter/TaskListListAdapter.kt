@@ -41,7 +41,6 @@ class TaskListListAdapter(
         return view
     }
 
-
     interface OnItemClickListener {
         fun onItemClick(position: TaskList)
     }

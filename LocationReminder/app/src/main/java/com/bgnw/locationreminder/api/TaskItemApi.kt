@@ -1,18 +1,18 @@
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
-import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
-import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface TaskItemApi {
     @GET("prod-taski/{item_id}")
     fun getItem(
-        @Path("item_id") listId: Int,
+        @Path("item_id") itemId: Int,
         @Query("format") format: String,
     ): Call<TaskItem>
 
@@ -49,4 +49,17 @@ interface TaskItemApi {
         @Path("item_id") item_id: Int,
         @Query("format") format: String,
     ): Call<List<Map<String, String>>?>
+
+    @PATCH("prod-taski/update/{item_id}")
+    fun updateItem(
+        @Path("item_id") item_id: Int,
+        @Query("format") format: String = "json",
+        @Body body: TaskItem
+    ): Call<Void>
+
+    @DELETE("prod-taski/delete/{item_id}")
+    fun deleteItem(
+        @Path("item_id") itemId: Int,
+        @Query("format") format: String,
+    ): Call<Void>
 }

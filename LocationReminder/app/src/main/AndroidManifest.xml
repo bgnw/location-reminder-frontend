@@ -28,7 +28,7 @@
             android:label="@string/title_activity_create_task_item"
             android:theme="@style/Theme.LocationReminder" />
         <activity
-            android:name=".activity.ViewTaskListActivity"
+            android:name=".activity.ViewEditTaskItemActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

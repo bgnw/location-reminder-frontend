@@ -4,6 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,16 +15,20 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.RadioGroup
 import android.widget.TextView
+import android.widget.TimePicker
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
-import androidx.lifecycle.MutableLiveData
+import androidx.core.view.iterator
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.R
@@ -38,10 +45,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 
-class CreateTaskItemActivity : AppCompatActivity() {
+class ViewEditTaskItemActivity : AppCompatActivity() {
 
-    /*
-    private val viewModel: ApplicationState by viewModels()
+    private lateinit var viewModel: ApplicationState
+
+    private val handler = Handler(Looper.getMainLooper())
 
     private val tags = listOf(
         mapOf("tag" to "amenity", "values" to listOf("parking", "parking_space", "bench", "place_of_worship", "restaurant", "school", "waste_basket", "bicycle_parking", "fast_food", "cafe", "fuel", "shelter", "recycling", "toilets", "bank", "pharmacy", "post_box", "kindergarten", "drinking_water")),
@@ -190,6 +198,24 @@ class CreateTaskItemActivity : AppCompatActivity() {
 
     }
 
+    private val tagsOfInterest = listOf(
+        "amenity",
+        "shop",
+        "leisure",
+        "education",
+        "tourism",
+        "public_transport",
+        "building",
+        "sport",
+        "product",
+        "vending",
+        "cuisine",
+        "landuse",
+        "healthcare",
+        "place_of_worship",
+        "restaurant",
+        "beauty"
+    )
 
 
     private fun closeActivityWithResult(item: TaskItem){
@@ -209,24 +235,77 @@ class CreateTaskItemActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_create_task_item)
+        setContentView(R.layout.activity_view_edit_task_item)
+
+        viewModel = ViewModelProvider(this)[ApplicationState::class.java]
+        viewModel.lists.value
 
 
-        val listID = intent.getIntExtra("listID", -1)
-        val username = intent.getStringExtra("username")
+
+//        val username = intent.getStringExtra("username")
+        val item: TaskItem? = intent?.extras?.getParcelable<TaskItem>("item_to_view")
+        if (item == null) {
+            throw Exception("Null task item passed")
+        }
+
+        val titleBox = findViewById<EditText>(R.id.vti_task_name)
+        val bodyBox = findViewById<EditText>(R.id.vti_body_text)
+        val snoozeMsg = findViewById<TextView>(R.id.vti_snooze_status_msg)
+        val completionMsg = findViewById<TextView>(R.id.vti_completion_status_msg)
+
+        val timePicker = findViewById<TimePicker>(R.id.vti_timepicker)
+        val datePicker = findViewById<DatePicker>(R.id.vti_datepicker)
+
+
+        val editTitleBtn = findViewById<Button>(R.id.vti_edit_name_btn)
+        val editBodyBtn = findViewById<Button>(R.id.vti_edit_body_btn)
+        val editSnoozeBtn = findViewById<Button>(R.id.vti_snooze_btn)
+        val toggleCompleteBtn = findViewById<Button>(R.id.vti_toggle_completion_btn)
+        val deleteItemBtn = findViewById<Button>(R.id.vti_delete_task_btn)
+        // TODO:       val editRemindTypeBtn = findViewById<Button>(R.id.vti)
+
+        val pickTimeDoneBtn = findViewById<Button>(R.id.vti_pick_time_done_btn)
+        val pickDateDoneBtn = findViewById<Button>(R.id.vti_pick_date_done_btn)
+
+
+        val loadingBg = findViewById<LinearLayout>(R.id.loading_bg)
+        val loadingPopup = findViewById<LinearLayout>(R.id.loading_popup)
+
+        val pickTimePopup = findViewById<LinearLayout>(R.id.timepicker_popup)
+        val pickDatePopup = findViewById<LinearLayout>(R.id.datepicker_popup)
+
+
+        fun updateTitleBox() {
+            titleBox.text = Editable.Factory.getInstance().newEditable(item.title)
+        }
+        fun updateBodyBox() {
+            bodyBox.text = Editable.Factory.getInstance().newEditable(item.body_text)
+        }
+        fun updateSnoozeMsg() {
+            snoozeMsg.text =
+                if (item.snooze_until == null) "Not currently snoozed" else "TODO snooze datetime" // TODO}
+        }
+        fun updateCompletionMsg() {
+            completionMsg.text = if (item.completed) "Completed" else "Not completed"
+            toggleCompleteBtn.text = if (item.completed) "Mark not complete" else "Mark complete"
+        }
+
+        updateTitleBox()
+        updateBodyBox()
+        updateSnoozeMsg()
+        updateCompletionMsg()
 
         // hide the category layout initially
-        val categoryLayout: LinearLayout? = findViewById(R.id.cti_category_selection_layout)
+        val categoryLayout: LinearLayout? = findViewById(R.id.vti_category_selection_layout)
         categoryLayout?.visibility = View.GONE
 
-
         // set function to run when remind method changes
-        val radioGroup: RadioGroup? = findViewById(R.id.cti_radio_group)
+        val radioGroup: RadioGroup? = findViewById(R.id.vti_radio_group)
         radioGroup?.setOnCheckedChangeListener { group, _ ->
 
             categoryLayout?.visibility = View.GONE
 
-            if (group.checkedRadioButtonId == R.id.cti_radio_opt_category) {
+            if (group.checkedRadioButtonId == R.id.vti_radio_opt_category) {
                 categoryLayout?.visibility = View.VISIBLE
             }
         }
@@ -235,15 +314,15 @@ class CreateTaskItemActivity : AppCompatActivity() {
 
 
         // setup of category search/selection flow
-        val catListView: ListView? = findViewById(R.id.cti_list_categories)
+        val catListView: ListView? = findViewById(R.id.vti_list_categories)
 
         val results: MutableList<TagValuePair> = mutableListOf()
-        val catListAdapter: CategoryAdapter = CategoryAdapter(this@CreateTaskItemActivity, results)
+        val catListAdapter: CategoryAdapter = CategoryAdapter(this@ViewEditTaskItemActivity, results)
         catListView?.adapter = catListAdapter
 
-        val keywordSearchBtn: Button? = findViewById(R.id.cti_keyword_search_btn)
-        val keywordBox: EditText? = findViewById(R.id.cti_category_search_keyword_edittext)
-        var outputTextView: TextView? = findViewById(R.id.cti_reminder_type_extra)
+        val keywordSearchBtn: Button? = findViewById(R.id.vti_keyword_search_btn)
+        val keywordBox: EditText? = findViewById(R.id.vti_category_search_keyword_edittext)
+        var outputTextView: TextView? = findViewById(R.id.vti_reminder_type_extra)
         keywordSearchBtn?.setOnClickListener {
 
             hideKeyboard()
@@ -262,40 +341,165 @@ class CreateTaskItemActivity : AppCompatActivity() {
 
 
 
-        val submitBtn: Button? = findViewById(R.id.cti_create_task_btn)
-        submitBtn?.setOnClickListener{
-            val title = findViewById<EditText>(R.id.cti_task_name).text.toString().trim()
-            val body = findViewById<EditText>(R.id.cti_body_text).text.toString().trim()
-            val categories = catListAdapter?.getSelectedCategories()
 
-            if (
-                username.isNullOrBlank()
-                || title.isBlank()
-                || categories.isNullOrEmpty()
-            ) {
-                // TODO show user a message
-                return@setOnClickListener
+
+
+
+        val interactElements: List<View> = listOf(
+            titleBox as View,
+            bodyBox as View,
+            keywordSearchBtn as View,
+            keywordBox as View,
+            editTitleBtn as View,
+            editBodyBtn as View,
+            editSnoozeBtn as View,
+            toggleCompleteBtn as View,
+            radioGroup as View,
+            deleteItemBtn as View
+        )
+
+        fun stateAll(enableButtonsEtc: Boolean) {
+            for (el in interactElements) {
+                if (el is RadioGroup) {
+                    for (btn in el) {
+                        btn.isEnabled = enableButtonsEtc
+                    }
+                }
+                else if (el is EditText) {
+                    el.isEnabled = false
+                }
+                else {
+                    el.isEnabled = enableButtonsEtc
+                }
+            }
+        }
+
+
+
+        var activeInteraction: View? = null
+
+        fun doUpdate(itemId: Int, item: TaskItem) {
+            loadingBg.visibility = View.VISIBLE
+            loadingPopup.visibility = View.VISIBLE
+
+            CoroutineScope(Dispatchers.IO).launch {
+                Requests.updateItem(
+                    itemId,
+                    item
+                ) {success ->
+                    loadingBg.visibility = View.GONE
+                    loadingPopup.visibility = View.GONE
+                    if (!success) {
+                        // todo: revert value shown
+                        Toast.makeText(applicationContext, "Update could not be made at this time", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
 
-            val categoriesKV = mutableListOf<String>()
-//            categories.forEach { el ->
-//
-//                if (el.value != null) {
-//                    categoriesKV.add("'${el.tag}'='${el.value}'")
+            viewModel.lists.value
+
+        }
+
+
+        editTitleBtn.setOnClickListener{
+            if (activeInteraction == null) {
+                stateAll(enableButtonsEtc = false)
+                titleBox.isEnabled = true
+                editTitleBtn.isEnabled = true
+                editTitleBtn.text = "Save"
+                activeInteraction = editTitleBtn
+            }
+            else if (activeInteraction == editTitleBtn) {
+                if (title.isBlank()) {
+                    return@setOnClickListener
+                }
+
+                item.title = titleBox.text.toString()
+
+                doUpdate(
+                    item.item_id!!,
+                    item
+                )
+
+                stateAll(enableButtonsEtc = true)
+                editTitleBtn.text = "Edit"
+                activeInteraction = null
+            }
+        }
+
+
+        editBodyBtn.setOnClickListener{
+            if (activeInteraction == null) {
+                stateAll(enableButtonsEtc = false)
+                bodyBox.isEnabled = true
+                editBodyBtn.isEnabled = true
+                editBodyBtn.text = "Save"
+                activeInteraction = editBodyBtn
+            }
+            else if (activeInteraction == editBodyBtn) {
+//                if (username.isNullOrBlank()) {
+//                    return@setOnClickListener
 //                }
-//                else {
-//                    categoriesKV.add("'${el.tag}'")
-//                    categoriesKV.add("'${el.tag}'='yes'")
-//                }
-//            }
-//
+
+                item.body_text = bodyBox.text.toString()
+
+                doUpdate(
+                    item.item_id!!,
+                    item
+                )
+
+                stateAll(enableButtonsEtc = true)
+                editBodyBtn.text = "Edit"
+                activeInteraction = null
+            }
+
+        }
+
+
+        editSnoozeBtn.setOnClickListener {
+            // show datetime dialog
+        }
+
+        toggleCompleteBtn.setOnClickListener {
+            // TODO PATCH query to api and show loading
+            // set true/false
+            // update msg on view
+            if (activeInteraction == null) {
+
+                stateAll(enableButtonsEtc = false)
+
+                item.completed = !item.completed
+
+                doUpdate(
+                    item.item_id!!,
+                    item
+                )
+
+                updateCompletionMsg()
+
+                stateAll(enableButtonsEtc = true)
+            }
+        }
+
+//        loadingBg.visibility= View.VISIBLE
+//        pickTimePopup.visibility= View.VISIBLE
+
+
+        /*
+        TODO: edit reminder categories / type
+        {
+            val categories = catListAdapter?.getSelectedCategories()
+            if (username.isNullOrBlank()
+                || categories.isNullOrEmpty()) {
+                 return@setOnClickListener
+            }
+        }
+        */
+
+
+        /*
             val newItem: MutableLiveData<TaskItem> = MutableLiveData()
-////
-//            reqIsDone.observe(this) {
-//                Log.d("bgnw", "donEEEE!!!!!!!!!!")
-////                viewModel.changeNeeded.postValue(true)
-//            }
-//
+
             newItem.observe(this) { newItem ->
                 if (newItem != null) {
                     Log.d("bgnw-viewresume", "viewModel.lists.value ${viewModel.lists.value}")
@@ -306,11 +510,6 @@ class CreateTaskItemActivity : AppCompatActivity() {
                     throw Exception("item should not be null once observer gets activated here")
                 }
             }
-//                else {
-//                    Log.d("bgnw", "newlist IS null")
-//
-//                }
-//            }
 
             val reqResult = CoroutineScope(Dispatchers.IO).async {
                 Requests.createItem(
@@ -337,10 +536,12 @@ class CreateTaskItemActivity : AppCompatActivity() {
 
                 closeActivityWithResult(itemResult)
                 newItem.postValue(itemResult)
-//                reqIsDone.postValue(true)
             }
-        }
-    }
+        */
 
-     */
+
+
+
+
+    }
 }

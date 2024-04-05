@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".activity.ViewTaskListActivity">
+    tools:context=".MainActivity">
 
     <!--    <TextView-->
     <!--        android:id="@+id/list_name"-->
@@ -18,22 +18,22 @@
     <!--        app:layout_constraintTop_toTopOf="parent"-->
     <!--        app:layout_constraintVertical_bias="0.5" />-->
 
-    <ListView
-        android:id="@+id/lv_viewing_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:listitem="@layout/list_task_item"
-        android:layout_above="@id/fab_add_task"
-        />
+<!--    <ListView-->
+<!--        android:id="@+id/lv_viewing_list"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        tools:listitem="@layout/list_task_item"-->
+<!--        android:layout_above="@id/fab_add_task"-->
+<!--        />-->
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_task"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="16dp"
-        app:srcCompat="@drawable/add_24"
-        tools:ignore="MissingConstraints" />
+<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--        android:id="@+id/fab_add_task"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:layout_alignParentEnd="true"-->
+<!--        android:layout_margin="16dp"-->
+<!--        app:srcCompat="@drawable/add_24"-->
+<!--        tools:ignore="MissingConstraints" />-->
 
 </RelativeLayout>

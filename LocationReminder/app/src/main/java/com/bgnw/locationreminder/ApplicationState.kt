@@ -27,6 +27,9 @@ class ApplicationState : ViewModel() {
     val reminders: MutableLiveData<MutableList<ItemOpportunity>> by lazy {
         MutableLiveData<MutableList<ItemOpportunity>>()
     }
+    val listIdToOpen: MutableLiveData<Int?> by lazy {
+        MutableLiveData<Int?>()
+    }
 //    val changeNeeded: MutableLiveData<Boolean> by lazy {
 //        MutableLiveData<Boolean>()
 //    }

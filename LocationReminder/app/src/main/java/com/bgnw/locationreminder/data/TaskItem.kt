@@ -2,6 +2,7 @@ package com.bgnw.locationreminder.data
 
 import android.os.Parcelable
 import com.bgnw.locationreminder.activity.CreateTaskItemActivity
+import com.bgnw.locationreminder.api.TagValuePair
 import com.google.gson.annotations.Expose
 import kotlinx.parcelize.Parcelize
 import java.util.Dictionary
@@ -15,9 +16,12 @@ data class TaskItem(
     var body_text: String,
     var remind_method: String?,
     var attachment_img_path: String?,
+    var user_peer: String? = null,
     var snooze_until: String?,
     var completed: Boolean,
     var due_at: String?,
+    var lati: Double? = null,
+    var longi: Double? = null,
     var is_sub_task: Boolean,
     var parent_task: Int?,
     var opportunities: MutableList<ItemOpportunity>? = mutableListOf(),
@@ -26,6 +30,15 @@ data class TaskItem(
     @Expose(serialize = false, deserialize = true)
     var applicable_filters: List<Map<String, String>>? = null
 ) : Parcelable {
+    override fun equals(other: Any?): Boolean {
+        if (other is TaskItem) {
+            return this.item_id === other.item_id
+        }
+        else {
+            return super.equals(other)
+        }
+    }
+
     override fun toString(): String {
 
         return """
@@ -112,8 +125,8 @@ data class TaskItem(
         }
 
 
-        fun convertFiltersToMap(filters: Collection<CreateTaskItemActivity.TagValuePair>): List<Map<String, String>> {
-            if (filters.isEmpty()) { return listOf() }
+        fun convertFiltersToMap(filters: Collection<TagValuePair>?): List<Map<String, String>> {
+            if (filters.isNullOrEmpty()) { return listOf() }
 
             val list = mutableListOf<Map<String, String>>()
             filters.forEach { filter ->

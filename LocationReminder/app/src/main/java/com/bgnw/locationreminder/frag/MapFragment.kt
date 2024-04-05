@@ -109,6 +109,8 @@ class MapFragment : Fragment() {
         mapView.controller.setZoom(19.0)
 
         mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.ALWAYS)
+        mapView.setMultiTouchControls(true);
+
 
         val updateMapButton: Button = requireView().findViewById(R.id.btn_update_map)
         val overrideButton: Button = requireView().findViewById(R.id.btn_override)
@@ -155,8 +157,8 @@ class MapFragment : Fragment() {
             Toast.makeText(context, "Location services are not available - try again later", Toast.LENGTH_LONG).show()
         }
 
-        addMarker(GeoPoint(55.91201, -3.31961), "GRID", "Research building")
-        mapView.invalidate()
+//        addMarker(GeoPoint(55.91201, -3.31961), "GRID", "Research building")
+//        mapView.invalidate()
 
         viewModel.userLocation.observe(viewLifecycleOwner) {pair ->
             if (pair != null) {
