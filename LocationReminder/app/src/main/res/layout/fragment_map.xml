@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".frag.MapFragment">
+
 
     <org.osmdroid.views.MapView
         android:id="@+id/osm_map"
@@ -11,10 +13,28 @@
         android:layout_height="match_parent">
     </org.osmdroid.views.MapView>
 
+    <Button
+        android:id="@+id/btn_center_map"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="70dp"
+        android:minWidth="0dp"
+        android:padding="15dp"
+        app:icon="@drawable/baseline_near_me_24"
+        android:text="Center map"
+        android:backgroundTint="@color/dark_blue"
+        app:iconPadding="8dp" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -29,12 +49,7 @@
         android:id="@+id/btn_override"
         />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="center"
-        android:id="@+id/btn_center_map"
-        />
+
 
     <Button
         android:layout_width="wrap_content"
@@ -61,4 +76,4 @@
 <!--        android:textStyle="bold"-->
 <!--        android:visibility="visible" />-->
 
-</FrameLayout>
+</RelativeLayout>

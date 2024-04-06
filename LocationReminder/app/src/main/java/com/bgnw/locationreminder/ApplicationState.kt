@@ -3,9 +3,11 @@ package com.bgnw.locationreminder
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.bgnw.locationreminder.activity.CreateTaskItemActivity
+import com.bgnw.locationreminder.data.Account
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.location.LocationModel
+import org.osmdroid.util.GeoPoint
 import java.time.Instant
 
 class ApplicationState : ViewModel() {
@@ -30,13 +32,7 @@ class ApplicationState : ViewModel() {
     val listIdToOpen: MutableLiveData<Int?> by lazy {
         MutableLiveData<Int?>()
     }
-//    val changeNeeded: MutableLiveData<Boolean> by lazy {
-//        MutableLiveData<Boolean>()
-//    }
-//    val changesMade: MutableLiveData<Boolean> by lazy {
-//        MutableLiveData<Boolean>()
-//    }
-//    val lastUpdate: MutableLiveData<Instant> by lazy {
-//        MutableLiveData<Instant>()
-//    }
+    val peerLocations: MutableLiveData<MutableMap<String, GeoPoint>> by lazy {
+        MutableLiveData<MutableMap<String, GeoPoint>>()
+    }
 }

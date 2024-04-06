@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,17 +12,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.api.Requests
+import com.bgnw.locationreminder.data.Account
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.map_aux.MapInfoBox
 import com.bgnw.locationreminder.overpass_api.OverpassElement
 import com.bgnw.locationreminder.overpass_api.OverpassResp
-import com.bgnw.locationreminder.overpass_api.getCoordinatesForElement
 import com.bgnw.locationreminder.overpass_api.queryOverpassApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +42,6 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import java.io.File
-import java.lang.Thread.sleep
 
 class MapFragment : Fragment() {
 
@@ -47,6 +50,7 @@ class MapFragment : Fragment() {
     private lateinit var mapView: MapView
     private lateinit var redMarkerDrawable: BitmapDrawable
     private lateinit var userLocationMarkerDrawable: BitmapDrawable
+    private lateinit var peerMarkerDrawable: Drawable
 
     private var markers = mutableSetOf<Marker>()
     private var markerSetLocked = MutableLiveData<Boolean>(false)
@@ -63,6 +67,11 @@ class MapFragment : Fragment() {
             BitmapDrawable(resources, BitmapFactory.decodeResource(resources, R.drawable.user_location_marker).let {
                 Bitmap.createScaledBitmap(it, 85, 85, false)
             })
+
+        val basePeerMarkerDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.baseline_person_pin_circle_24)!!
+        val yellowGreen = ContextCompat.getColor(requireContext(), R.color.yellow_green)
+        peerMarkerDrawable = DrawableCompat.wrap(basePeerMarkerDrawable)
+        DrawableCompat.setTint(peerMarkerDrawable, yellowGreen)
     }
 
     override fun onCreateView(
@@ -173,6 +182,8 @@ class MapFragment : Fragment() {
         }
 
         viewModel.reminders.value?.let { updateMarkers(it) }
+        viewModel.peerLocations.value?.let { updatePeerMarkers(it) }
+
 
         /* MAP LOADING MESSAGE
         val mapLoadingMessage = getView()?.findViewById<TextView>(R.id.map_loading_message)
@@ -207,6 +218,10 @@ class MapFragment : Fragment() {
             updateMarkers(reminders)
         }
 
+        viewModel.peerLocations.observe(viewLifecycleOwner) { peers ->
+            updatePeerMarkers(peers)
+        }
+
 //
 //        viewModel.lists.observe(viewLifecycleOwner, Observer { lists ->
 //            val opps = Utils.getOppsFromLists(lists?.toMutableList())
@@ -238,27 +253,27 @@ class MapFragment : Fragment() {
                 if (nodes != null) {
                     for (element: OverpassElement in nodes.elements) {
 
-                        addMarker(
-                            getCoordinatesForElement(element),
-                            element.tags?.name ?: element.tags?.official_name ?: "(no name)",
-                            element.tags?.amenity
-                                ?: element.tags?.shop
-                                ?: element.tags?.leisure
-                                ?: element.tags?.education
-                                ?: element.tags?.tourism
-                                ?: element.tags?.public_transport
-                                ?: element.tags?.building
-                                ?: element.tags?.sport
-                                ?: element.tags?.product
-                                ?: element.tags?.vending
-                                ?: element.tags?.cuisine
-                                ?: element.tags?.landuse
-                                ?: element.tags?.healthcare
-                                ?: element.tags?.place_of_worship
-                                ?: element.tags?.restaurant
-                                ?: element.tags?.beauty
-                                ?: "(no info)"
-                        )
+//                        addMarker(
+//                            getCoordinatesForElement(element),
+//                            element.tags?.name ?: element.tags?.official_name ?: "(no name)",
+//                            element.tags?.amenity
+//                                ?: element.tags?.shop
+//                                ?: element.tags?.leisure
+//                                ?: element.tags?.education
+//                                ?: element.tags?.tourism
+//                                ?: element.tags?.public_transport
+//                                ?: element.tags?.building
+//                                ?: element.tags?.sport
+//                                ?: element.tags?.product
+//                                ?: element.tags?.vending
+//                                ?: element.tags?.cuisine
+//                                ?: element.tags?.landuse
+//                                ?: element.tags?.healthcare
+//                                ?: element.tags?.place_of_worship
+//                                ?: element.tags?.restaurant
+//                                ?: element.tags?.beauty
+//                                ?: "(no info)"
+//                        )
                     }
                 }
             }
@@ -312,13 +327,19 @@ class MapFragment : Fragment() {
 
     }
 
-    private fun addMarker(geoPoint: GeoPoint, name: String, information: String, shouldInvalidate: Boolean = true): Marker {
+    private fun addMarker(
+        geoPoint: GeoPoint,
+        name: String,
+        information: String,
+        type: String,
+        shouldInvalidate: Boolean = true
+    ): Marker {
         val marker = Marker(mapView)
         marker.position = geoPoint
         marker.title = name
         marker.snippet = information
         marker.infoWindow = MapInfoBox(mapView)
-        marker.icon = redMarkerDrawable
+        marker.icon = if (type == "USER") peerMarkerDrawable else redMarkerDrawable
         marker.id = "${geoPoint.latitude}x${geoPoint.longitude}"
 
 
@@ -343,7 +364,7 @@ class MapFragment : Fragment() {
     }
 
     private fun updateMarkers(reminders: MutableList<ItemOpportunity>) {
-        for(marker in markers.toList()) {
+        for (marker in markers.toList()) {
             removeMarker(marker = marker, shouldInvalidate = false)
         }
 
@@ -352,12 +373,32 @@ class MapFragment : Fragment() {
                 geoPoint = GeoPoint(reminder.lati, reminder.longi),
                 name = reminder.category,
                 information = "Matches ${reminder.matchingItemCount} ${if (reminder.matchingItemCount == 1) "item" else "items"}",
+                type = "PLACE",
                 shouldInvalidate = false
             )
         }
 
         mapView.invalidate() // update map to show updated markers
     }
+
+    private fun updatePeerMarkers(peers: MutableMap<String, GeoPoint>) {
+//        for (marker in markers.toList()) {
+//            removeMarker(marker = marker, shouldInvalidate = false)
+//        }
+        for (peer in peers.toList()) {
+            addMarker(
+                geoPoint = peer.second,
+                name = peer.first,
+                information = "your friend",
+                type = "USER",
+                shouldInvalidate = false
+            )
+        }
+
+        mapView.invalidate() // update map to show updated markers
+    }
+
+
 
     private suspend fun getNearbyNodes(
         lat: Double,

@@ -16,10 +16,20 @@ class NotificationTools {
             context: Context,
             title: String,
             body: String,
+            longText: Boolean = false
         ) {
             val builder = NotificationCompat.Builder(context, R.string.channel_id.toString())
-                .setSmallIcon(R.drawable.baseline_info_24).setContentTitle(title)
-                .setContentText(body).setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSmallIcon(R.drawable.baseline_info_24)
+                .setContentTitle(title)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+
+            if (longText) {
+                builder.setStyle(NotificationCompat.BigTextStyle()
+                    .bigText(body))
+            } else {
+                builder.setContentText(body)
+            }
+
 
             with(NotificationManagerCompat.from(context)) {
                 if (ActivityCompat.checkSelfPermission(

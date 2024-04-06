@@ -120,6 +120,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private fun signOut() {
         AccountDeviceTools.eraseData(this)
         viewModel.lists.value = mutableListOf()
+        viewModel.peerLocations.value = mutableMapOf()
         viewModel.loggedInUsername.value = null
         viewModel.loggedInDisplayName.value = null
     }
@@ -167,6 +168,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         viewModel.lists.value = mutableListOf()
         viewModel.reminders.value = mutableListOf()
+        viewModel.peerLocations.value = mutableMapOf()
 
 
 
@@ -339,6 +341,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 Log.d("bgnw_LOCATIONPROVIDER", msg)
 
                 CoroutineScope(Dispatchers.IO).launch {
+                    loadNearbyPeers(loc.latitude, loc.longitude)
+
                     val locCatReminders = checkForLocationReminders(debug = false)
                     val locUserReminders = checkForUserReminders(lat = loc.latitude, lon = loc.longitude)
                     val locPointReminders = checkForLocationPointReminders(lat = loc.latitude, lon = loc.longitude)
@@ -371,7 +375,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         NotificationTools.showNotification(
                             this@MainActivity,
                             "$allRemindersCount tasks can be completed nearby",
-                            body
+                            body,
+                            true
                         )
                     }
 
@@ -576,6 +581,45 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
 
+    private fun loadNearbyPeers(lat: Double, lon: Double) {
+        if (viewModel.loggedInUsername.value == null) return
+        CoroutineScope(Dispatchers.IO).launch {
+            val collabs = Requests.getCollabs(viewModel.loggedInUsername.value!!)
+            var allPeers = mutableMapOf<String, GeoPoint>()
+            var nearbyPeers = mutableMapOf<String, GeoPoint>()
+
+            for (collab in collabs!!) {
+                val otherUsername =
+                    if (collab.user_peer != viewModel.loggedInUsername.value!!)
+                        collab.user_peer
+                    else
+                        collab.user_master
+                val otherAccount = Requests.lookupUser(otherUsername)
+                if (otherAccount.lati != null && otherAccount.longi != null) {
+                    allPeers.put(
+                        otherAccount.username,
+                        GeoPoint(otherAccount.lati!!, otherAccount.longi!!)
+                    )
+                }
+            }
+
+            for (peer in allPeers) {
+                val diff = floatArrayOf(99f)
+                Location.distanceBetween(
+                    lat, lon,
+                    peer.value.latitude, peer.value.longitude,
+                    diff
+                )
+                if (diff[0] < 40) {
+                    nearbyPeers.put(peer.key, peer.value)
+                }
+            }
+
+            viewModel.peerLocations.value?.clear()
+            viewModel.peerLocations.value?.putAll(nearbyPeers)
+            viewModel.peerLocations.postValue(viewModel.peerLocations.value)
+        }
+    }
 
     private suspend fun checkForUserReminders(lat: Double, lon: Double): MutableList<TaskItem> {
         val lists = viewModel.lists.value
@@ -618,6 +662,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 }
             }
         }
+
+//        viewModel.peerLocations.value?.clear()
+//        viewModel.peerLocations.value?.putAll(userLocations)
+//        viewModel.peerLocations.postValue(viewModel.peerLocations.value)
+
         return itemsToRemind
     }
 
