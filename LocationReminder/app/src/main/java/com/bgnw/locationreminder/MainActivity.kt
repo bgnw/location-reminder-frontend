@@ -262,13 +262,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
                     Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
                 }
-                // DEVELOPER MENU:
-                R.id.DEV_MENU -> {
-                    currentFragId = R.id.DEV_MENU
-                    changeFragment(DeveloperOptions(), it.title.toString())
-                }
-                R.id.DEV_MAP -> {
-                    currentFragId = R.id.DEV_MAP
+//                // DEVELOPER MENU:
+//                R.id.DEV_MENU -> {
+//                    currentFragId = R.id.DEV_MENU
+//                    changeFragment(DeveloperOptions(), it.title.toString())
+//                }
+                R.id.map -> {
+                    currentFragId = R.id.map
                     changeFragment(MapFragment(), it.title.toString())
                 }
             }

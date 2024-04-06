@@ -22,8 +22,13 @@
                     android:icon="@drawable/baseline_checklist_24" />
 
                 <item
+                    android:id="@+id/map"
+                    android:title="Map"
+                    android:icon="@drawable/baseline_near_me_24"/>
+
+                <item
                     android:id="@+id/sharing"
-                    android:title="Sharing"
+                    android:title="Friends"
                     android:icon="@drawable/baseline_group_24" />
             </group>
         </menu>
@@ -50,19 +55,17 @@
         </menu>
     </item>
 
-    <item android:title="DEVELOPER">
-        <menu>
-            <group android:checkableBehavior="single">
-                <item
-                    android:id="@+id/DEV_MENU"
-                    android:title="DEVELOPER OPTIONS" />
+<!--    <item android:title="DEVELOPER">-->
+<!--        <menu>-->
+<!--            <group android:checkableBehavior="single">-->
+<!--                <item-->
+<!--                    android:id="@+id/DEV_MENU"-->
+<!--                    android:title="DEVELOPER OPTIONS" />-->
 
-                <item
-                    android:id="@+id/DEV_MAP"
-                    android:title="INITIAL MAP" />
 
-            </group>
-        </menu>
-    </item>
+
+<!--            </group>-->
+<!--        </menu>-->
+<!--    </item>-->
 
 </menu>
