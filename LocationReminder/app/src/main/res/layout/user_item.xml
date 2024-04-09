@@ -26,7 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="marquee"
-                android:maxWidth="160dp"
+                android:maxWidth="180dp"
                 android:maxLines="1"
                 android:paddingBottom="5dp"
                 android:textSize="16sp" />
@@ -42,19 +42,30 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true">
 
+
+
             <Button
                 android:id="@+id/ui_action1_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="4sp"
-                />
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:minWidth="0dp"
+                android:padding="10dp"
+                app:icon="@drawable/baseline_done_24"
+                app:iconPadding="0dp" />
 
             <Button
                 android:id="@+id/ui_action2_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="4sp"
-                />
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:minWidth="0dp"
+                android:padding="10dp"
+                android:backgroundTint="@color/red"
+                app:icon="@drawable/baseline_close_24"
+                app:iconPadding="0dp" />
 
         </LinearLayout>
     </RelativeLayout>

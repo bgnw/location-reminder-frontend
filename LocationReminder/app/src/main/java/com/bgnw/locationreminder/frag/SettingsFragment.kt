@@ -27,17 +27,13 @@ class SettingsFragment : Fragment() {
     // https://stackoverflow.com/questions/21504088
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as? AppCompatActivity)?.supportActionBar?.hide()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        (requireActivity() as? AppCompatActivity)?.supportActionBar?.show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val x = viewModel.loggedInUsername.value
-        Log.d("bgnw", "from settingsfr ${x.toString()}")
     }
 }

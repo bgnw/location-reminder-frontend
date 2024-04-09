@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.MutableLiveData
 import com.bgnw.locationreminder.R
@@ -24,9 +25,13 @@ class ItemOpportunityListAdapter(
         val opp = opps[position]
         val liTitle: TextView = view.findViewById(R.id.li_title)
         val liSubtitle: TextView = view.findViewById(R.id.li_subtitle)
+        val liButton: Button = view.findViewById(R.id.item_info_btn)
 
         liTitle.text = opp.place_name ?: opp.category
+        liTitle.isSingleLine = false
+        liTitle.maxLines = 2
         liSubtitle.text = "Matches ${opp.matchingItemCount} ${if (opp.matchingItemCount == 1) "item" else "items"}, ${opp.metresFromUser}m away"
+        liButton.visibility = View.GONE
 
         return view
     }

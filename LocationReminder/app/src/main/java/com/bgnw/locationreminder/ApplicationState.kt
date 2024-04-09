@@ -4,6 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import com.bgnw.locationreminder.data.Account
+import com.bgnw.locationreminder.data.Collab
+import com.bgnw.locationreminder.data.CollabReq
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.location.LocationModel
@@ -35,4 +37,8 @@ class ApplicationState : ViewModel() {
     val peerLocations: MutableLiveData<MutableMap<String, GeoPoint>> by lazy {
         MutableLiveData<MutableMap<String, GeoPoint>>()
     }
+    var receivedRequests: MutableLiveData<List<CollabReq>> = MutableLiveData()
+    var sentRequests: MutableLiveData<List<CollabReq>> = MutableLiveData()
+    var collabs: MutableLiveData<List<Collab>> = MutableLiveData()
+    var receivedRequestsCount: MutableLiveData<Int> = MutableLiveData()
 }

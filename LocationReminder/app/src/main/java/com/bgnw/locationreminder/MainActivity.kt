@@ -10,6 +10,8 @@ import android.location.Location
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
 import android.widget.TextView
@@ -18,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -81,7 +84,28 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private val viewModel: ApplicationState by viewModels()
 
+    private val handler = Handler(Looper.getMainLooper())
+
+    public val fetchCollabsEtcTask = object : Runnable {
+        override fun run() {
+            CoroutineScope(Dispatchers.IO).launch {
+                if (viewModel.loggedInUsername.value == null) { return@launch }
+                val username = viewModel.loggedInUsername.value!!
+                viewModel.receivedRequests.postValue(Requests.getReceivedRequests(username))
+                viewModel.sentRequests.postValue(Requests.getSentRequests(username))
+                viewModel.collabs.postValue(Requests.getCollabs(username))
+            }
+            handler.postDelayed(this, 10000)
+        }
+    }
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+
+    private lateinit var notLoggedInText: Toast
+
+    private var collabRequestCount = -1
+
 
     fun updateTLs(username: String) {
         Log.d("bgnw", "updating TLs in MainActivity")
@@ -123,6 +147,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         viewModel.peerLocations.value = mutableMapOf()
         viewModel.loggedInUsername.value = null
         viewModel.loggedInDisplayName.value = null
+        drawerLayout.closeDrawers()
+
     }
 
     // function is run once activity created (i.e. app is loaded in fg)
@@ -131,6 +157,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         // call default onCreate function
         super.onCreate(savedInstanceState)
 
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+        notLoggedInText = Toast.makeText(applicationContext, "Please log-in or create an account to use GeoCue", Toast.LENGTH_LONG)
 
 
         Class.forName("org.postgresql.Driver")
@@ -144,6 +173,15 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 "${Build.MODEL}: ** RESTARTED APP **"
             )
         }
+
+
+        val savedUser = retrieveUsername(this)
+        if (savedUser != null && viewModel.loggedInUsername.value != savedUser) {
+            viewModel.loggedInUsername.value = savedUser
+            viewModel.loggedInDisplayName.value = retrieveDisplayName(this)
+        }
+
+
 
         // set main content view
         setContentView(R.layout.activity_main)
@@ -174,8 +212,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         // actions to take when user logs in
         viewModel.loggedInUsername.observe(this) { username ->
-            navUsername.text = username
-            if (username != null) {
+            if (username == null) {
+                navUsername.text = "No account"
+            } else {
+                navUsername.text = username
                 updateTLs(username)
                 updateFilters(username)
             }
@@ -185,7 +225,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         // When user logs in, update the display name shown
         viewModel.loggedInDisplayName.observe(this, Observer { displayName ->
             runOnUiThread {
-                navDisplayName.text = displayName
+               if (displayName == null) {
+                   navDisplayName.text = "Visit the Account tab to log-in"
+               } else {
+                   navDisplayName.text = displayName
+               }
             }
         })
 
@@ -212,15 +256,49 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 //        viewModel.changesMade.value = true
 
 
+        (this as? AppCompatActivity)?.supportActionBar?.show()
 
 
-        var currentFragId: Int = R.id.lists
         val listFrag = ListsFragment()
+        val accountFrag = AccountFragment()
+        val mapFrag = MapFragment()
+        val sharingFrag = SharingFragment()
 
+
+        handler.post(fetchCollabsEtcTask)
+
+        viewModel.receivedRequests.observe(this) {reqs ->
+            if (
+                viewModel.receivedRequestsCount.value == null
+                || viewModel.receivedRequestsCount.value!! == -1
+                ) {
+                viewModel.receivedRequestsCount.postValue(reqs.size)
+            }
+            else if (reqs.size > (viewModel.receivedRequestsCount.value!!)) {
+                NotificationTools.showNotification(
+                    this@MainActivity,
+                    "You have new friend requests",
+                    "Go to the Friends tab to view them",
+                    false
+                )
+                viewModel.receivedRequestsCount.postValue(reqs.size)
+            }
+        }
+
+        var currentFragId: Int =
+            if (viewModel.loggedInUsername.value.isNullOrEmpty())
+                R.id.account
+            else
+                R.id.lists
 
         // open default fragment
-        changeFragment(listFrag, "Lists")
-        navView.setCheckedItem(R.id.lists)
+        if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
+            changeFragment(accountFrag, "Account")
+            navView.setCheckedItem(R.id.account)
+        } else {
+            changeFragment(listFrag, "Lists")
+            navView.setCheckedItem(R.id.lists)
+        }
 
 
         // nav menu click handler
@@ -232,30 +310,52 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             it.isChecked = true
             when (it.itemId) {
                 R.id.nearby -> {
-                    currentFragId = R.id.nearby
-                    changeFragment(NearbyFragment(), it.title.toString())
+                    if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
+                        notLoggedInText.show()
+                        return@setNavigationItemSelectedListener true
+                    } else {
+                        currentFragId = R.id.nearby
+                        changeFragment(NearbyFragment(), it.title.toString())
+                    }
                 }
                 R.id.lists -> {
-                    currentFragId = R.id.lists
-                    changeFragment(listFrag, it.title.toString())
+                    if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
+                        notLoggedInText.show()
+                        return@setNavigationItemSelectedListener true
+                    } else {
+                        currentFragId = R.id.lists
+                        changeFragment(listFrag, it.title.toString())
+                    }
                 }
                 R.id.sharing -> {
-                    currentFragId = R.id.sharing
-                    changeFragment(SharingFragment(), it.title.toString())
+                    if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
+                        notLoggedInText.show()
+                        return@setNavigationItemSelectedListener true
+                    } else {
+                        currentFragId = R.id.sharing
+                        changeFragment(sharingFrag, it.title.toString())
+                    }
                 }
                 R.id.account -> {
                     currentFragId = R.id.account
-                    changeFragment(AccountFragment(), it.title.toString())
+                    changeFragment(accountFrag, it.title.toString())
                 }
                 R.id.settings -> {
-                    currentFragId = R.id.settings
-                    changeFragment(SettingsFragment(), it.title.toString())
+                    if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
+                        notLoggedInText.show()
+                        return@setNavigationItemSelectedListener true
+                    } else {
+                        currentFragId = R.id.settings
+                        changeFragment(SettingsFragment(), it.title.toString())
+                    }
                 }
                 R.id.sign_out -> {
-                    val text = if (viewModel.loggedInUsername.value != null) {
+                    currentFragId = R.id.account
+                    changeFragment(accountFrag, "Account")
+                    val text = if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
                         "You're logged out"
                     } else {
-                        "Logged out of ${viewModel.loggedInDisplayName}'s account"
+                        "Logged out of ${viewModel.loggedInDisplayName.value}'s account"
                     }
 
                     signOut()
@@ -268,8 +368,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 //                    changeFragment(DeveloperOptions(), it.title.toString())
 //                }
                 R.id.map -> {
-                    currentFragId = R.id.map
-                    changeFragment(MapFragment(), it.title.toString())
+                    if (viewModel.loggedInUsername.value == null) {
+                        notLoggedInText.show()
+                    } else {
+                        currentFragId = R.id.map
+                        changeFragment(mapFrag, it.title.toString())
+                    }
                 }
             }
             true
@@ -300,8 +404,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val locationData = LocationLiveData(this)
 
         var lastUpdateHadContent: MutableLiveData<Boolean> = MutableLiveData(false)
+        var lastUpdateMsg: MutableLiveData<String> = MutableLiveData()
 
         viewModel.loggedInUsername.observe(this) {
+            lastUpdateHadContent.postValue(false)
+        }
+        viewModel.collabs.observe(this) {
             lastUpdateHadContent.postValue(false)
         }
 
@@ -336,9 +444,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             lastLocation = loc
 
             if (lastUpdateHadContent.value == false || diff[0] > 4 || lastLocation == null) {
-                val msg = "loc: ${loc.latitude}, ${loc.longitude} (diff: ${diff[0]})"
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-                Log.d("bgnw_LOCATIONPROVIDER", msg)
+//                val msg = "loc: ${loc.latitude}, ${loc.longitude} (diff: ${diff[0]})"
+//                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+//                Log.d("bgnw_LOCATIONPROVIDER", msg)
 
                 CoroutineScope(Dispatchers.IO).launch {
                     loadNearbyPeers(loc.latitude, loc.longitude)
@@ -358,26 +466,30 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     var body = ""
                     if (locCatReminders != null) {
                         for (reminder in locCatReminders) {
-                            body += "(Category) ${reminder.title}\n"
+                            body += "(Nearby locations) ${reminder.title}\n"
                         }
                     }
                     for (reminder in locUserReminders) {
-                        body += "(User, ${reminder.user_peer}) ${reminder.title}\n"
+                        body += "(Near user ${reminder.user_peer}) ${reminder.title}\n"
                     }
                     if (locPointReminders != null) {
                         for (reminder in locPointReminders) {
-                            body += "(Location) ${reminder.title}\n"
+                            body += "(Nearby location) ${reminder.title}\n"
                         }
                     }
 
 
+
                     if (allRemindersCount > 0) {
-                        NotificationTools.showNotification(
-                            this@MainActivity,
-                            "$allRemindersCount tasks can be completed nearby",
-                            body,
-                            true
-                        )
+                        if (lastUpdateMsg.value.isNullOrEmpty() || lastUpdateMsg.value != body) {
+                            lastUpdateMsg.postValue(body)
+                            NotificationTools.showNotification(
+                                this@MainActivity,
+                                "$allRemindersCount tasks can be completed nearby",
+                                body,
+                                true
+                            )
+                        }
                     }
 
 
@@ -403,13 +515,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         // Launch coroutine to check for reminders/notifications to send to user
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-
-        val savedUser = retrieveUsername(this)
-        if (savedUser != null && viewModel.loggedInUsername.value != savedUser) {
-            viewModel.loggedInUsername.value = savedUser
-            viewModel.loggedInDisplayName.value = retrieveDisplayName(this)
-        }
-
         viewModel.reminders.observe(this) {_ ->
             Log.d("bgnw", "reminders, running changes")
             if (currentFragId == R.id.nearby) {
@@ -417,12 +522,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 reloadNearbyFragment()
             }
         }
+
     }
 
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (toggle.onOptionsItemSelected(item)) {
+        if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
+            notLoggedInText.show()
+            return false
+        }
+        else if (toggle.onOptionsItemSelected(item)) {
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -433,6 +543,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frame_layout, fragment)
+//        fragmentTransaction.addToBackStack(null)
         fragmentTransaction.commit()
         setTitle(title)
         drawerLayout.closeDrawers()
@@ -582,42 +693,44 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
     private fun loadNearbyPeers(lat: Double, lon: Double) {
-        if (viewModel.loggedInUsername.value == null) return
         CoroutineScope(Dispatchers.IO).launch {
-            val collabs = Requests.getCollabs(viewModel.loggedInUsername.value!!)
-            var allPeers = mutableMapOf<String, GeoPoint>()
-            var nearbyPeers = mutableMapOf<String, GeoPoint>()
+            try {
+                val collabs = Requests.getCollabs(viewModel.loggedInUsername.value!!)
+                var allPeers = mutableMapOf<String, GeoPoint>()
+                var nearbyPeers = mutableMapOf<String, GeoPoint>()
 
-            for (collab in collabs!!) {
-                val otherUsername =
-                    if (collab.user_peer != viewModel.loggedInUsername.value!!)
-                        collab.user_peer
-                    else
-                        collab.user_master
-                val otherAccount = Requests.lookupUser(otherUsername)
-                if (otherAccount.lati != null && otherAccount.longi != null) {
-                    allPeers.put(
-                        otherAccount.username,
-                        GeoPoint(otherAccount.lati!!, otherAccount.longi!!)
+                for (collab in collabs!!) {
+                    val otherUsername =
+                        if (collab.user_peer != viewModel.loggedInUsername.value!!)
+                            collab.user_peer
+                        else
+                            collab.user_master
+                    val otherAccount = Requests.lookupUser(otherUsername)
+                    if (otherAccount.lati != null && otherAccount.longi != null) {
+                        allPeers.put(
+                            otherAccount.username,
+                            GeoPoint(otherAccount.lati!!, otherAccount.longi!!)
+                        )
+                    }
+                }
+
+                for (peer in allPeers) {
+                    val diff = floatArrayOf(99f)
+                    Location.distanceBetween(
+                        lat, lon,
+                        peer.value.latitude, peer.value.longitude,
+                        diff
                     )
+                    if (diff[0] < 100) {
+                        nearbyPeers.put(peer.key, peer.value)
+                    }
                 }
-            }
 
-            for (peer in allPeers) {
-                val diff = floatArrayOf(99f)
-                Location.distanceBetween(
-                    lat, lon,
-                    peer.value.latitude, peer.value.longitude,
-                    diff
-                )
-                if (diff[0] < 40) {
-                    nearbyPeers.put(peer.key, peer.value)
-                }
+                viewModel.peerLocations.value?.clear()
+                viewModel.peerLocations.value?.putAll(nearbyPeers)
+                viewModel.peerLocations.postValue(viewModel.peerLocations.value)
             }
-
-            viewModel.peerLocations.value?.clear()
-            viewModel.peerLocations.value?.putAll(nearbyPeers)
-            viewModel.peerLocations.postValue(viewModel.peerLocations.value)
+            catch (e: NullPointerException) { return@launch }
         }
     }
 
@@ -764,8 +877,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
                     var placeName =
-                        matchingTags.first().value
-                        ?: matchingTags.first().tag
+                        if (matchingTags.isEmpty())
+                            "Location"
+                        else
+                            matchingTags.first().value ?: matchingTags.first().tag
 
                     // put tag name in place name
                     placeName = placeName[0].uppercase() + placeName.removeRange(0,1).replace('_', ' ')
@@ -880,6 +995,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         } else {
             if (debug) Log.d("bgnw", "res empty")
             return null
+        }
+    }
+
+    override fun onBackPressed() {
+        if (supportFragmentManager.backStackEntryCount != 0) {
+            super.onBackPressed()
         }
     }
 }

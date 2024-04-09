@@ -8,11 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginStart
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
@@ -36,9 +38,6 @@ class ListsFragment : Fragment() {
     private val viewModel: ApplicationState by activityViewModels()
 
     private lateinit var binding: FragmentListsBinding
-    private lateinit var samples: List<TaskList> // TEMP
-    private val dtFormatter: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm") // TODO remove if not used here
 
     private var adapter: TaskListListAdapter? = null
     private var request: ActivityResultLauncher<Intent>? = null
@@ -48,7 +47,6 @@ class ListsFragment : Fragment() {
     private val itemClickListener = object : TaskListListAdapter.OnItemClickListener {
         override fun onItemClick(position: TaskList) {
 
-            // TEMP: --------------------------------------------------------
             val viewTaskListFragment = ViewTaskListFragment()
             val bundle = Bundle()
             bundle.putInt("LIST_ID", position.list_id!!)
@@ -58,19 +56,6 @@ class ListsFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
             return
-            // ----------------------------------------
-
-//            Log.d("bgnw_Data: ", position.toString())
-//
-//            val intent = Intent(context, ViewTaskListActivity::class.java)
-//            Log.d("bgnw_PASSING LIST:", position.toString())
-//            intent.putExtra("selected_list", position) // TODO pass whole list obj
-//            intent.putExtra("username", viewModel.loggedInUsername.value)
-//            if (request != null) {
-//                request!!.launch(intent)
-//            } else {
-//                Toast.makeText(context, "Please try again later or force close the app", Toast.LENGTH_LONG).show()
-//            }
         }
     }
 
@@ -78,8 +63,6 @@ class ListsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-//        viewModel = ViewModelProvider(requireActivity()).get(ApplicationState::class.java)
         viewModel.lists.value
         val x = viewModel.loggedInUsername.value
         Log.d("bgnw", "from listsfr ${x.toString()}")
@@ -122,10 +105,6 @@ class ListsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        makeSamples()
-
-        Log.d("bgnw-create", "creating lists frg")
-
         binding = FragmentListsBinding.inflate(layoutInflater)
 
         val context = context as MainActivity
@@ -149,6 +128,7 @@ class ListsFragment : Fragment() {
         addListButton?.setOnClickListener { _ -> // https://www.digitalocean.com/community/tutorials/android-alert-dialog-using-kotlin
 
             val editText = EditText(context)
+            editText.isSingleLine = true
             editText.hint = "Provide a list name"
 
             val dialog = AlertDialog.Builder(context)
@@ -164,7 +144,6 @@ class ListsFragment : Fragment() {
                         val newList: MutableLiveData<TaskList> = MutableLiveData()
 
                         reqIsDone.observe(viewLifecycleOwner) {
-                            Log.d("bgnw", "donEEEE!!!!!!!!!!")
                             // updateTLs(username)
                             (requireActivity() as MainActivity).updateTLs(username)
 //                            viewModel.changesMade.postValue(true)

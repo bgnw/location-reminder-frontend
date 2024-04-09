@@ -176,13 +176,15 @@ fun tagsStringMapToPairs(tagList: List<Map<String, String>>): MutableList<TagVal
     for (tagMap in tagList) {
         var attr = tagMap["filters"]
         val matchResult = pattern.find(attr!!)
-        var (osmTag, osmValue: String?) = matchResult!!.destructured
-        tagPairs.add(
-            TagValuePair(
-                osmTag,
-                osmValue.ifBlank { null }
+        if (matchResult != null) {
+            var (osmTag, osmValue: String?) = matchResult!!.destructured
+            tagPairs.add(
+                TagValuePair(
+                    osmTag,
+                    osmValue.ifBlank { null }
+                )
             )
-        )
+        }
 }
 
     return tagPairs

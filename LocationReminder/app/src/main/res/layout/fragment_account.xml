@@ -19,7 +19,7 @@
         android:layout_height="match_parent"
         android:text="What would you like to do?"
         android:gravity="center"
-        android:paddingTop="10dp" />
+        android:paddingTop="30dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -155,28 +155,26 @@
 <!--        android:textSize="27sp"-->
 <!--        android:textStyle="bold" />-->
 
-    <EditText
-        android:id="@+id/account_login_username"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="5dp"
-        android:hint="Username"
-        android:text="ba"
-        android:maxLength="30"
-        android:singleLine="true" />
+        <EditText
+            android:id="@+id/account_login_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="5dp"
+            android:hint="Username"
+            android:maxLength="30"
+            android:singleLine="true" />
 
-    <EditText
-        android:id="@+id/account_login_password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="5dp"
-        android:hint="Password"
-        android:text="pwd"
-        android:maxLength="200"
-        android:singleLine="true"
-        android:inputType="textPassword"/>
+        <EditText
+            android:id="@+id/account_login_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="5dp"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:maxLength="200"
+            android:singleLine="true" />
 
     <Button
         android:id="@+id/account_login_submit"

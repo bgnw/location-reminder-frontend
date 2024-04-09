@@ -1,5 +1,6 @@
 package com.bgnw.locationreminder.frag
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
@@ -11,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -24,12 +26,14 @@ import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.data.Account
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.map_aux.MapInfoBox
+import com.bgnw.locationreminder.nominatim_api.queryNominatimApi
 import com.bgnw.locationreminder.overpass_api.OverpassElement
 import com.bgnw.locationreminder.overpass_api.OverpassResp
 import com.bgnw.locationreminder.overpass_api.queryOverpassApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.config.IConfigurationProvider
@@ -114,7 +118,7 @@ class MapFragment : Fragment() {
         mapView.getLocalVisibleRect(Rect())
 
         mapView.minZoomLevel = 16.0
-        mapView.maxZoomLevel = 19.0
+        mapView.maxZoomLevel = 22.0
         mapView.controller.setZoom(19.0)
 
         mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.ALWAYS)
@@ -152,6 +156,10 @@ class MapFragment : Fragment() {
         val userLocationMarker = Marker(mapView)
         userLocationMarker.icon = userLocationMarkerDrawable
         userLocationMarker.id = "USER_CURRENT_LOC_MARKER"
+        userLocationMarker.title = "Your location"
+        userLocationMarker.snippet = ""
+        userLocationMarker.infoWindow = MapInfoBox(mapView)
+
 
         if (sharedUserLocation != null) {
             val point = GeoPoint(
@@ -169,6 +177,12 @@ class MapFragment : Fragment() {
 //        addMarker(GeoPoint(55.91201, -3.31961), "GRID", "Research building")
 //        mapView.invalidate()
 
+        val mapLocalityMsg: TextView = view.findViewById(R.id.map_locality_msg)
+        if (sharedUserLocation != null) {
+            val locality = getLocality(sharedUserLocation.first.latitude, sharedUserLocation.first.longitude)
+            mapLocalityMsg.text = "You're in $locality"
+        }
+
         viewModel.userLocation.observe(viewLifecycleOwner) {pair ->
             if (pair != null) {
                 val loc = pair.first
@@ -177,6 +191,9 @@ class MapFragment : Fragment() {
                 if (diff > 0.5) {
                     userLocationMarker.position = GeoPoint(loc.latitude, loc.longitude)
                     mapView.invalidate()
+
+                    val locality = getLocality(loc.latitude, loc.longitude)
+                    mapLocalityMsg.text = "You're in $locality"
                 }
             }
         }
@@ -483,5 +500,24 @@ class MapFragment : Fragment() {
             Log.d("bgnw_overpass", "Error: ${e.message}")
             return null
         }
+    }
+
+    fun getLocality(lat: Double, lon: Double): String {
+        val nominatimResp = CoroutineScope(Dispatchers.IO).async {
+            queryNominatimApi(lat, lon)
+        }
+        while (!nominatimResp.isCompleted) {
+            Thread.sleep(500)
+        }
+        var addressObj = nominatimResp.getCompleted().address
+        var primary = addressObj.neighbourhood ?: addressObj.city
+        var secondary =
+            if (primary == addressObj.neighbourhood && addressObj.city != null) {
+                addressObj.city
+            } else {
+                addressObj.county ?: addressObj.state ?: addressObj.country
+            }
+        var locality = "${if (primary != null) "$primary, " else ""}${secondary}"
+        return locality
     }
 }

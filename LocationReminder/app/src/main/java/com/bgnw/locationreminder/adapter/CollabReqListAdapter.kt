@@ -67,8 +67,8 @@ class CollabReqListAdapter(
         }
         liSubtitle.text = "Requested at ${LocalDateTime.parse(items[position].datetime_sent, dtZulu).format(dtHuman)}"
 
-        action1Button.text = "Accept"
-        action2Button.text = "Decline"
+//        action1Button.text = "Accept"
+//        action2Button.text = "Decline"
         var selectedItem: CollabReq
 
         action1Button.setOnClickListener {
@@ -81,7 +81,7 @@ class CollabReqListAdapter(
                 items.remove(selectedItem)
                 this.notifyDataSetChanged()
                 this.notifyDataSetInvalidated()
-                (collabsLv.adapter as CollabListAdapter).addItem(data)
+//                (collabsLv.adapter as CollabListAdapter).addItem(data)
             }
 
             selectedItem = items[position]

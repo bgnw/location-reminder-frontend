@@ -1,12 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme. -->
+
     <style name="Base.Theme.LocationReminder" parent="Theme.Material3.Light">
         <!-- Customize your light theme here. -->
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowBackground">@color/white</item>
         <item name="colorPrimary">@color/forest_green</item>
+        <item name="colorPrimaryDark">@color/forest_green</item>
         <item name="colorAccent">@color/orange</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-
-
-    <style name="Theme.LocationReminder" parent="Base.Theme.LocationReminder" />
 </resources>

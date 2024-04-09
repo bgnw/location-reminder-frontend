@@ -665,7 +665,15 @@ class CreateTaskItemFragment : Fragment() {
             queryResult.postValue(Requests.getCollabs(viewModel.loggedInUsername.value!!))
         }
 
+
         queryResult.observe(viewLifecycleOwner) {data ->
+
+            resultsDataset.clear()
+
+            if (data.isNullOrEmpty()) {
+                Toast.makeText(context, "Please connect with friends first. See the Friends tab for more", Toast.LENGTH_SHORT).show()
+            }
+
             data?.forEach {
                     d ->
                 if (viewModel.loggedInUsername.value != d.user_master)

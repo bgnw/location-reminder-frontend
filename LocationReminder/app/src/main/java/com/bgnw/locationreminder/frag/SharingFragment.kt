@@ -2,6 +2,8 @@ package com.bgnw.locationreminder.frag
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,9 +34,8 @@ class SharingFragment : Fragment() {
     private val viewModel: ApplicationState by activityViewModels()
     private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
 
-    private var receivedRequests: MutableLiveData<List<CollabReq>> = MutableLiveData()
-    private var sentRequests: MutableLiveData<List<CollabReq>> = MutableLiveData()
-    private var collabs: MutableLiveData<List<Collab>> = MutableLiveData()
+    private val handler = Handler(Looper.getMainLooper())
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,13 +52,9 @@ class SharingFragment : Fragment() {
         var reqAdapter: CollabReqListAdapter? = null
         var collabAdapter: CollabListAdapter? = null
 
-        CoroutineScope(Dispatchers.IO).launch {
-            receivedRequests.postValue(Requests.getReceivedRequests(viewModel.loggedInUsername.value!!))
-            sentRequests.postValue(Requests.getSentRequests(viewModel.loggedInUsername.value!!))
-            collabs.postValue(Requests.getCollabs(viewModel.loggedInUsername.value!!))
-        }
 
-        receivedRequests.observe(viewLifecycleOwner) {data ->
+
+        viewModel.receivedRequests.observe(viewLifecycleOwner) {data ->
             if (data != null) {
                 reqAdapter = CollabReqListAdapter(requireActivity(), data.toMutableList())
                 reqLv.adapter = reqAdapter
@@ -65,13 +62,13 @@ class SharingFragment : Fragment() {
             }
         }
 
-        sentRequests.observe(viewLifecycleOwner) {data ->
+        viewModel.sentRequests.observe(viewLifecycleOwner) {data ->
             if (data != null) {
                 layout.findViewById<TextView>(R.id.friend_request_msg)?.text = "You've sent ${data.size} pending friend request${if (data.size == 1) "" else "s"}."
             }
         }
 
-        collabs.observe(viewLifecycleOwner) { data ->
+        viewModel.collabs.observe(viewLifecycleOwner) { data ->
             if (data != null) {
                 collabAdapter = CollabListAdapter(requireActivity(), data.toMutableList())
                 collabLv.adapter = collabAdapter
@@ -104,7 +101,7 @@ class SharingFragment : Fragment() {
                     val returnedReq: MutableLiveData<CollabReq> = MutableLiveData()
                     CoroutineScope(Dispatchers.IO).async {
                         returnedReq.postValue(Requests.addClRequest(newRequestObj))
-                        sentRequests.postValue(Requests.getSentRequests(viewModel.loggedInUsername.value!!))
+                        viewModel.sentRequests.postValue(Requests.getSentRequests(viewModel.loggedInUsername.value!!))
                     }
 
                     returnedReq.observe(viewLifecycleOwner) { data ->

@@ -2,6 +2,9 @@ package com.bgnw.locationreminder.frag
 
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -100,6 +103,9 @@ class AccountFragment : Fragment() {
             loginResultText?.text = ""
         }
 
+        val clearLoginResultTask = Runnable { clearLoginResult() }
+        val handler = Handler(Looper.getMainLooper())
+
         loginUsername?.setOnFocusChangeListener { _, _ -> clearLoginResult() }
         loginPassword?.setOnFocusChangeListener { _, _ -> clearLoginResult() }
         toggleLogin?.setOnFocusChangeListener { _, _ -> clearLoginResult() }
@@ -111,8 +117,12 @@ class AccountFragment : Fragment() {
             val username: String = loginUsername?.text.toString()
             val password: String = loginPassword?.text.toString()
 
+            loginUsername?.text = Editable.Factory.getInstance().newEditable("")
+            loginPassword?.text = Editable.Factory.getInstance().newEditable("")
+
             if (username.isEmpty() || password.isEmpty()) {
                 loginResultText?.text = "Error: You could not be authenticated."
+                handler.postDelayed(clearLoginResultTask, 3000)
                 return@setOnClickListener
             }
 
@@ -123,11 +133,14 @@ class AccountFragment : Fragment() {
                         && authSuccess.authentication_success
                     ) {
                         loginResultText?.text = "Success: you're now logged in as $username."
+                        handler.postDelayed(clearLoginResultTask, 3000)
+
                         val accountData = Requests.lookupUser(username)
                         viewModel.loggedInUsername.value = accountData.username
                         viewModel.loggedInDisplayName.value = accountData.display_name
                     } else {
                         loginResultText?.text = "Error: You could not be authenticated."
+                        handler.postDelayed(clearLoginResultTask, 3000)
                     }
 
 
