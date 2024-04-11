@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    public val fetchCollabsEtcTask = object : Runnable {
+    val fetchCollabsEtcTask = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (viewModel.loggedInUsername.value == null) { return@launch }
@@ -100,12 +100,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
-
     private lateinit var notLoggedInText: Toast
-
-    private var collabRequestCount = -1
-
 
     fun updateTLs(username: String) {
         Log.d("bgnw", "updating TLs in MainActivity")
@@ -161,7 +156,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         notLoggedInText = Toast.makeText(applicationContext, "Please log-in or create an account to use GeoCue", Toast.LENGTH_LONG)
 
-
         Class.forName("org.postgresql.Driver")
 
         Requests.initialiseApi()
@@ -174,19 +168,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             )
         }
 
-
         val savedUser = retrieveUsername(this)
         if (savedUser != null && viewModel.loggedInUsername.value != savedUser) {
             viewModel.loggedInUsername.value = savedUser
             viewModel.loggedInDisplayName.value = retrieveDisplayName(this)
         }
 
-
-
         // set main content view
         setContentView(R.layout.activity_main)
-
-//        viewModel.changeNeeded.value = false
 
         // initialise navigation drawer
         drawerLayout = findViewById(R.id.drawer_layout)
@@ -201,14 +190,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val navDisplayName: TextView =
             navView.getHeaderView(0).findViewById(R.id.nav_user_display_name)
 
-
-
-
         viewModel.lists.value = mutableListOf()
         viewModel.reminders.value = mutableListOf()
         viewModel.peerLocations.value = mutableMapOf()
-
-
 
         // actions to take when user logs in
         viewModel.loggedInUsername.observe(this) { username ->
@@ -233,31 +217,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         })
 
-//        viewModel.changeNeeded.observe(this, Observer { changeNeeded ->
-//            if (changeNeeded) {
-//                Log.d("bgnw", "running changes")
-//                val username = viewModel.loggedInUsername.value
-//                if (username != null) {
-////                    updateTLs(username)
-//                }
-//                viewModel.changeNeeded.value = false
-//            }
-//        })
-//
-//
-//
-//        viewModel.changesMade.observe(this) {changesMade ->
-//            if (changesMade == null || changesMade == true) {
-//                viewModel.changesMade.value = false
-//                retrieveUsername(this)?.let { updateTLs(it) }
-//            }
-//        }
-//
-//        viewModel.changesMade.value = true
-
-
         (this as? AppCompatActivity)?.supportActionBar?.show()
-
 
         val listFrag = ListsFragment()
         val accountFrag = AccountFragment()
@@ -388,10 +348,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         })
 
-
-
         // Check and (if needed) request permission from the user to send notifications
-        // TODO check this works on >= android 13
         requestNotifPermission()
 
         // Request permission to use location, if needed
@@ -429,25 +386,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     diff
                 )
             }
-            Log.d("bgnw", "got location update, diff: ${diff[0]}")
 
-            // ** FOR LOCATION LOGGING **
-//            CoroutineScope(Dispatchers.IO).launch {
-//                Log.d("bgnw", "sending log")
-//                Requests.addLog(
-//                    loc.latitude,
-//                    loc.longitude,
-//                    "${Build.MODEL}: Got location update (significant? ${lastUpdateHadContent.value == false || diff[0] > 4 || lastLocation == null})"
-//                )
-//            }
+            Log.d("bgnw", "got location update, diff: ${diff[0]}")
 
             lastLocation = loc
 
             if (lastUpdateHadContent.value == false || diff[0] > 4 || lastLocation == null) {
-//                val msg = "loc: ${loc.latitude}, ${loc.longitude} (diff: ${diff[0]})"
-//                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-//                Log.d("bgnw_LOCATIONPROVIDER", msg)
-
                 CoroutineScope(Dispatchers.IO).launch {
                     loadNearbyPeers(loc.latitude, loc.longitude)
 
@@ -516,9 +460,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         viewModel.reminders.observe(this) {_ ->
-            Log.d("bgnw", "reminders, running changes")
             if (currentFragId == R.id.nearby) {
-                Log.d("bgnw", "going to reload nearby frag")
                 reloadNearbyFragment()
             }
         }
@@ -575,13 +517,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         // https://stackoverflow.com/questions/76490047/how-to-request-permission-to-send-notifications-android
         val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission(),
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permission Granted TODO
-            } else {
-                // Permission Denied / Cancel TODO
-            }
-        }
+        ) { isGranted: Boolean -> }
 
         if (SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
@@ -589,29 +525,19 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                // Do your task on permission granted
                 Log.d("bgnw_NOTIF", "permission already granted") // TEMP
-
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                // TODO: display an educational UI explaining to the user the features that will be enabled
-                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
-                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
-                //       If the user selects "No thanks," allow the user to continue without notifications.
-                Log.d("bgnw_NOTIF", "would show rationale then ask for perm") // TEMP
             } else {
-                // Directly ask for the permission
                 Log.d("bgnw_NOTIF", "asking for permission") // TEMP
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
-            // Below Android 13 You don't need to ask for notification permission.
             Log.d("bgnw_NOTIF", "below android 13, request not needed") // TEMP
         }
     }
 
     private fun createNotificationChannel() {
-        val name = "Channel Name"
-        val descriptionText = "Channel Description"
+        val name = "GeoCue Notifications"
+        val descriptionText = "Reminders and notifications for GeoCue"
         val importance = NotificationManager.IMPORTANCE_HIGH
         val channel =
             NotificationChannel(R.string.channel_id.toString(), name, importance).apply {
@@ -627,33 +553,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private fun requestLocationPermission() {
         val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission(),
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permission Granted TODO
-            } else {
-                // Permission Denied / Cancel TODO
-            }
-        }
+        ) { isGranted: Boolean -> }
 
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            // Do your task on permission granted
-            Log.d("bgnw_LOCATION_PERMS", "permission already granted") // TEMP
-
-        } else if (SDK_INT >= Build.VERSION_CODES.M
-            && shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
-        ) {
-            // TODO: display an educational UI explaining to the user the features that will be enabled
-            //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
-            //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
-            //       If the user selects "No thanks," allow the user to continue without notifications.
-            Log.d("bgnw_LOCATION_PERMS", "would show rationale then ask for perm") // TEMP
+            Log.d("bgnw_LOCATION_PERMS", "permission already granted")
         } else if (SDK_INT >= Build.VERSION_CODES.M) {
             // Directly ask for the permission
-            Log.d("bgnw_LOCATION_PERMS", "asking for permission") // TEMP
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
@@ -665,9 +574,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         areaRadius: Double,
         filters: List<String>?
     ): OverpassResp? {
-        Log.d("bgnw", "running getNearbyNodes")
-
-
         if (filters == null) { return null }
 
         val overpassQuery = buildString {
@@ -681,7 +587,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         try {
             val response = queryOverpassApi(overpassQuery)
-            Log.d("bgnw", "running getNearbyNodes -> done.")
 
             return response
         } catch (e: Exception) {
@@ -765,21 +670,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     diff
                 )
 
-                if (diff[0] <= 30) {
-                    itemsToRemind.add(item)
-//                    NotificationTools.showNotification(
-//                        this@MainActivity,
-//                        "${item.user_peer} is nearby",
-//                        "",
-//                    )
-                }
+                if (diff[0] <= 30) { itemsToRemind.add(item) }
             }
         }
-
-//        viewModel.peerLocations.value?.clear()
-//        viewModel.peerLocations.value?.putAll(userLocations)
-//        viewModel.peerLocations.postValue(viewModel.peerLocations.value)
-
         return itemsToRemind
     }
 
@@ -812,12 +705,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 nearbyItems.add(item)
             }
         }
-
-//        NotificationTools.showNotification(
-//            this@MainActivity,
-//            "${nearbyItems.size} *location point* items can be completed nearby",
-//            nearbyItems.joinToString(", ") { item -> item.title },
-//        )
         return nearbyItems
     }
 
@@ -930,15 +817,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             if (remainingPlacesCount > 0) {
                 finalMessage += " ($remainingPlacesCount more)..."
             }
-
-//            NotificationTools.showNotification(
-//                this@MainActivity,
-//                "${matchingTasks.size} tasks can be completed nearby",
-//                "Places nearby: $finalMessage",
-//            )
-
             val x = viewModel.reminders.value
-            x;
         }
 
 
@@ -955,47 +834,23 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             resultsDeferred = GlobalScope.async {
                 remindersPt2(userLoc!!.latitude, userLoc!!.longitude)
             }
-
-            /*
-            val cancelToken: CancellationToken = CancellationTokenSource().token
-            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancelToken)
-                .addOnSuccessListener { loc ->
-                    if (loc != null) {
-                        resultsDeferred = GlobalScope.async {
-                            remindersPt2(loc.latitude, loc.longitude)
-                        }
-                    }
-                }
-             */
         }
-
 
         userLoc = viewModel.userLocation.value?.first
         if (userLoc == null) { return null }
 
-        if (debug) Log.d("bgnw", "run remindersPt1()")
         remindersPt1()
-        if (debug) Log.d("bgnw", "run remindersPt1() -> done")
 
+        while (resultsDeferred == null) { sleep(1000) }
 
-        while (resultsDeferred == null) {
-            if (debug) Log.d("bgnw", "wait for pt2 task")
-            sleep(1000)
-        }
-
-        if (debug) Log.d("bgnw", "wait for pt2 task -> done")
         val res = resultsDeferred!!.await()
         if (res.first != null) {
             viewModel.reminders.value?.clear() // clear out old reminders
 
-            if (debug) Log.d("bgnw", "run remindersPt3()")
             remindersPt3(res.first!!)
-            if (debug) Log.d("bgnw", "run remindersPt3() -> done (data is ${res.first.toString()})")
             return matchingTasks.toMutableList()
-        } else {
-            if (debug) Log.d("bgnw", "res empty")
-            return null
         }
+        else { return null }
     }
 
     override fun onBackPressed() {
