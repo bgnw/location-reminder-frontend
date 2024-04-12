@@ -20,7 +20,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
-import com.bgnw.locationreminder.activity.ViewEditTaskItemActivity
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.data.Collab
 import com.bgnw.locationreminder.data.TaskItem

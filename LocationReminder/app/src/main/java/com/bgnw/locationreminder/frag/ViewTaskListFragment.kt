@@ -17,7 +17,6 @@ import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.TaskItemListAdapter
 import com.bgnw.locationreminder.activity.CreateTaskItemActivity
-import com.bgnw.locationreminder.activity.ViewEditTaskItemActivity
 import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.databinding.FragmentNearbyBinding

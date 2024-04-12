@@ -37,7 +37,6 @@ import androidx.lifecycle.lifecycleScope
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
-import com.bgnw.locationreminder.activity.ViewEditTaskItemActivity
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.api.TagValuePair
 import com.bgnw.locationreminder.data.TaskItem
@@ -51,6 +50,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.format.DateTimeFormatter
 
 class ViewEditTaskItemFragment : Fragment() {
 
@@ -60,6 +62,9 @@ class ViewEditTaskItemFragment : Fragment() {
     private var itemObj: TaskItem? = null
     private lateinit var username: String
 
+    private val dtHuman: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
+    private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+
     private val handler = Handler(Looper.getMainLooper())
 
     private val tags = listOf(
@@ -68,7 +73,6 @@ class ViewEditTaskItemFragment : Fragment() {
         mapOf("tag" to "leisure", "values" to listOf("pitch", "swimming_pool", "park", "garden", "playground", "picnic_table", "sports_centre", "nature_reserve", "track")),
         mapOf("tag" to "education", "values" to listOf("kindergarten", "school", "facultative_school", "centre", "courses", "college", "music", "university", "coaching")),
         mapOf("tag" to "tourism", "values" to listOf("information", "hotel", "artwork", "attraction", "viewpoint", "guest_house", "picnic_site", "camp_site", "museum", "chalet", "camp_pitch", "apartment", "hostel", "motel", "caravan_site")),
-//        mapOf("tag" to "public_transport", "values" to listOf("platform", "stop_position", "stop_area", "station")),
         mapOf("tag" to "sport", "values" to listOf("soccer", "tennis", "basketball", "baseball", "multi", "swimming", "equestrian", "golf", "fitness", "running", "athletics", "table_tennis", "beachvolleyball", "climbing", "volleyball", "boules")),
         mapOf("tag" to "product", "values" to listOf("food", "charcoal", "oil", "bricks", "wine", "fuel", "beer", "gas")),
         mapOf("tag" to "vending", "values" to listOf("parking_tickets", "excrement_bags", "drinks", "public_transport_tickets", "cigarettes", "fuel", "sweets", "newspapers", "food", "coffee", "condoms", "water")),
@@ -257,6 +261,7 @@ class ViewEditTaskItemFragment : Fragment() {
         val titleBox = rootView.findViewById<EditText>(R.id.vti_task_name)
         val bodyBox = rootView.findViewById<EditText>(R.id.vti_body_text)
         val snoozeMsg = rootView.findViewById<TextView>(R.id.vti_snooze_status_msg)
+        val dueMsg = rootView.findViewById<TextView>(R.id.vti_due_status_msg)
         val completionMsg = rootView.findViewById<TextView>(R.id.vti_completion_status_msg)
 
         val timePicker = rootView.findViewById<TimePicker>(R.id.vti_timepicker)
@@ -265,7 +270,10 @@ class ViewEditTaskItemFragment : Fragment() {
 
         val editTitleBtn = rootView.findViewById<Button>(R.id.vti_edit_name_btn)
         val editBodyBtn = rootView.findViewById<Button>(R.id.vti_edit_body_btn)
-        val editSnoozeBtn = rootView.findViewById<Button>(R.id.vti_snooze_btn)
+        val editSnoozeDate = rootView.findViewById<Button>(R.id.vti_snooze_edit_date)
+        val editSnoozeTime = rootView.findViewById<Button>(R.id.vti_snooze_edit_time)
+        val editDueDate = rootView.findViewById<Button>(R.id.vti_due_edit_date)
+        val editDueTime = rootView.findViewById<Button>(R.id.vti_due_edit_time)
         val toggleCompleteBtn = rootView.findViewById<Button>(R.id.vti_toggle_completion_btn)
         val deleteItemBtn = rootView.findViewById<Button>(R.id.vti_delete_task_btn)
         // TODO:       val editRemindTypeBtn = rootView.findViewById<Button>(R.id.vti)
@@ -289,7 +297,17 @@ class ViewEditTaskItemFragment : Fragment() {
         }
         fun updateSnoozeMsg() {
             snoozeMsg.text =
-                if (itemObj!!.snooze_until == null) "Not currently snoozed" else "TODO snooze datetime" // TODO}
+                if (itemObj!!.snooze_until == null)
+                    "Not currently snoozed"
+                else
+                    LocalDateTime.parse(itemObj!!.snooze_until!!, dtZulu).format(dtHuman)
+        }
+        fun updateDueMsg() {
+            snoozeMsg.text =
+                if (itemObj!!.due_at == null)
+                    "No due date"
+                else
+                    LocalDateTime.parse(itemObj!!.due_at!!, dtZulu).format(dtHuman)
         }
         fun updateCompletionMsg() {
             completionMsg.text = if (itemObj!!.completed) "Completed" else "Not completed"
@@ -299,6 +317,7 @@ class ViewEditTaskItemFragment : Fragment() {
         updateTitleBox()
         updateBodyBox()
         updateSnoozeMsg()
+        updateDueMsg()
         updateCompletionMsg()
 
         // hide the category layout initially
@@ -358,7 +377,10 @@ class ViewEditTaskItemFragment : Fragment() {
             keywordBox as View,
             editTitleBtn as View,
             editBodyBtn as View,
-            editSnoozeBtn as View,
+            editSnoozeDate as View,
+            editSnoozeTime as View,
+            editDueDate as View,
+            editDueTime as View,
             toggleCompleteBtn as View,
             radioGroup as View,
             deleteItemBtn as View
@@ -490,9 +512,110 @@ class ViewEditTaskItemFragment : Fragment() {
         }
 
 
-        editSnoozeBtn.setOnClickListener {
-            // show datetime dialog
+        editSnoozeDate.setOnClickListener {
+            loadingBg.visibility = View.VISIBLE
+            pickDatePopup.visibility = View.VISIBLE
         }
+
+        editSnoozeTime.setOnClickListener {
+            loadingBg.visibility = View.VISIBLE
+            pickTimePopup.visibility = View.VISIBLE
+        }
+
+        editDueDate.setOnClickListener {
+            loadingBg.visibility = View.VISIBLE
+            pickDatePopup.visibility = View.VISIBLE
+        }
+
+        editDueTime.setOnClickListener {
+            loadingBg.visibility = View.VISIBLE
+            pickTimePopup.visibility = View.VISIBLE
+        }
+
+        pickDateDoneBtn.setOnClickListener {
+            loadingBg.visibility = View.GONE
+            pickDatePopup.visibility = View.GONE
+
+            val currentSnoozeString = itemObj!!.snooze_until
+            val currentDT =
+                if (currentSnoozeString == null)
+                    null
+                else
+                    LocalDateTime.parse(currentSnoozeString, dtZulu)
+            var newDT = LocalDateTime.of(
+                datePicker.year,
+                datePicker.month,
+                datePicker.dayOfMonth,
+                currentDT?.hour ?: 0,
+                currentDT?.minute ?: 0
+            )
+
+            if (activeInteraction == editSnoozeTime) {
+                itemObj!!.snooze_until = newDT.format(dtZulu)
+                doUpdate(
+                    itemObj!!.item_id!!,
+                    itemObj!!
+                )
+                updateSnoozeMsg()
+
+            }
+            if (activeInteraction == editDueTime) {
+                itemObj!!.due_at = newDT.format(dtZulu)
+                doUpdate(
+                    itemObj!!.item_id!!,
+                    itemObj!!
+                )
+                updateDueMsg()
+            }
+
+
+        }
+
+        pickTimeDoneBtn.setOnClickListener {
+            loadingBg.visibility = View.GONE
+            pickTimePopup.visibility = View.GONE
+
+            val currentSnoozeString =
+                when (activeInteraction){
+                    editSnoozeTime -> itemObj!!.snooze_until
+                    editDueTime -> itemObj!!.due_at
+                    else -> throw Exception("Illegal activeInteraction")
+                }
+            val currentDT =
+                if (currentSnoozeString == null)
+                    null
+                else
+                    LocalDateTime.parse(currentSnoozeString, dtZulu)
+            var newDT = LocalDateTime.of(
+                currentDT?.year ?: LocalDateTime.now().year,
+                currentDT?.month ?: LocalDateTime.now().month,
+                currentDT?.dayOfMonth ?: LocalDateTime.now().dayOfMonth,
+                timePicker.hour,
+                timePicker.minute
+            )
+
+            if (activeInteraction == editSnoozeTime) {
+                itemObj!!.snooze_until = newDT.format(dtZulu)
+                doUpdate(
+                    itemObj!!.item_id!!,
+                    itemObj!!
+                )
+                updateSnoozeMsg()
+
+            }
+            if (activeInteraction == editDueTime) {
+                itemObj!!.due_at = newDT.format(dtZulu)
+                doUpdate(
+                    itemObj!!.item_id!!,
+                    itemObj!!
+                )
+                updateDueMsg()
+            }
+        }
+
+
+
+
 
         toggleCompleteBtn.setOnClickListener {
             // TODO PATCH query to api and show loading

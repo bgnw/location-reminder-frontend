@@ -83,6 +83,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     lateinit var drawerLayout: DrawerLayout
 
     private val viewModel: ApplicationState by viewModels()
+    private val ENABLE_LOGGING: Boolean = false
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -160,12 +161,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         Requests.initialiseApi()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            Requests.addLog(
-                0.0,
-                0.0,
-                "${Build.MODEL}: ** RESTARTED APP **"
-            )
+        if (ENABLE_LOGGING) {
+            CoroutineScope(Dispatchers.IO).launch {
+                Requests.addLog(
+                    0.0,
+                    0.0,
+                    "${Build.MODEL}: ** RESTARTED APP **"
+                )
+            }
         }
 
         val savedUser = retrieveUsername(this)
@@ -229,12 +232,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         viewModel.receivedRequests.observe(this) {reqs ->
             if (
-                viewModel.receivedRequestsCount.value == null
-                || viewModel.receivedRequestsCount.value!! == -1
+                (      viewModel.receivedRequestsCount.value == null
+                    || viewModel.receivedRequestsCount.value!! == -1
+                )
+                && reqs != null
                 ) {
                 viewModel.receivedRequestsCount.postValue(reqs.size)
             }
-            else if (reqs.size > (viewModel.receivedRequestsCount.value!!)) {
+            else if (reqs != null && reqs.size > (viewModel.receivedRequestsCount.value!!)) {
                 NotificationTools.showNotification(
                     this@MainActivity,
                     "You have new friend requests",
@@ -394,6 +399,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             if (lastUpdateHadContent.value == false || diff[0] > 4 || lastLocation == null) {
                 CoroutineScope(Dispatchers.IO).launch {
                     loadNearbyPeers(loc.latitude, loc.longitude)
+
+                    if (ENABLE_LOGGING) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            Log.d("bgnw", "sending log")
+                            Requests.addLog(
+                                loc.latitude,
+                                loc.longitude,
+                                "${Build.MODEL}: Got location update (significant? ${lastUpdateHadContent.value == false || diff[0] > 4 || lastLocation == null})"
+                            )
+                        }
+                    }
 
                     val locCatReminders = checkForLocationReminders(debug = false)
                     val locUserReminders = checkForUserReminders(lat = loc.latitude, lon = loc.longitude)

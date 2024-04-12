@@ -40,6 +40,19 @@
             android:id="@+id/cti_body_text" />
 
 
+<!--        <TextView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Due date/time:" />-->
+
+<!--        <EditText-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:inputType="text"-->
+<!--            android:id="@+id/cti_due_date_time" />-->
+
+
+
 
         <TextView
             android:layout_width="match_parent"

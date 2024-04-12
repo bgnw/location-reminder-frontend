@@ -21,8 +21,10 @@ import androidx.lifecycle.MutableLiveData
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.TaskItemMultiListAdapter
 import com.bgnw.locationreminder.adapter.TaskListListAdapter
 import com.bgnw.locationreminder.api.Requests
+import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.databinding.FragmentListsBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -30,6 +32,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 
@@ -40,9 +44,14 @@ class ListsFragment : Fragment() {
     private lateinit var binding: FragmentListsBinding
 
     private var adapter: TaskListListAdapter? = null
+    private var adapterDigest: TaskItemMultiListAdapter? = null
     private var request: ActivityResultLauncher<Intent>? = null
 
+    private val dtHuman: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
+    private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
+    private var digestShown = false
+    private var digestNoItemsToast: Toast? = null
 
     private val itemClickListener = object : TaskListListAdapter.OnItemClickListener {
         override fun onItemClick(position: TaskList) {
@@ -63,9 +72,11 @@ class ListsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.lists.value
-        val x = viewModel.loggedInUsername.value
-        Log.d("bgnw", "from listsfr ${x.toString()}")
+        digestNoItemsToast = Toast.makeText(
+            context,
+            "There are no items due today, or overdue.",
+            Toast.LENGTH_SHORT
+        )
 
         request = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
@@ -109,9 +120,9 @@ class ListsFragment : Fragment() {
 
         val context = context as MainActivity
         val lv = context.findViewById(R.id.lv_tasklist_list) as ListView
+        val lvDigest = context.findViewById(R.id.lv_daily_digest) as ListView
         adapter = viewModel.lists.value?.let { TaskListListAdapter(context, it, itemClickListener) }
         lv.adapter = adapter
-
 
         if (viewModel.listIdToOpen.value != null && viewModel.lists.value != null) {
             val id = viewModel.listIdToOpen.value!!
@@ -139,21 +150,17 @@ class ListsFragment : Fragment() {
                     val title = editText.text.toString()
                     val username = viewModel.loggedInUsername.value
                     if (title.isNotEmpty() && username != null) {
+                        editText.text.clear()
 
                         val reqIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
                         val newList: MutableLiveData<TaskList> = MutableLiveData()
 
                         reqIsDone.observe(viewLifecycleOwner) {
-                            // updateTLs(username)
                             (requireActivity() as MainActivity).updateTLs(username)
-//                            viewModel.changesMade.postValue(true)
                         }
 
                         newList.observe(viewLifecycleOwner) { newList ->
                             if (newList != null) {
-                                Log.d("bgnw", "newlist is not null")
-
-//                                adapter?.add(newList)
                                 if (viewModel.lists.value != null) {
                                     viewModel.lists.value!!.add(newList)
                                 } else {
@@ -162,9 +169,6 @@ class ListsFragment : Fragment() {
                                 viewModel.lists.value?.sortBy { list -> list.title }
                                 adapter?.notifyDataSetChanged()
                                 adapter?.notifyDataSetInvalidated()
-
-                            } else {
-                                Log.d("bgnw", "newlist IS null")
 
                             }
                         }
@@ -188,7 +192,7 @@ class ListsFragment : Fragment() {
                     }
                 }
                 .setNegativeButton("Cancel") { _, _ ->
-                    Toast.makeText(context, "CANCEL", Toast.LENGTH_SHORT).show()
+                    editText.text.clear()
                 }
                 .create()
 
@@ -196,51 +200,59 @@ class ListsFragment : Fragment() {
         }
 
 
+        val dailyDigestButton: FloatingActionButton? = context.findViewById(R.id.fab_daily_digest)
 
+        dailyDigestButton?.setOnClickListener {
+            if (digestShown) {
+                lv.visibility = View.VISIBLE
+                lvDigest.visibility = View.GONE
+                addListButton?.visibility = View.VISIBLE
+                dailyDigestButton.setImageResource(R.drawable.baseline_today_24)
+                digestShown = false
+            }
+            else {
+                val dueItems: MutableList<Pair<String, TaskItem>> = mutableListOf()
+                val lists = viewModel.lists.value
+                if (lists.isNullOrEmpty()) { digestNoItemsToast?.show(); return@setOnClickListener; }
+                for (list in lists) {
+                    if (list.items == null) { continue }
+                    for (item in list.items!!) {
+                        if (
+                            (!item.due_at.isNullOrBlank())
+                            &&
+                            (LocalDateTime.parse(item.due_at, dtZulu)
+                                .isBefore(LocalDateTime.now().with(LocalTime.MAX)))
+                        ) {
+                            dueItems.add(Pair(list.title, item))
+                        }
+                    }
+//                    val thisListDueItems = list.items?.filter { item ->
+//                        (!item.due_at.isNullOrBlank())
+//                        &&
+//                        (LocalDateTime.parse(item.due_at, dtZulu) < LocalDateTime.now()
+//                            .with(LocalTime.MAX))
+//                    }
+//                    thisListDueItems?.forEach { item ->
+//                        dueItems.add(Pair(list.title, item))
+//                    }
+                }
 
+                if (dueItems.isEmpty()) { digestNoItemsToast?.show(); return@setOnClickListener; }
 
-//        context.findViewById<Button>(R.id.changefalse).setOnClickListener {
-//            viewModel.changeNeeded.value = false
-//        }
-//        context.findViewById<Button>(R.id.changetrue).setOnClickListener {
-//            viewModel.changeNeeded.value = true
-//        }
-
-    }
-
-
-    override fun onResume() {
-        super.onResume()
-
-        Log.d("bgnw_updates", "onresume")
-
-//        // NOTE: this gets called very frequently
-//        if (viewModel.lastUpdate.value == null
-//            ||
-//            (
-//                viewModel.lastUpdate.value != null
-//                        && viewModel.lastUpdate.value!!.isBefore((Instant.now()).minusSeconds(60))
-//                )
-//        ) {
-//            viewModel.changesMade.value = false
-//            viewModel.lastUpdate.postValue(Instant.now())
-//            Log.d("bgnw_updates", "updating")
-//
-//
-//            AccountDeviceTools.retrieveUsername(requireContext())?.let {
-//                (requireActivity() as MainActivity).updateTLs(it)
-//            }
-//
-//
-//        }
-
-
-
+                adapterDigest = TaskItemMultiListAdapter(context, dueItems)
+                lvDigest.adapter = adapterDigest
+                adapterDigest?.notifyDataSetChanged()
+                lv.visibility = View.GONE
+                lvDigest.visibility = View.VISIBLE
+                addListButton?.visibility = View.GONE
+                dailyDigestButton.setImageResource(R.drawable.baseline_close_24)
+                digestShown = true
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-//        viewModel.changeNeeded.removeObservers(viewLifecycleOwner)
         viewModel.lists.removeObservers(viewLifecycleOwner)
     }
 

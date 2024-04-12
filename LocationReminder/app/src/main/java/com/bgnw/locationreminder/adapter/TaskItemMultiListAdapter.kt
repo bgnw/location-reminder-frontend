@@ -23,11 +23,10 @@ import kotlinx.coroutines.async
 import java.lang.Thread.sleep
 
 
-class TaskItemListAdapter(
+class TaskItemMultiListAdapter(
     private val context: Activity,
-    private val taskItems: List<TaskItem>,
-    private val listener: OnInfoClickListener
-) : ArrayAdapter<TaskItem>(context, R.layout.list_task_item, taskItems) {
+    private val taskItems: MutableList<Pair<String, TaskItem>>,
+) : ArrayAdapter<Pair<String, TaskItem>>(context, R.layout.list_task_item, taskItems) {
 
     private val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
     private val locationTagPattern = Regex("""([^=]+)="([^"]+)"""")
@@ -44,12 +43,12 @@ class TaskItemListAdapter(
 
         val item = taskItems[position]
 
-        liTitle.text = item.title
+        liTitle.text = item.second.title
 
 
-        if (item.remind_method == "LOCATION_CATEGORY") {
-            if (item.applicable_filters!!.size >= 1) {
-                val first2Places = item.applicable_filters!!.take(2)
+        if (item.second.remind_method == "LOCATION_CATEGORY") {
+            if (item.second.applicable_filters!!.size >= 1) {
+                val first2Places = item.second.applicable_filters!!.take(2)
                 val filtervalues = mutableListOf<String>()
                 val humanPlaceNames = mutableSetOf<String>()
                 first2Places.forEach { entry ->
@@ -63,7 +62,7 @@ class TaskItemListAdapter(
                     filtervalues.add(regexMatch)
                     humanPlaceNames.add(place)
                 }
-                val remainingPlacesCount = item.applicable_filters!!.size - first2Places.size
+                val remainingPlacesCount = item.second.applicable_filters!!.size - first2Places.size
 //                var finalMessage = filtervalues.joinToString(", ")
                 var finalMessage = humanPlaceNames.joinToString(", ")
                 if (remainingPlacesCount > 0) {
@@ -72,15 +71,15 @@ class TaskItemListAdapter(
                 liSubtitle.text = "When near locations: ${finalMessage}"
             }
             else {
-                liSubtitle.text = taskItems[position].body_text
+                liSubtitle.text = ""
             }
         }
-        else if (item.remind_method == "PEER_USER") {
-            liSubtitle.text = "When near user: ${item.user_peer}"
+        else if (item.second.remind_method == "PEER_USER") {
+            liSubtitle.text = "When near user: ${item.second.user_peer}"
         }
-        else if (item.remind_method == "LOCATION_POINT") {
+        else if (item.second.remind_method == "LOCATION_POINT") {
             val nominatimResp = CoroutineScope(Dispatchers.IO).async {
-                queryNominatimApi(item.lati!!, item.longi!!)
+                queryNominatimApi(item.second.lati!!, item.second.longi!!)
             }
             while (!nominatimResp.isCompleted) {
                 sleep(500)
@@ -98,7 +97,7 @@ class TaskItemListAdapter(
 
         }
         else {
-            liSubtitle.text = taskItems[position].body_text
+            liSubtitle.text = ""
         }
 //        liSubtitle.text = "${task.distance}m away${
 //            if (task.due_at != null) ", due " + task.due_at?.format(dtFormatter) else ""
@@ -106,12 +105,11 @@ class TaskItemListAdapter(
 //        liSubtitle.text = "${task.distance}m away, due ${task.getHumanDuration()}"
 
 
+        liSubtitle.text = liSubtitle.text.toString() + "\n(From list: ${item.first})"
+
         val infoBtn: Button = view.findViewById(R.id.item_info_btn)
 
 
-        infoBtn.setOnClickListener {
-            listener.onInfoClick(item)
-        }
 
         return view
     }
