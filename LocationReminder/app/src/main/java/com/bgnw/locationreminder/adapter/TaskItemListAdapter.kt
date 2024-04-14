@@ -55,7 +55,7 @@ class TaskItemListAdapter(
                 if (remainingPlacesCount > 0) {
                     finalMessage += " ($remainingPlacesCount more)..."
                 }
-                liSubtitle.text = "When near locations: ${finalMessage}"
+                liSubtitle.text = "When near locations: $finalMessage"
             } else {
                 liSubtitle.text = taskItems[position].body_text
             }
@@ -68,15 +68,15 @@ class TaskItemListAdapter(
             while (!nominatimResp.isCompleted) {
                 sleep(500)
             }
-            var addressObj = nominatimResp.getCompleted().address
-            var primary = addressObj.neighbourhood ?: addressObj.city
-            var secondary =
+            val addressObj = nominatimResp.getCompleted().address
+            val primary = addressObj.neighbourhood ?: addressObj.city
+            val secondary =
                 if (primary == addressObj.neighbourhood && addressObj.city != null) {
                     addressObj.city
                 } else {
                     addressObj.county ?: addressObj.state ?: addressObj.country
                 }
-            var locality = "${if (primary != null) "$primary, " else ""}${secondary}"
+            val locality = "${if (primary != null) "$primary, " else ""}${secondary}"
             liSubtitle.text = "When near location in $locality"
 
         } else {

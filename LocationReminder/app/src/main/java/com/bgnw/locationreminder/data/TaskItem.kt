@@ -65,7 +65,7 @@ data class TaskItem(
 
             val filterString = buildString {
                 append("[")
-                filters?.forEach { filter -> append("{\"filters\": \"$filter\"},") }
+                filters.forEach { filter -> append("{\"filters\": \"$filter\"},") }
             }
 
             return filterString.dropLast(1) + "]"
@@ -96,7 +96,7 @@ data class TaskItem(
             items: List<TaskItem>,
             filters: List<Map<String, String>>
         ): List<TaskItem> {
-            var matches = mutableListOf<TaskItem>()
+            val matches = mutableListOf<TaskItem>()
 
             for (item in items) {
                 for (filter in filters) {

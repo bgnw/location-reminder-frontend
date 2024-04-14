@@ -109,7 +109,7 @@ class MapFragment : Fragment() {
         mapView.controller.setZoom(19.0)
 
         mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.ALWAYS)
-        mapView.setMultiTouchControls(true);
+        mapView.setMultiTouchControls(true)
 
         val centerButton: Button = requireView().findViewById(R.id.btn_center_map)
 
@@ -281,15 +281,15 @@ class MapFragment : Fragment() {
         while (!nominatimResp.isCompleted) {
             Thread.sleep(500)
         }
-        var addressObj = nominatimResp.getCompleted().address
-        var primary = addressObj.neighbourhood ?: addressObj.city
-        var secondary =
+        val addressObj = nominatimResp.getCompleted().address
+        val primary = addressObj.neighbourhood ?: addressObj.city
+        val secondary =
             if (primary == addressObj.neighbourhood && addressObj.city != null) {
                 addressObj.city
             } else {
                 addressObj.county ?: addressObj.state ?: addressObj.country
             }
-        var locality = "${if (primary != null) "$primary, " else ""}${secondary}"
+        val locality = "${if (primary != null) "$primary, " else ""}${secondary}"
         return locality
     }
 }

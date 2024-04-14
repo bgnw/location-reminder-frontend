@@ -47,7 +47,7 @@ class CollabListAdapter(
             else
                 items[position].user_peer
         liTitle.text = buildSpannedString {
-            bold { append("$otherUser") }
+            bold { append(otherUser) }
         }
 
         action1Button.visibility = View.GONE

@@ -34,7 +34,7 @@ class TaskItemMultiListAdapter(
 
 
         if (item.second.remind_method == "LOCATION_CATEGORY") {
-            if (item.second.applicable_filters!!.size >= 1) {
+            if (item.second.applicable_filters!!.isNotEmpty()) {
                 val first2Places = item.second.applicable_filters!!.take(2)
                 val filtervalues = mutableListOf<String>()
                 val humanPlaceNames = mutableSetOf<String>()
@@ -54,7 +54,7 @@ class TaskItemMultiListAdapter(
                 if (remainingPlacesCount > 0) {
                     finalMessage += " ($remainingPlacesCount more)..."
                 }
-                liSubtitle.text = "When near locations: ${finalMessage}"
+                liSubtitle.text = "When near locations: $finalMessage"
             } else {
                 liSubtitle.text = ""
             }
@@ -67,15 +67,15 @@ class TaskItemMultiListAdapter(
             while (!nominatimResp.isCompleted) {
                 sleep(500)
             }
-            var addressObj = nominatimResp.getCompleted().address
-            var primary = addressObj.neighbourhood ?: addressObj.city
-            var secondary =
+            val addressObj = nominatimResp.getCompleted().address
+            val primary = addressObj.neighbourhood ?: addressObj.city
+            val secondary =
                 if (primary == addressObj.neighbourhood && addressObj.city != null) {
                     addressObj.city
                 } else {
                     addressObj.county ?: addressObj.state ?: addressObj.country
                 }
-            var locality = "${if (primary != null) "$primary, " else ""}${secondary}"
+            val locality = "${if (primary != null) "$primary, " else ""}${secondary}"
             liSubtitle.text = "When near location in $locality"
 
         } else {

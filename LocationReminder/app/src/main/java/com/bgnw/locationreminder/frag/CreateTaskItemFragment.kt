@@ -70,7 +70,7 @@ class CreateTaskItemFragment : Fragment() {
         private val vowels = listOf('a', 'e', 'i', 'o', 'u')
         private val selectedCategories: MutableList<TagValuePair> = mutableListOf()
 
-        fun decideAOrAn(char: Char): String {
+        private fun decideAOrAn(char: Char): String {
             return if (char in vowels) {
                 "an"
             } else {
@@ -130,7 +130,7 @@ class CreateTaskItemFragment : Fragment() {
         private val elements: List<String>
     ) : ArrayAdapter<String>(context, R.layout.list_categories_checkbox, elements) {
 
-        private var selectedUsername: String? = null;
+        private var selectedUsername: String? = null
         private var selectedPosition = -1
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -163,15 +163,6 @@ class CreateTaskItemFragment : Fragment() {
         fun getSelectedUsernames(): String? {
             return selectedUsername
         }
-    }
-
-    class NoInfoWindow(marker: Marker, mapView: MapView) : InfoWindow(0, mapView) {
-        init {
-            mView = null
-        }
-
-        override fun onOpen(item: Any?) {}
-        override fun onClose() {}
     }
 
     private val viewModel: ApplicationState by activityViewModels()
@@ -459,7 +450,7 @@ class CreateTaskItemFragment : Fragment() {
 
         Configuration.getInstance().load(
             context,
-            androidx.preference.PreferenceManager.getDefaultSharedPreferences(context as MainActivity)
+            androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
         )
 
         var selectedMethod: String? = null
@@ -528,7 +519,7 @@ class CreateTaskItemFragment : Fragment() {
         zoomControl.setZoomInEnabled(true)
         zoomControl.setZoomOutEnabled(true)
 
-        mapView.setMultiTouchControls(true);
+        mapView.setMultiTouchControls(true)
 
         val userLocationMarker = Marker(mapView)
         userLocationMarker.icon = userLocationMarkerDrawable
@@ -647,7 +638,7 @@ class CreateTaskItemFragment : Fragment() {
                                 is_sub_task = false,
                                 parent_task = null,
                                 filters = categories
-                            );
+                            )
                         }
                     }
 

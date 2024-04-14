@@ -43,7 +43,7 @@ class CollabReqListAdapter(
         val action2Button: Button = view.findViewById(R.id.ui_action2_btn)
 
         liTitle.text = buildSpannedString {
-            bold { append("${items[position].user_sender}") }
+            bold { append(items[position].user_sender) }
             append(" sent you a friend request ")
         }
         liSubtitle.text = "Requested at ${

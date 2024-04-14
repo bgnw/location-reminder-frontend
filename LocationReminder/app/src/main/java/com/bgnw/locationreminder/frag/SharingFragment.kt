@@ -22,6 +22,7 @@ import com.bgnw.locationreminder.data.CollabReq
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -88,7 +89,7 @@ class SharingFragment : Fragment() {
                     )
 
                     val returnedReq: MutableLiveData<CollabReq> = MutableLiveData()
-                    CoroutineScope(Dispatchers.IO).async {
+                    CoroutineScope(Dispatchers.IO).launch {
                         returnedReq.postValue(Requests.addClRequest(newRequestObj))
                         viewModel.sentRequests.postValue(Requests.getSentRequests(viewModel.loggedInUsername.value!!))
                     }

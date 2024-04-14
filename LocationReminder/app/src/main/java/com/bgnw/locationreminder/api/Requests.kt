@@ -36,13 +36,13 @@ import com.bgnw.locationreminder.data.Log as Log1
 class Requests {
 
     companion object Factory {
-        val initialised = false
-        lateinit var retrofit: Retrofit
-        lateinit var accountApi: AccountApi
-        lateinit var taskListApi: TaskListApi
-        lateinit var taskItemApi: TaskItemApi
-        lateinit var logApi: LogApi
-        lateinit var collabApi: CollabApi
+        private var initialised = false
+        private lateinit var retrofit: Retrofit
+        private lateinit var accountApi: AccountApi
+        private lateinit var taskListApi: TaskListApi
+        private lateinit var taskItemApi: TaskItemApi
+        private lateinit var logApi: LogApi
+        private lateinit var collabApi: CollabApi
 
         fun initialiseApi() {
             if (!initialised) {
@@ -60,6 +60,8 @@ class Requests {
                 taskItemApi = retrofit.create(TaskItemApi::class.java)
                 logApi = retrofit.create(LogApi::class.java)
                 collabApi = retrofit.create(CollabApi::class.java)
+
+                initialised = true
             }
         }
 
@@ -72,7 +74,7 @@ class Requests {
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
 
-                    var call = taskItemApi.updateItem(item_id = itemId, body = itemWithUpdates)
+                    val call = taskItemApi.updateItem(item_id = itemId, body = itemWithUpdates)
 
                     call.enqueue(object : Callback<Void> {
                         override fun onFailure(call: Call<Void>, t: Throwable) {
@@ -102,7 +104,7 @@ class Requests {
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
 
-                    var call = taskItemApi.deleteItem(itemId = itemId, format = "json")
+                    val call = taskItemApi.deleteItem(itemId = itemId, format = "json")
 
                     call.enqueue(object : Callback<Void> {
                         override fun onFailure(call: Call<Void>, t: Throwable) {
@@ -128,7 +130,7 @@ class Requests {
         suspend fun lookupUser(username: String): Account {
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
-                    var call = accountApi.getAccount(username, "json")
+                    val call = accountApi.getAccount(username, "json")
 
                     call.enqueue(object : Callback<Account> {
                         override fun onFailure(call: Call<Account>, t: Throwable) {
@@ -192,7 +194,7 @@ class Requests {
         ): TaskList {
             return suspendCoroutine { continuation ->
 
-                var dateFormatZulu: DateTimeFormatter =
+                val dateFormatZulu: DateTimeFormatter =
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
                 GlobalScope.launch(Dispatchers.IO) {
@@ -205,7 +207,7 @@ class Requests {
                         sort_by = sort_by,
                         visibility = visibility
                     )
-                    var call = taskListApi.createList(obj)
+                    val call = taskListApi.createList(obj)
 
                     call.enqueue(object : Callback<TaskList> {
                         override fun onFailure(call: Call<TaskList>, t: Throwable) {
@@ -265,7 +267,7 @@ class Requests {
                         longi = longi,
                         filters = TaskItem.convertFiltersToMap(filters)
                     )
-                    var call = taskItemApi.createItem(obj)
+                    val call = taskItemApi.createItem(obj)
 
                     call.enqueue(object : Callback<TaskItem> {
                         override fun onFailure(call: Call<TaskItem>, t: Throwable) {
@@ -294,7 +296,7 @@ class Requests {
             return@withContext suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
 
-                    var call = taskItemApi.getListItems(listId, "json")
+                    val call = taskItemApi.getListItems(listId, "json")
 
                     call.enqueue(object : Callback<List<TaskItem>> {
                         override fun onFailure(call: Call<List<TaskItem>>, t: Throwable) {
@@ -426,7 +428,7 @@ class Requests {
                     val df = DecimalFormat("###.#########")
                     df.roundingMode = RoundingMode.HALF_UP
 
-                    var call = logApi.sendLog(
+                    val call = logApi.sendLog(
                         Log1(
                             df.format(lati).toDouble(),
                             df.format(longi).toDouble(),
@@ -457,7 +459,7 @@ class Requests {
         suspend fun updateLocation(account: AccountPartialForLocation) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = accountApi.updateAccountLocation(account.username, account)
+                    val call = accountApi.updateAccountLocation(account.username, account)
 
                     val df = DecimalFormat("###.########")
                     df.roundingMode = RoundingMode.HALF_UP
@@ -490,7 +492,7 @@ class Requests {
         suspend fun addClRequest(clRequest: CollabReq) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = collabApi.addRequest(clRequest)
+                    val call = collabApi.addRequest(clRequest)
                     call.enqueue(object : Callback<CollabReq> {
                         override fun onFailure(call: Call<CollabReq>, t: Throwable) {
                             continuation.resume(null)
@@ -513,7 +515,7 @@ class Requests {
         suspend fun deleteClRequest(requestId: Int) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = collabApi.deleteRequest(requestId)
+                    val call = collabApi.deleteRequest(requestId)
                     call.enqueue(object : Callback<CollabReq> {
                         override fun onFailure(call: Call<CollabReq>, t: Throwable) {
                             continuation.resume(null)
@@ -536,7 +538,7 @@ class Requests {
         suspend fun getSentRequests(usernameSender: String) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = collabApi.getSentRequests(usernameSender)
+                    val call = collabApi.getSentRequests(usernameSender)
                     call.enqueue(object : Callback<List<CollabReq>?> {
                         override fun onFailure(call: Call<List<CollabReq>?>, t: Throwable) {
                             continuation.resume(null)
@@ -559,7 +561,7 @@ class Requests {
         suspend fun getReceivedRequests(usernameRecipient: String) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = collabApi.getReceivedRequests(usernameRecipient)
+                    val call = collabApi.getReceivedRequests(usernameRecipient)
                     call.enqueue(object : Callback<List<CollabReq>?> {
                         override fun onFailure(call: Call<List<CollabReq>?>, t: Throwable) {
                             continuation.resume(null)
@@ -582,7 +584,7 @@ class Requests {
         suspend fun addCollab(clRequest: Collab) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = collabApi.addCollab(clRequest)
+                    val call = collabApi.addCollab(clRequest)
                     call.enqueue(object : Callback<Collab> {
                         override fun onFailure(call: Call<Collab>, t: Throwable) {
                             continuation.resume(null)
@@ -602,7 +604,7 @@ class Requests {
         suspend fun deleteCollab(requestId: Int) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = collabApi.deleteCollab(requestId)
+                    val call = collabApi.deleteCollab(requestId)
                     call.enqueue(object : Callback<Collab> {
                         override fun onFailure(call: Call<Collab>, t: Throwable) {
                             continuation.resume(null)
@@ -622,7 +624,7 @@ class Requests {
         suspend fun getCollabs(usernameSender: String) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = collabApi.getCollabsForUser(usernameSender)
+                    val call = collabApi.getCollabsForUser(usernameSender)
                     call.enqueue(object : Callback<List<Collab>?> {
                         override fun onFailure(call: Call<List<Collab>?>, t: Throwable) {
                             continuation.resume(null)
@@ -645,7 +647,7 @@ class Requests {
         suspend fun rejectCollabReq(collabReq: CollabReq) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = collabApi.deleteRequest(collabReq.request_id!!)
+                    val call = collabApi.deleteRequest(collabReq.request_id!!)
                     call.enqueue(object : Callback<CollabReq> {
                         override fun onFailure(call: Call<CollabReq>, t: Throwable) {
                             continuation.resume(null)
@@ -668,8 +670,8 @@ class Requests {
         suspend fun acceptCollabReq(collabReq: CollabReq) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var deleteCall = collabApi.deleteRequest(collabReq.request_id!!)
-                    var addCall = collabApi.addCollab(
+                    val deleteCall = collabApi.deleteRequest(collabReq.request_id!!)
+                    val addCall = collabApi.addCollab(
                         Collab(
                             collab_id = null,
                             user_master = collabReq.user_sender,
@@ -704,7 +706,7 @@ class Requests {
         suspend fun removeCollab(collab: Collab) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
-                    var call = collabApi.deleteCollab(collab.collab_id!!)
+                    val call = collabApi.deleteCollab(collab.collab_id!!)
                     call.enqueue(object : Callback<Collab> {
                         override fun onFailure(call: Call<Collab>, t: Throwable) {
                             continuation.resume(null)

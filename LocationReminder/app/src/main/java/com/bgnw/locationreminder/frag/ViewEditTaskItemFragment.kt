@@ -343,7 +343,7 @@ class ViewEditTaskItemFragment : Fragment() {
         private val vowels = listOf('a', 'e', 'i', 'o', 'u')
         private val selectedCategories: MutableList<TagValuePair> = mutableListOf()
 
-        fun decideAOrAn(char: Char): String {
+        private fun decideAOrAn(char: Char): String {
             return if (char in vowels) {
                 "an"
             } else {
@@ -709,7 +709,7 @@ class ViewEditTaskItemFragment : Fragment() {
                     null
                 else
                     LocalDateTime.parse(currentSnoozeString, dtZulu)
-            var newDT = LocalDateTime.of(
+            val newDT = LocalDateTime.of(
                 datePicker.year,
                 datePicker.month,
                 datePicker.dayOfMonth,
@@ -751,7 +751,7 @@ class ViewEditTaskItemFragment : Fragment() {
                     null
                 else
                     LocalDateTime.parse(currentSnoozeString, dtZulu)
-            var newDT = LocalDateTime.of(
+            val newDT = LocalDateTime.of(
                 currentDT?.year ?: LocalDateTime.now().year,
                 currentDT?.month ?: LocalDateTime.now().month,
                 currentDT?.dayOfMonth ?: LocalDateTime.now().dayOfMonth,

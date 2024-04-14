@@ -158,10 +158,10 @@ fun tagsStringMapToPairs(tagList: List<Map<String, String>>): MutableList<TagVal
     val tagPairs = mutableListOf<TagValuePair>()
 
     for (tagMap in tagList) {
-        var attr = tagMap["filters"]
+        val attr = tagMap["filters"]
         val matchResult = pattern.find(attr!!)
         if (matchResult != null) {
-            var (osmTag, osmValue: String?) = matchResult!!.destructured
+            val (osmTag, osmValue: String?) = matchResult.destructured
             tagPairs.add(
                 TagValuePair(
                     osmTag,

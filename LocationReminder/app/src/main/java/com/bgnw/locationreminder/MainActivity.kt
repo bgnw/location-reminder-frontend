@@ -25,7 +25,6 @@ import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.api.AccountDeviceTools
 import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDebug
 import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDisplayName
@@ -82,13 +81,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         job.cancel()
     }
 
-    lateinit var toggle: ActionBarDrawerToggle
-    lateinit var drawerLayout: DrawerLayout
+    private lateinit var toggle: ActionBarDrawerToggle
+    private lateinit var drawerLayout: DrawerLayout
 
     private val viewModel: ApplicationState by viewModels()
     private val handler = Handler(Looper.getMainLooper())
 
-    val fetchCollabsEtcTask = object : Runnable {
+    private val fetchCollabsEtcTask = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (viewModel.loggedInUsername.value == null) {
@@ -151,7 +150,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     // function is run once activity created (i.e. app is loaded in fg)
-    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         // call default onCreate function
         super.onCreate(savedInstanceState)
@@ -199,7 +197,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         toggle.syncState()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // intialise account information in nav drawer
+        // initialise account information in nav drawer
         val navUsername: TextView = navView.getHeaderView(0).findViewById(R.id.nav_user_username)
         val navDisplayName: TextView =
             navView.getHeaderView(0).findViewById(R.id.nav_user_display_name)
@@ -221,7 +219,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
         // When user logs in, update the display name shown
-        viewModel.loggedInDisplayName.observe(this, Observer { displayName ->
+        viewModel.loggedInDisplayName.observe(this) { displayName ->
             runOnUiThread {
                 if (displayName == null) {
                     navDisplayName.text = "Visit the Account tab to log-in"
@@ -229,7 +227,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     navDisplayName.text = displayName
                 }
             }
-        })
+        }
 
         (this as? AppCompatActivity)?.supportActionBar?.show()
 
@@ -362,13 +360,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             true
         }
 
-        viewModel.lists.observe(this, Observer {
+        viewModel.lists.observe(this) {
             if (currentFragId == R.id.lists) {
                 reloadListsFragment()
             } else if (currentFragId == R.id.nearby) {
                 reloadNearbyFragment()
             }
-        })
+        }
 
         // Check and (if needed) request permission from the user to send notifications
         requestNotifPermission()
@@ -381,8 +379,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
         val locationData = LocationLiveData(this)
-        var lastUpdateHadContent: MutableLiveData<Boolean> = MutableLiveData(false)
-        var lastUpdateMsg: MutableLiveData<String> = MutableLiveData()
+        val lastUpdateHadContent: MutableLiveData<Boolean> = MutableLiveData(false)
+        val lastUpdateMsg: MutableLiveData<String> = MutableLiveData()
 
         viewModel.loggedInUsername.observe(this) {
             lastUpdateHadContent.postValue(false)
@@ -432,7 +430,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         }
                     }
 
-                    val locCatReminders = checkForLocationReminders(debug = false)
+                    val locCatReminders = checkForLocationReminders()
                     val locUserReminders =
                         checkForUserReminders(lat = loc.latitude, lon = loc.longitude)
                     val locPointReminders =
@@ -586,10 +584,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             Log.d("bgnw_LOCATION_PERMS", "permission already granted")
-        } else if (SDK_INT >= Build.VERSION_CODES.M) {
+        } else
             // Directly ask for the permission
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
     }
 
 
@@ -612,9 +609,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
         try {
-            val response = queryOverpassApi(overpassQuery)
 
-            return response
+            return queryOverpassApi(overpassQuery)
         } catch (e: Exception) {
             Log.d("bgnw_overpass", "Error in main: ${e.message}")
             return null
@@ -626,8 +622,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val collabs = Requests.getCollabs(viewModel.loggedInUsername.value!!)
-                var allPeers = mutableMapOf<String, GeoPoint>()
-                var nearbyPeers = mutableMapOf<String, GeoPoint>()
+                val allPeers = mutableMapOf<String, GeoPoint>()
+                val nearbyPeers = mutableMapOf<String, GeoPoint>()
 
                 for (collab in collabs!!) {
                     val otherUsername =
@@ -667,9 +663,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private suspend fun checkForUserReminders(lat: Double, lon: Double): MutableList<TaskItem> {
         val lists = viewModel.lists.value
-        var userLocations = mutableMapOf<String, GeoPoint>()
-        var relevantItems = mutableListOf<TaskItem>()
-        var itemsToRemind = mutableListOf<TaskItem>()
+        val userLocations = mutableMapOf<String, GeoPoint>()
+        val relevantItems = mutableListOf<TaskItem>()
+        val itemsToRemind = mutableListOf<TaskItem>()
         lists?.forEach { list ->
             list.items?.forEach { item ->
                 if (item.remind_method == "PEER_USER" && item.user_peer != null) {
@@ -706,8 +702,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private fun checkForLocationPointReminders(lat: Double, lon: Double): MutableList<TaskItem>? {
         val lists = viewModel.lists.value
-        var nearbyItems = mutableListOf<TaskItem>()
-        var locationPointItems = mutableListOf<TaskItem>()
+        val nearbyItems = mutableListOf<TaskItem>()
+        val locationPointItems = mutableListOf<TaskItem>()
 
         if (viewModel.lists.value.isNullOrEmpty()) {
             return null
@@ -737,10 +733,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("MissingPermission")
-    private suspend fun checkForLocationReminders(debug: Boolean = false): MutableList<TaskItem>? {
+    private suspend fun checkForLocationReminders(): MutableList<TaskItem>? {
         var resultsDeferred: Deferred<Pair<OverpassResp?, Pair<Double, Double>>>? = null
         var userLoc: LocationModel? = null
-        var matchingTasks = mutableSetOf<TaskItem>()
+        val matchingTasks = mutableSetOf<TaskItem>()
 
         fun remindersPt3(res: OverpassResp) {
             val lists = viewModel.lists.value
@@ -751,7 +747,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             lists.forEach { list -> items.addAll(list.items ?: listOf()) }
 
             var message = ""
-            var places = mutableSetOf<String>()
+            val places = mutableSetOf<String>()
 
             for (element in res.elements) {
                 val coords: GeoPoint = getCoordinatesForElement(element)
