@@ -49,8 +49,6 @@ class AccountDeviceTools {
             return getSharedPreferences(context).getInt("remind_radius", 50)
         }
 
-
-
         fun eraseData(context: Context): Boolean {
             val sharedPrefsEditor = getSharedPreferences(context).edit()
             sharedPrefsEditor.remove("username")
