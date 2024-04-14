@@ -583,7 +583,6 @@ class ViewEditTaskItemFragment : Fragment() {
                     loadingBg.visibility = View.GONE
                     loadingPopup.visibility = View.GONE
                     if (!success) {
-                        // todo: revert value shown
                         Toast.makeText(
                             context,
                             "Update could not be made at this time",

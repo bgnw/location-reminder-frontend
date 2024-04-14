@@ -72,23 +72,23 @@ class AccountFragment : Fragment() {
             wrapperLogin?.visibility = View.VISIBLE
         }
 
-        viewModel.loggedInUsername.observe(viewLifecycleOwner, { username ->
+        viewModel.loggedInUsername.observe(viewLifecycleOwner) { username ->
             if (username != null) {
                 AccountDeviceTools.saveUsername(
                     context = requireContext(),
                     username = username,
                 )
             }
-        })
+        }
 
-        viewModel.loggedInDisplayName.observe(viewLifecycleOwner, { displayName ->
+        viewModel.loggedInDisplayName.observe(viewLifecycleOwner) { displayName ->
             if (displayName != null) {
                 AccountDeviceTools.saveDisplayName(
                     context = requireContext(),
                     displayName = displayName,
                 )
             }
-        })
+        }
 
         fun clearLoginResult() {
             loginResultText?.text = ""
