@@ -23,14 +23,6 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="26">
         <activity
-            android:name=".activity.CreateTaskItemActivity"
-            android:exported="false"
-            android:label="@string/title_activity_create_task_item"
-            android:theme="@style/Theme.LocationReminder" />
-        <activity
-            android:name=".activity.ViewEditTaskItemActivity"
-            android:exported="false" />
-        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
