@@ -1,4 +1,4 @@
-package com.bgnw.locationreminder
+/*package com.bgnw.locationreminder
 
 import AccountApi
 import TaskListApi
@@ -37,9 +37,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.Thread.sleep
 import kotlin.coroutines.CoroutineContext
 
-
 class DeveloperOptions : Fragment(), CoroutineScope {
-
 
     // coroutine boilerplate from https://stackoverflow.com/questions/53928668/
     private var job: Job = Job()
@@ -52,17 +50,15 @@ class DeveloperOptions : Fragment(), CoroutineScope {
         job.cancel()
     }
 
-
     private var notifButton: Button? = null
     private var reqButton: Button? = null
 
-    private var reqQueue: RequestQueue? = null //gson
+    private var reqQueue: RequestQueue? = null
     private var tvOutput: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_developer_options, container, false)
     }
 
@@ -70,7 +66,6 @@ class DeveloperOptions : Fragment(), CoroutineScope {
         super.onViewCreated(view, savedInstanceState)
 
         tvOutput = getView()?.findViewById(R.id.text_DEV_output)
-
 
         notifButton = getView()?.findViewById(R.id.button_DEV_test_notif)
         notifButton?.setOnClickListener {
@@ -289,3 +284,4 @@ class DeveloperOptions : Fragment(), CoroutineScope {
 
 
 }
+*/

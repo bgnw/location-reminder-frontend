@@ -48,11 +48,8 @@ data class Tags(
     val place_of_worship: String? = "",
     val restaurant: String? = "",
     val beauty: String? = ""
-
-
 ) {
     override fun toString(): String {
-
         // show only the tags that are non null
         val sb = StringBuilder("Tags(")
 
@@ -83,7 +80,6 @@ data class Tags(
 
         return sb.toString()
     }
-
 }
 
 @Serializable
@@ -93,9 +89,7 @@ data class OverpassResp(val elements: List<OverpassElement>) {
     }
 }
 
-
 suspend fun queryOverpassApi(query: String): OverpassResp {
-
     val client = HttpClient {
         install(ContentNegotiation) {
             json(Json {
@@ -122,7 +116,6 @@ fun getCoordinatesForElement(element: OverpassElement): GeoPoint {
     }
 }
 
-
 fun tagsClassToPairs(tags: Tags?): MutableList<TagValuePair>? {
     if (tags == null) { return null }
     val tagPairs = mutableListOf<TagValuePair>()
@@ -148,30 +141,8 @@ fun tagsClassToPairs(tags: Tags?): MutableList<TagValuePair>? {
 }
 
 fun tagsStringMapToPairs(tagList: List<Map<String, String>>): MutableList<TagValuePair>? {
-
     val pattern = """([a-zA-Z_]+)=\"([a-zA-Z_]*)\"""".toRegex()
-
-
     val tagPairs = mutableListOf<TagValuePair>()
-
-    val tagsOfInterest = listOf(
-        "amenity",
-        "shop",
-        "leisure",
-        "education",
-        "tourism",
-        "public_transport",
-        "building",
-        "sport",
-        "product",
-        "vending",
-        "cuisine",
-        "landuse",
-        "healthcare",
-        "place_of_worship",
-        "restaurant",
-        "beauty"
-    )
 
     for (tagMap in tagList) {
         var attr = tagMap["filters"]
@@ -185,7 +156,6 @@ fun tagsStringMapToPairs(tagList: List<Map<String, String>>): MutableList<TagVal
                 )
             )
         }
-}
-
+    }
     return tagPairs
 }

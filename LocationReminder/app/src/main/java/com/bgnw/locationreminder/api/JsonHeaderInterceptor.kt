@@ -7,7 +7,6 @@ class JsonHeaderInterceptor : Interceptor { // https://stackoverflow.com/questio
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request().newBuilder()
             .addHeader("Accept", "application/json")
-//            .addHeader("Connection", "close")
             .build()
         return chain.proceed(request)
     }

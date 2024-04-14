@@ -26,7 +26,8 @@ data class TaskItem(
     var parent_task: Int?,
     var opportunities: MutableList<ItemOpportunity>? = mutableListOf(),
     var filters: List<Map<String, String>>?,
-    // @Transient // https://stackoverflow.com/questions/49791539
+
+    // @Expose usage: https://stackoverflow.com/questions/49791539
     @Expose(serialize = false, deserialize = true)
     var applicable_filters: List<Map<String, String>>? = null
 ) : Parcelable {
@@ -40,7 +41,6 @@ data class TaskItem(
     }
 
     override fun toString(): String {
-
         return """
             {
                 "item_id": $item_id,
@@ -60,58 +60,6 @@ data class TaskItem(
         """.trimIndent()
     }
 
-
-
-
-
-//    "filters": ${if (filters == null) "null" else "$filters"},
-
-
-
-    /*
-    fun getHumanDuration(): String {
-        val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
-        val dueInFuture: Boolean
-        lateinit var durationUntilDue: String
-
-        val units = arrayOf(
-            ChronoUnit.YEARS,
-            ChronoUnit.MONTHS,
-            ChronoUnit.WEEKS,
-            ChronoUnit.DAYS,
-            ChronoUnit.HOURS,
-            ChronoUnit.MINUTES,
-        )
-
-        val secToDue = LocalDateTime.now().until(this.due_at, ChronoUnit.SECONDS)
-        if (secToDue > 59) { // if more than 59 sec in future
-            dueInFuture = true
-        } else if (secToDue < -59) { // if more than 59 sec in past
-            dueInFuture = false
-        } else {
-            return "now"
-        }
-
-        for (unit: ChronoUnit in units) {
-            val thisUnitDuration =
-                if (dueInFuture)
-                    LocalDateTime.now().until(this.due_at, unit)
-                else
-                    this.due_at.until(LocalDateTime.now(), unit)
-            if (thisUnitDuration > 0) {
-                durationUntilDue = thisUnitDuration.toString() + " ${unit.toString().lowercase()}"
-                break
-            }
-        }
-
-
-
-        return if (dueInFuture)
-            "in $durationUntilDue"
-        else
-            "$durationUntilDue ago"
-    }
-     */
     companion object {
         fun convertFiltersToString(filters: Collection<String>): String {
             if (filters.isEmpty()) { return "[]" }
@@ -123,7 +71,6 @@ data class TaskItem(
 
             return filterString.dropLast(1) + "]"
         }
-
 
         fun convertFiltersToMap(filters: Collection<TagValuePair>?): List<Map<String, String>> {
             if (filters.isNullOrEmpty()) { return listOf() }

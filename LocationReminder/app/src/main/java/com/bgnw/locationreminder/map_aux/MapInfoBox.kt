@@ -11,7 +11,6 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow
 class MapInfoBox(mapView: MapView) :
     InfoWindow(R.layout.bonuspack_bubble, mapView) {
 
-
     override fun onClose() {
         mView.visibility = View.GONE
     }

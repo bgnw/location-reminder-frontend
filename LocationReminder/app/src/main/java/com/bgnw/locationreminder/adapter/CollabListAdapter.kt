@@ -37,9 +37,6 @@ class CollabListAdapter(
     private val items: MutableList<Collab>
 ) : ArrayAdapter<Collab>(context, R.layout.user_item, items) {
 
-    private val dtHuman: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
-    private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
-
     fun addItem(collab: Collab) {
         items.add(collab)
         this.notifyDataSetChanged()
@@ -52,7 +49,6 @@ class CollabListAdapter(
         val view: View = inflater.inflate(R.layout.user_item, null)
 
         val liTitle: TextView = view.findViewById(R.id.ui_title)
-        val liSubtitle: TextView = view.findViewById(R.id.ui_subtitle)
         val action1Button: Button = view.findViewById(R.id.ui_action1_btn)
         val action2Button: Button = view.findViewById(R.id.ui_action2_btn)
 
@@ -78,27 +74,13 @@ class CollabListAdapter(
                 returnedCollab.postValue(Requests.deleteCollab(selectedItem.collab_id!!))
             }
             returnedCollab.observe(parent.context as LifecycleOwner) { data ->
-//                val x = items.remove(selectedItem)
                 val x = items.removeIf { item ->
                     item.user_master == selectedItem.user_master
                             && item.user_peer == selectedItem.user_peer
                 }
                 this.notifyDataSetChanged()
                 this.notifyDataSetInvalidated()
-                x;
             }
-
-//            selectedItem = items[position]
-//            CoroutineScope(Dispatchers.IO).launch {
-//                returnedCollab.postValue(Requests.deleteCollab(selectedItem.collab_id!!))
-//            }
-//            returnedCollab.observe(parent.context as LifecycleOwner) { data ->
-//                val x = items.remove(selectedItem)
-//
-//                this.notifyDataSetChanged()
-//                this.notifyDataSetInvalidated()
-//                x;
-//            }
         }
 
         return view

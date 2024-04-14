@@ -6,7 +6,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class ItemOpportunity(
     val opp_id: Int,
-//    val item_id: Int,
     val matchingItems: List<TaskItem>?,
     val suppressed: Boolean,
     val place_name: String?,

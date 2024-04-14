@@ -28,13 +28,6 @@ data class TaskList(
     )
 
     override fun toString(): String {
-
-        var dateFormatZulu: DateTimeFormatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-        val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-
-//        "created_at": "${dateFormatZulu.parse(created_at)}",
-
         return """
             {
                 "list_id": $list_id,

@@ -29,15 +29,11 @@ class TaskItemListAdapter(
     private val listener: OnInfoClickListener
 ) : ArrayAdapter<TaskItem>(context, R.layout.list_task_item, taskItems) {
 
-    private val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
     private val locationTagPattern = Regex("""([^=]+)="([^"]+)"""")
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-
-        Log.d("bgnw_TILA", "running getView")
         val inflater: LayoutInflater = LayoutInflater.from(context)
         val view: View = inflater.inflate(R.layout.list_task_item, null)
-
 
         val liTitle: TextView = view.findViewById(R.id.li_title)
         val liSubtitle: TextView = view.findViewById(R.id.li_subtitle)
@@ -46,9 +42,8 @@ class TaskItemListAdapter(
 
         liTitle.text = item.title
 
-
         if (item.remind_method == "LOCATION_CATEGORY") {
-            if (item.applicable_filters!!.size >= 1) {
+            if (item.applicable_filters!!.isNotEmpty()) {
                 val first2Places = item.applicable_filters!!.take(2)
                 val filtervalues = mutableListOf<String>()
                 val humanPlaceNames = mutableSetOf<String>()
@@ -64,7 +59,6 @@ class TaskItemListAdapter(
                     humanPlaceNames.add(place)
                 }
                 val remainingPlacesCount = item.applicable_filters!!.size - first2Places.size
-//                var finalMessage = filtervalues.joinToString(", ")
                 var finalMessage = humanPlaceNames.joinToString(", ")
                 if (remainingPlacesCount > 0) {
                     finalMessage += " ($remainingPlacesCount more)..."
@@ -100,14 +94,8 @@ class TaskItemListAdapter(
         else {
             liSubtitle.text = taskItems[position].body_text
         }
-//        liSubtitle.text = "${task.distance}m away${
-//            if (task.due_at != null) ", due " + task.due_at?.format(dtFormatter) else ""
-//        }"
-//        liSubtitle.text = "${task.distance}m away, due ${task.getHumanDuration()}"
-
 
         val infoBtn: Button = view.findViewById(R.id.item_info_btn)
-
 
         infoBtn.setOnClickListener {
             listener.onInfoClick(item)

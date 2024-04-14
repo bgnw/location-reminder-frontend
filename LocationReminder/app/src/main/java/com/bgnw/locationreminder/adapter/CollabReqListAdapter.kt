@@ -41,12 +41,6 @@ class CollabReqListAdapter(
     private val dtHuman: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
     private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
 
-    fun addItem(request: CollabReq) {
-        items.add(request)
-        this.notifyDataSetChanged()
-        this.notifyDataSetInvalidated()
-    }
-
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
 
         val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -62,12 +56,9 @@ class CollabReqListAdapter(
         liTitle.text = buildSpannedString {
             bold{ append("${items[position].user_sender}") }
             append(" sent you a friend request ")
-//            bold{ append("${items[position].user_recipient}") }
         }
         liSubtitle.text = "Requested at ${LocalDateTime.parse(items[position].datetime_sent, dtZulu).format(dtHuman)}"
 
-//        action1Button.text = "Accept"
-//        action2Button.text = "Decline"
         var selectedItem: CollabReq
 
         action1Button.setOnClickListener {
@@ -80,12 +71,10 @@ class CollabReqListAdapter(
                 items.remove(selectedItem)
                 this.notifyDataSetChanged()
                 this.notifyDataSetInvalidated()
-//                (collabsLv.adapter as CollabListAdapter).addItem(data)
             }
 
             selectedItem = items[position]
             CoroutineScope(Dispatchers.IO).launch {
-//                returnedCollab.postValue(Requests.acceptCollabReq(selectedItem))
             }
             returnedCollab.observe(parent.context as LifecycleOwner) {data ->
                 items.remove(selectedItem)
@@ -94,6 +83,7 @@ class CollabReqListAdapter(
                 (collabsLv.adapter as CollabListAdapter).addItem(data)
             }
         }
+
         action2Button.setOnClickListener {
             selectedItem = items[position]
             val result: MutableLiveData<CollabReq?> = MutableLiveData()
@@ -115,11 +105,8 @@ class CollabReqListAdapter(
                 this.notifyDataSetChanged()
                 this.notifyDataSetInvalidated()
             }
-
         }
-
 
         return view
     }
-
 }

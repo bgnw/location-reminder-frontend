@@ -110,7 +110,6 @@ class ListsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_lists, container, false)
     }
 
@@ -136,12 +135,13 @@ class ListsFragment : Fragment() {
         }
 
         val addListButton: FloatingActionButton? = context.findViewById(R.id.fab_add_list)
-        addListButton?.setOnClickListener { _ -> // https://www.digitalocean.com/community/tutorials/android-alert-dialog-using-kotlin
+        addListButton?.setOnClickListener { _ ->
 
             val editText = EditText(context)
             editText.isSingleLine = true
             editText.hint = "Provide a list name"
 
+            // https://www.digitalocean.com/community/tutorials/android-alert-dialog-using-kotlin
             val dialog = AlertDialog.Builder(context)
                 .setTitle("Create new list")
                 .setView(editText)
@@ -169,7 +169,6 @@ class ListsFragment : Fragment() {
                                 viewModel.lists.value?.sortBy { list -> list.title }
                                 adapter?.notifyDataSetChanged()
                                 adapter?.notifyDataSetInvalidated()
-
                             }
                         }
 
@@ -182,10 +181,6 @@ class ListsFragment : Fragment() {
 
                         CoroutineScope(Dispatchers.IO).launch {
                             val listResult = reqResult.await()
-
-                            // Process the result
-                            Log.d("bgnw", "Async operation result: $listResult")
-
                             newList.postValue(listResult)
                             reqIsDone.postValue(true)
                         }
@@ -208,6 +203,7 @@ class ListsFragment : Fragment() {
                 lvDigest.visibility = View.GONE
                 addListButton?.visibility = View.VISIBLE
                 dailyDigestButton.setImageResource(R.drawable.baseline_today_24)
+                activity?.title = "Lists"
                 digestShown = false
             }
             else {
@@ -220,21 +216,14 @@ class ListsFragment : Fragment() {
                         if (
                             (!item.due_at.isNullOrBlank())
                             &&
+                            (!item.completed)
+                            &&
                             (LocalDateTime.parse(item.due_at, dtZulu)
                                 .isBefore(LocalDateTime.now().with(LocalTime.MAX)))
                         ) {
                             dueItems.add(Pair(list.title, item))
                         }
                     }
-//                    val thisListDueItems = list.items?.filter { item ->
-//                        (!item.due_at.isNullOrBlank())
-//                        &&
-//                        (LocalDateTime.parse(item.due_at, dtZulu) < LocalDateTime.now()
-//                            .with(LocalTime.MAX))
-//                    }
-//                    thisListDueItems?.forEach { item ->
-//                        dueItems.add(Pair(list.title, item))
-//                    }
                 }
 
                 if (dueItems.isEmpty()) { digestNoItemsToast?.show(); return@setOnClickListener; }
@@ -246,6 +235,7 @@ class ListsFragment : Fragment() {
                 lvDigest.visibility = View.VISIBLE
                 addListButton?.visibility = View.GONE
                 dailyDigestButton.setImageResource(R.drawable.baseline_close_24)
+                activity?.title = "Daily Digest"
                 digestShown = true
             }
         }

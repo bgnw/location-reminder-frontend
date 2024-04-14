@@ -60,12 +60,10 @@ class ViewEditTaskItemFragment : Fragment() {
 
     private var listId: Int? = null
     private var itemObj: TaskItem? = null
-    private lateinit var username: String
+    private var username: String? = null
 
     private val dtHuman: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
     private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-
-    private val handler = Handler(Looper.getMainLooper())
 
     private val tags = listOf(
         mapOf("tag" to "amenity", "values" to listOf("parking", "parking_space", "bench", "place_of_worship", "restaurant", "school", "waste_basket", "bicycle_parking", "fast_food", "cafe", "fuel", "shelter", "recycling", "toilets", "bank", "pharmacy", "post_box", "kindergarten", "drinking_water")),
@@ -109,18 +107,13 @@ class ViewEditTaskItemFragment : Fragment() {
         )
         adapter.notifyDataSetChanged()
 
-
-        Log.d("bgnw", "RDS after local search: $resultsDataset")
-
-
         if (resultsDataset.size < 3) {
 
-            var res: TagInfoResponse? = null
+            var res: TagInfoResponse?
 
-            val resTask = GlobalScope.async {
+            val resTask = CoroutineScope(Dispatchers.IO).async {
                 procGetSuggestionsFromKeyword(term)
             }
-
 
             lifecycleScope.launch {
                 try {
@@ -146,13 +139,9 @@ class ViewEditTaskItemFragment : Fragment() {
                 }
 
                 adapter.notifyDataSetChanged()
-
-                Log.d("bgnw", "RDS after API pull: $resultsDataset")
             }
         }
     }
-
-
 
     class CategoryAdapter(
         private val context: Activity,
@@ -208,9 +197,6 @@ class ViewEditTaskItemFragment : Fragment() {
 
             return view
         }
-
-        fun getSelectedCategories(): MutableList<TagValuePair> { return selectedCategories }
-
     }
 
     private val tagsOfInterest = listOf(
@@ -232,8 +218,6 @@ class ViewEditTaskItemFragment : Fragment() {
         "beauty"
     )
 
-
-
     private fun hideKeyboard() {
         if (view != null) {
             val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -245,14 +229,13 @@ class ViewEditTaskItemFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         val rootView = inflater.inflate(R.layout.fragment_view_edit_task_item, container, false)
         val context = context as MainActivity
 
 
         listId = arguments?.getInt("LIST_ID")
         itemObj = arguments?.getParcelable("ITEM") as TaskItem?
-        username = viewModel.loggedInUsername.value!!
+        username = viewModel.loggedInUsername.value
 
         if (listId == null || itemObj == null || username == null) {
             throw Exception("None of (listId, itemObj, username) can be null.")
@@ -276,18 +259,15 @@ class ViewEditTaskItemFragment : Fragment() {
         val editDueTime = rootView.findViewById<Button>(R.id.vti_due_edit_time)
         val toggleCompleteBtn = rootView.findViewById<Button>(R.id.vti_toggle_completion_btn)
         val deleteItemBtn = rootView.findViewById<Button>(R.id.vti_delete_task_btn)
-        // TODO:       val editRemindTypeBtn = rootView.findViewById<Button>(R.id.vti)
 
         val pickTimeDoneBtn = rootView.findViewById<Button>(R.id.vti_pick_time_done_btn)
         val pickDateDoneBtn = rootView.findViewById<Button>(R.id.vti_pick_date_done_btn)
-
 
         val loadingBg = rootView.findViewById<LinearLayout>(R.id.loading_bg)
         val loadingPopup = rootView.findViewById<LinearLayout>(R.id.loading_popup)
 
         val pickTimePopup = rootView.findViewById<LinearLayout>(R.id.timepicker_popup)
         val pickDatePopup = rootView.findViewById<LinearLayout>(R.id.datepicker_popup)
-
 
         fun updateTitleBox() {
             titleBox.text = Editable.Factory.getInstance().newEditable(itemObj!!.title)
@@ -303,7 +283,7 @@ class ViewEditTaskItemFragment : Fragment() {
                     LocalDateTime.parse(itemObj!!.snooze_until!!, dtZulu).format(dtHuman)
         }
         fun updateDueMsg() {
-            snoozeMsg.text =
+            dueMsg.text =
                 if (itemObj!!.due_at == null)
                     "No due date"
                 else
@@ -335,9 +315,6 @@ class ViewEditTaskItemFragment : Fragment() {
             }
         }
 
-
-
-
         // setup of category search/selection flow
         val catListView: ListView? = rootView.findViewById(R.id.vti_list_categories)
 
@@ -355,20 +332,11 @@ class ViewEditTaskItemFragment : Fragment() {
                 return@setOnClickListener
             }
 
-
             results.clear()
             catListAdapter.notifyDataSetChanged()
 
             lookupTagsAndValues(keywordBox.text.toString().trim(), results, catListAdapter)
-
-
         }
-
-
-
-
-
-
 
         val interactElements: List<View> = listOf(
             titleBox as View,
@@ -402,8 +370,6 @@ class ViewEditTaskItemFragment : Fragment() {
             }
         }
 
-
-
         var activeInteraction: View? = null
 
         fun doUpdate(itemId: Int, item: TaskItem) {
@@ -425,7 +391,6 @@ class ViewEditTaskItemFragment : Fragment() {
             }
 
             viewModel.lists.value
-
         }
 
         fun doDelete(itemId: Int, item: TaskItem) {
@@ -456,7 +421,6 @@ class ViewEditTaskItemFragment : Fragment() {
 
         }
 
-
         editTitleBtn.setOnClickListener{
             if (activeInteraction == null) {
                 stateAll(enableButtonsEtc = false)
@@ -483,7 +447,6 @@ class ViewEditTaskItemFragment : Fragment() {
             }
         }
 
-
         editBodyBtn.setOnClickListener{
             if (activeInteraction == null) {
                 stateAll(enableButtonsEtc = false)
@@ -493,10 +456,6 @@ class ViewEditTaskItemFragment : Fragment() {
                 activeInteraction = editBodyBtn
             }
             else if (activeInteraction == editBodyBtn) {
-//                if (username.isNullOrBlank()) {
-//                    return@setOnClickListener
-//                }
-
                 itemObj!!.body_text = bodyBox.text.toString()
 
                 doUpdate(
@@ -511,25 +470,28 @@ class ViewEditTaskItemFragment : Fragment() {
 
         }
 
-
         editSnoozeDate.setOnClickListener {
             loadingBg.visibility = View.VISIBLE
             pickDatePopup.visibility = View.VISIBLE
+            activeInteraction = editSnoozeDate
         }
 
         editSnoozeTime.setOnClickListener {
             loadingBg.visibility = View.VISIBLE
             pickTimePopup.visibility = View.VISIBLE
+            activeInteraction = editSnoozeTime
         }
 
         editDueDate.setOnClickListener {
             loadingBg.visibility = View.VISIBLE
             pickDatePopup.visibility = View.VISIBLE
+            activeInteraction = editDueDate
         }
 
         editDueTime.setOnClickListener {
             loadingBg.visibility = View.VISIBLE
             pickTimePopup.visibility = View.VISIBLE
+            activeInteraction = editDueTime
         }
 
         pickDateDoneBtn.setOnClickListener {
@@ -550,7 +512,7 @@ class ViewEditTaskItemFragment : Fragment() {
                 currentDT?.minute ?: 0
             )
 
-            if (activeInteraction == editSnoozeTime) {
+            if (activeInteraction == editSnoozeDate) {
                 itemObj!!.snooze_until = newDT.format(dtZulu)
                 doUpdate(
                     itemObj!!.item_id!!,
@@ -559,7 +521,7 @@ class ViewEditTaskItemFragment : Fragment() {
                 updateSnoozeMsg()
 
             }
-            if (activeInteraction == editDueTime) {
+            else if (activeInteraction == editDueDate) {
                 itemObj!!.due_at = newDT.format(dtZulu)
                 doUpdate(
                     itemObj!!.item_id!!,
@@ -567,8 +529,7 @@ class ViewEditTaskItemFragment : Fragment() {
                 )
                 updateDueMsg()
             }
-
-
+            activeInteraction = null
         }
 
         pickTimeDoneBtn.setOnClickListener {
@@ -603,7 +564,7 @@ class ViewEditTaskItemFragment : Fragment() {
                 updateSnoozeMsg()
 
             }
-            if (activeInteraction == editDueTime) {
+            else if (activeInteraction == editDueTime) {
                 itemObj!!.due_at = newDT.format(dtZulu)
                 doUpdate(
                     itemObj!!.item_id!!,
@@ -611,16 +572,10 @@ class ViewEditTaskItemFragment : Fragment() {
                 )
                 updateDueMsg()
             }
+            activeInteraction = null
         }
 
-
-
-
-
         toggleCompleteBtn.setOnClickListener {
-            // TODO PATCH query to api and show loading
-            // set true/false
-            // update msg on view
             if (activeInteraction == null) {
 
                 stateAll(enableButtonsEtc = false)
@@ -645,7 +600,6 @@ class ViewEditTaskItemFragment : Fragment() {
                 itemObj!!.item_id!!,
                 itemObj!!
             )
-//            closeThisFragment()
         }
 
         return rootView
@@ -660,14 +614,5 @@ class ViewEditTaskItemFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         (requireActivity() as? AppCompatActivity)?.supportActionBar?.show()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    private fun closeThisFragment() {
-        val fragmentManager: FragmentManager = this.requireActivity().supportFragmentManager
-        fragmentManager.popBackStack()
     }
 }

@@ -154,16 +154,8 @@ class CreateTaskItemFragment : Fragment() {
                 selectedUsername = elements[position]
                 notifyDataSetChanged()
             }
-
-//            checkBox.setOnCheckedChangeListener{_, isChecked ->
-//
-//                if (isChecked) { selectedUsername.add(currentElement) }
-//                else { selectedUsername.remove(currentElement) }
-//            }
-
             return view
         }
-
         fun getSelectedUsernames(): String? { return selectedUsername }
     }
 
@@ -193,7 +185,6 @@ class CreateTaskItemFragment : Fragment() {
         mapOf("tag" to "leisure", "values" to listOf("pitch", "swimming_pool", "park", "garden", "playground", "picnic_table", "sports_centre", "nature_reserve", "track")),
         mapOf("tag" to "education", "values" to listOf("kindergarten", "school", "facultative_school", "centre", "courses", "college", "music", "university", "coaching")),
         mapOf("tag" to "tourism", "values" to listOf("information", "hotel", "artwork", "attraction", "viewpoint", "guest_house", "picnic_site", "camp_site", "museum", "chalet", "camp_pitch", "apartment", "hostel", "motel", "caravan_site")),
-//        mapOf("tag" to "public_transport", "values" to listOf("platform", "stop_position", "stop_area", "station")),
         mapOf("tag" to "sport", "values" to listOf("soccer", "tennis", "basketball", "baseball", "multi", "swimming", "equestrian", "golf", "fitness", "running", "athletics", "table_tennis", "beachvolleyball", "climbing", "volleyball", "boules")),
         mapOf("tag" to "product", "values" to listOf("food", "charcoal", "oil", "bricks", "wine", "fuel", "beer", "gas")),
         mapOf("tag" to "vending", "values" to listOf("parking_tickets", "excrement_bags", "drinks", "public_transport_tickets", "cigarettes", "fuel", "sweets", "newspapers", "food", "coffee", "condoms", "water")),
@@ -225,12 +216,10 @@ class CreateTaskItemFragment : Fragment() {
     )
 
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_create_task_item, container, false)
 
         df.roundingMode = RoundingMode.HALF_UP
@@ -286,7 +275,6 @@ class CreateTaskItemFragment : Fragment() {
                 return@setOnClickListener
             }
 
-
             results.clear()
             catListAdapter.notifyDataSetChanged()
 
@@ -300,8 +288,6 @@ class CreateTaskItemFragment : Fragment() {
         val usernameResults: MutableList<String> = mutableListOf()
         val userListAdapter = UserAdapter(requireActivity(), usernameResults)
         userListView?.adapter = userListAdapter
-
-
 
         val configuration: IConfigurationProvider = Configuration.getInstance()
         val path = requireContext().filesDir
@@ -332,16 +318,10 @@ class CreateTaskItemFragment : Fragment() {
         userLocationMarker.icon = userLocationMarkerDrawable
         userLocationMarker.id = "USER_CURRENT_LOC_MARKER"
 
-
-
-
         val marker = Marker(mapView)
         marker.icon = redMarkerDrawable
         marker.infoWindow = null
         mapView.overlays.add(marker)
-
-
-
 
         val sharedUserLocation = viewModel.userLocation.value
         if (sharedUserLocation != null) {
@@ -358,8 +338,6 @@ class CreateTaskItemFragment : Fragment() {
         } else {
             Toast.makeText(context, "Location services are not available - try again later", Toast.LENGTH_LONG).show()
         }
-
-
 
         class MyMapEventsReceiver : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
@@ -381,8 +359,6 @@ class CreateTaskItemFragment : Fragment() {
         val eventsOverlay: MapEventsOverlay = MapEventsOverlay(mapEventsReceiver)
         mapView.overlays.add(0, eventsOverlay)
 
-
-
         viewModel.userLocation.observe(viewLifecycleOwner) {pair ->
             if (pair != null) {
                 val loc = pair.first
@@ -394,15 +370,6 @@ class CreateTaskItemFragment : Fragment() {
                 }
             }
         }
-
-
-//        val locationPointSelectionDoneBtn = rootView.findViewById<Button>(R.id.cti_location_point_sel_done)
-//        locationPointSelectionDoneBtn.setOnClickListener {
-//            val coord = marker.position
-//
-//        }
-
-
 
         val submitBtn: Button? = rootView.findViewById(R.id.cti_create_task_btn)
         submitBtn?.setOnClickListener{
@@ -439,19 +406,8 @@ class CreateTaskItemFragment : Fragment() {
                     throw Exception("item should not be null once observer gets activated here")
                 }
             }
-//                else {
-//                    Log.d("bgnw", "newlist IS null")
-//
-//                }
-//            }
-
-
-
-
-
 
             val reqResult =
-
                 when (selectedMethod) {
                     "LOCATION_CATEGORY" -> {
                         CoroutineScope(Dispatchers.IO).async {
@@ -516,24 +472,11 @@ class CreateTaskItemFragment : Fragment() {
                     }
                 }
 
-
-
-
             CoroutineScope(Dispatchers.IO).launch {
                 val itemResult = reqResult.await()
-
-                // Process the result
-                Log.d("bgnw", "Async operation result: $itemResult")
-
-//                closeActivityWithResult(itemResult)
                 newItem.postValue(itemResult)
-//                reqIsDone.postValue(true)
             }
         }
-
-
-
-
 
         // set function to run when remind method changes
         val radioGroup: RadioGroup? = rootView.findViewById(R.id.cti_radio_group)
@@ -559,8 +502,6 @@ class CreateTaskItemFragment : Fragment() {
             }
         }
 
-
-
         return rootView
     }
 
@@ -578,13 +519,6 @@ class CreateTaskItemFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         (requireActivity() as? AppCompatActivity)?.supportActionBar?.show()
-
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val x = viewModel.loggedInUsername.value
-        Log.d("bgnw", "from settingsfr ${x.toString()}")
     }
 
     private fun lookupTagsAndValues(
@@ -612,18 +546,11 @@ class CreateTaskItemFragment : Fragment() {
         )
         adapter.notifyDataSetChanged()
 
-
-        Log.d("bgnw", "RDS after local search: $resultsDataset")
-
-
         if (resultsDataset.size < 3) {
-
-            var res: TagInfoResponse? = null
-
+            var res: TagInfoResponse?
             val resTask = GlobalScope.async {
                 procGetSuggestionsFromKeyword(term)
             }
-
 
             lifecycleScope.launch {
                 try {
@@ -649,8 +576,6 @@ class CreateTaskItemFragment : Fragment() {
                 }
 
                 adapter.notifyDataSetChanged()
-
-                Log.d("bgnw", "RDS after API pull: $resultsDataset")
             }
         }
     }
@@ -664,7 +589,6 @@ class CreateTaskItemFragment : Fragment() {
         CoroutineScope(Dispatchers.IO).launch {
             queryResult.postValue(Requests.getCollabs(viewModel.loggedInUsername.value!!))
         }
-
 
         queryResult.observe(viewLifecycleOwner) {data ->
 

@@ -82,7 +82,6 @@ class MapFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_map, container, false)
     }
 
@@ -103,15 +102,6 @@ class MapFragment : Fragment() {
         configuration.osmdroidBasePath = osmdroidBasePath
         configuration.osmdroidTileCache = osmdroidTilePath
 
-
-//        val osmdroidBasePath = File(Environment.getExternalStorageDirectory(), "osmdroid")
-//        val osmdroidTileCache = File(osmdroidBasePath, "tile")
-
-        // Set the storage parameters
-//        Configuration.getInstance().osmdroidBasePath = osmdroidBasePath
-//        Configuration.getInstance().osmdroidTileCache = osmdroidTileCache
-
-
         mapView = requireView().findViewById(R.id.osm_map)
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.mapCenter
@@ -124,34 +114,9 @@ class MapFragment : Fragment() {
         mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.ALWAYS)
         mapView.setMultiTouchControls(true);
 
-
-        val updateMapButton: Button = requireView().findViewById(R.id.btn_update_map)
-        val overrideButton: Button = requireView().findViewById(R.id.btn_override)
         val centerButton: Button = requireView().findViewById(R.id.btn_center_map)
 
-        val addMkrBtn: Button = requireView().findViewById(R.id.btn_mkr_add)
-        val delMkrBtn: Button = requireView().findViewById(R.id.btn_mkr_del)
-
-
-//        val locationOverlay: MyLocationNewOverlay
         val sharedUserLocation = viewModel.userLocation.value
-//        if (sharedUserLocation != null) {
-//            locationOverlay = MyLocationNewOverlay(, mapView)
-//        }
-//        else {
-//            locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), mapView)
-//        }
-
-//        locationOverlay.enableMyLocation()
-//        locationOverlay.enableFollowLocation()
-////        locationOverlay.isDrawAccuracyEnabled = true
-//        locationOverlay.runOnFirstFix {
-//            requireActivity().runOnUiThread {
-//                mapView.controller.setCenter(locationOverlay.myLocation)
-//                mapView.controller.animateTo(locationOverlay.myLocation)
-//            }
-//        }
-//        mapView.overlays.add(locationOverlay)
 
         val userLocationMarker = Marker(mapView)
         userLocationMarker.icon = userLocationMarkerDrawable
@@ -159,7 +124,6 @@ class MapFragment : Fragment() {
         userLocationMarker.title = "Your location"
         userLocationMarker.snippet = ""
         userLocationMarker.infoWindow = MapInfoBox(mapView)
-
 
         if (sharedUserLocation != null) {
             val point = GeoPoint(
@@ -173,9 +137,6 @@ class MapFragment : Fragment() {
         } else {
             Toast.makeText(context, "Location services are not available - try again later", Toast.LENGTH_LONG).show()
         }
-
-//        addMarker(GeoPoint(55.91201, -3.31961), "GRID", "Research building")
-//        mapView.invalidate()
 
         val mapLocalityMsg: TextView = view.findViewById(R.id.map_locality_msg)
         if (sharedUserLocation != null) {
@@ -230,7 +191,6 @@ class MapFragment : Fragment() {
         val eventsOverlay: MapEventsOverlay = MapEventsOverlay(mapEventsReceiver)
         mapView.overlays.add(0, eventsOverlay)
 
-
         viewModel.reminders.observe(viewLifecycleOwner) { reminders ->
             updateMarkers(reminders)
         }
@@ -239,109 +199,9 @@ class MapFragment : Fragment() {
             updatePeerMarkers(peers)
         }
 
-//
-//        viewModel.lists.observe(viewLifecycleOwner, Observer { lists ->
-//            val opps = Utils.getOppsFromLists(lists?.toMutableList())
-//            if (opps != null) {
-//                for (opp: ItemOpportunity in opps) {
-//                    addMarker(GeoPoint(opp.lati, opp.longi), opp.place_name, opp.category)
-//                }
-//            }
-//        })
-
-//        fun getAsianFood(lat: Double, lon: Double, areaRadius: Double) {
-//            GlobalScope.launch {
-//                val asianFood = getNearbyNodes(lat, lon, areaRadius, "\"cuisine\"=\"asian\"")
-//                if (asianFood != null) {
-//                    for (element: OverpassElement in asianFood.elements) {
-//                        addMarker(
-//                            GeoPoint(element.lat, element.lon),
-//                            element.tags?.name ?: "<name>",
-//                            element.tags?.amenity ?: "<amenity/shop>"
-//                        )
-//                    }
-//                }
-//            }
-//        }
-
-        fun getPOI(lat: Double, lon: Double, areaRadius: Double) {
-            CoroutineScope(Dispatchers.IO).launch {
-                val nodes = getAllNearbyPOI(lat, lon, areaRadius)
-                if (nodes != null) {
-                    for (element: OverpassElement in nodes.elements) {
-
-//                        addMarker(
-//                            getCoordinatesForElement(element),
-//                            element.tags?.name ?: element.tags?.official_name ?: "(no name)",
-//                            element.tags?.amenity
-//                                ?: element.tags?.shop
-//                                ?: element.tags?.leisure
-//                                ?: element.tags?.education
-//                                ?: element.tags?.tourism
-//                                ?: element.tags?.public_transport
-//                                ?: element.tags?.building
-//                                ?: element.tags?.sport
-//                                ?: element.tags?.product
-//                                ?: element.tags?.vending
-//                                ?: element.tags?.cuisine
-//                                ?: element.tags?.landuse
-//                                ?: element.tags?.healthcare
-//                                ?: element.tags?.place_of_worship
-//                                ?: element.tags?.restaurant
-//                                ?: element.tags?.beauty
-//                                ?: "(no info)"
-//                        )
-                    }
-                }
-            }
-        }
-
-        fun updateOnDrag(lat: Double, lon: Double, zoom: Double): Boolean {
-            val areaRadius = 300 + (20 - zoom) * 80
-            Log.d("bgnw_update-map", "updating map due to drag (zoom: $zoom, factor:$areaRadius)")
-            // getAsianFood(lat, lon, areaRadius)
-            getPOI(lat, lon, areaRadius)
-            return true
-        }
-
-        updateMapButton.setOnClickListener {
-            GlobalScope.launch {
-                val resp = getNearbyNodes(mapView.boundingBox.centerLatitude, mapView.boundingBox.centerLongitude, 400.0, "'amenity'='bicycle_parking'")
-                Log.d("bgnw", resp.toString())
-            }
-            updateOnDrag(
-                mapView.boundingBox.centerLatitude,
-                mapView.boundingBox.centerLongitude,
-                mapView.zoomLevelDouble
-            )
-        }
-
-        overrideButton.setOnClickListener {
-            mapView.maxZoomLevel = 25.0
-            mapView.minZoomLevel = 0.0
-        }
-
         centerButton.setOnClickListener {
             mapView.controller.setCenter(userLocationMarker.position)
         }
-
-
-
-
-//
-//        var themarker: Marker? = null
-//        addMkrBtn.setOnClickListener {
-//           themarker = addMarker(GeoPoint(55.90001, -3.30061), "test", "test2")
-//        }
-//
-//        delMkrBtn.setOnClickListener {
-//            removeMarker(themarker!!)
-//
-//            for(marker in markers.toList()) {
-//                removeMarker(marker)
-//            }
-//        }
-
     }
 
     private fun addMarker(
@@ -399,9 +259,6 @@ class MapFragment : Fragment() {
     }
 
     private fun updatePeerMarkers(peers: MutableMap<String, GeoPoint>) {
-//        for (marker in markers.toList()) {
-//            removeMarker(marker = marker, shouldInvalidate = false)
-//        }
         for (peer in peers.toList()) {
             addMarker(
                 geoPoint = peer.second,
@@ -415,94 +272,7 @@ class MapFragment : Fragment() {
         mapView.invalidate() // update map to show updated markers
     }
 
-
-
-    private suspend fun getNearbyNodes(
-        lat: Double,
-        lon: Double,
-        areaRadius: Double,
-        conditions: String
-    ): OverpassResp? {
-        val overpassQuery = """
-        [out:json][timeout:60];
-        (
-          node(around: $areaRadius, $lat, $lon)[$conditions];
-        );
-        out geom;
-
-    """.trimIndent()
-
-        try {
-            val response = queryOverpassApi(overpassQuery)
-            return response
-        } catch (e: Exception) {
-            Log.d("bgnw_overpass", "Error: ${e.message}")
-            return null
-        }
-    }
-
-    private suspend fun getAllNearbyPOI(
-        lat: Double,
-        lon: Double,
-        areaRadius: Double
-    ): OverpassResp? {
-        val overpassQuery = """
-        [out:json][timeout:60];
-        (
-            node(around: $areaRadius, $lat, $lon)["amenity"]
-                ["amenity" != "bench"]
-                ["amenity" != "waste_basket"];
-            node(around: $areaRadius, $lat, $lon)["tourism"];
-            node(around: $areaRadius, $lat, $lon)["shop"];
-            node(around: $areaRadius, $lat, $lon)["leisure"];
-            node(around: $areaRadius, $lat, $lon)["public_transport"];
-            node(around: $areaRadius, $lat, $lon)["craft"];
-            node(around: $areaRadius, $lat, $lon)["office"];
-            node(around: $areaRadius, $lat, $lon)["place"];
-            node(around: $areaRadius, $lat, $lon)["building"];
-            node(around: $areaRadius, $lat, $lon)["man_made"];
-            node(around: $areaRadius, $lat, $lon)["emergency"];
-            node(around: $areaRadius, $lat, $lon)["healthcare"];
-            node(around: $areaRadius, $lat, $lon)["education"];
-            node(around: $areaRadius, $lat, $lon)["sport"];
-            
-            
-        );
-        out geom;
-
-    """.trimIndent()
-
-        /* removed from query for now
-
-            way(around: $areaRadius, $lat, $lon)["amenity"];
-            way(around: $areaRadius, $lat, $lon)["tourism"];
-            way(around: $areaRadius, $lat, $lon)["shop"];
-            way(around: $areaRadius, $lat, $lon)["leisure"];
-            way(around: $areaRadius, $lat, $lon)["public_transport"];
-            way(around: $areaRadius, $lat, $lon)["craft"];
-            way(around: $areaRadius, $lat, $lon)["office"];
-            way(around: $areaRadius, $lat, $lon)["place"]
-                ["place" != "neighbourhood"];
-            way(around: $areaRadius, $lat, $lon)["man_made"];
-            way(around: $areaRadius, $lat, $lon)["emergency"];
-            way(around: $areaRadius, $lat, $lon)["healthcare"];
-            way(around: $areaRadius, $lat, $lon)["education"];
-            way(around: $areaRadius, $lat, $lon)["sport"];
-         */
-
-        Log.d("bgnw_overpass", "QUERY IS: \n$overpassQuery")
-
-
-        try {
-            val response = queryOverpassApi(overpassQuery)
-            return response
-        } catch (e: Exception) {
-            Log.d("bgnw_overpass", "Error: ${e.message}")
-            return null
-        }
-    }
-
-    fun getLocality(lat: Double, lon: Double): String {
+    private fun getLocality(lat: Double, lon: Double): String {
         val nominatimResp = CoroutineScope(Dispatchers.IO).async {
             queryNominatimApi(lat, lon)
         }

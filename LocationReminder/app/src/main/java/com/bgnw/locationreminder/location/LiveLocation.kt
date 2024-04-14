@@ -37,6 +37,10 @@ class LocationLiveData(context: Context) : LiveData<LocationModel>() {
             Priority.PRIORITY_HIGH_ACCURACY,
             10000,
         ).build()
+
+        fun changeUpdateInterval(seconds: Int) {
+            locationRequest.setInterval((seconds * 1000).toLong())
+        }
     }
 
     private val locationCallback = object : LocationCallback() {

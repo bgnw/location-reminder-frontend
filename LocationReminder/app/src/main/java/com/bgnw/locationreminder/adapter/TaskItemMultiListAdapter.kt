@@ -28,15 +28,11 @@ class TaskItemMultiListAdapter(
     private val taskItems: MutableList<Pair<String, TaskItem>>,
 ) : ArrayAdapter<Pair<String, TaskItem>>(context, R.layout.list_task_item, taskItems) {
 
-    private val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
     private val locationTagPattern = Regex("""([^=]+)="([^"]+)"""")
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-
-        Log.d("bgnw_TILA", "running getView")
         val inflater: LayoutInflater = LayoutInflater.from(context)
         val view: View = inflater.inflate(R.layout.list_task_item, null)
-
 
         val liTitle: TextView = view.findViewById(R.id.li_title)
         val liSubtitle: TextView = view.findViewById(R.id.li_subtitle)
@@ -63,7 +59,6 @@ class TaskItemMultiListAdapter(
                     humanPlaceNames.add(place)
                 }
                 val remainingPlacesCount = item.second.applicable_filters!!.size - first2Places.size
-//                var finalMessage = filtervalues.joinToString(", ")
                 var finalMessage = humanPlaceNames.joinToString(", ")
                 if (remainingPlacesCount > 0) {
                     finalMessage += " ($remainingPlacesCount more)..."
@@ -99,23 +94,9 @@ class TaskItemMultiListAdapter(
         else {
             liSubtitle.text = ""
         }
-//        liSubtitle.text = "${task.distance}m away${
-//            if (task.due_at != null) ", due " + task.due_at?.format(dtFormatter) else ""
-//        }"
-//        liSubtitle.text = "${task.distance}m away, due ${task.getHumanDuration()}"
-
 
         liSubtitle.text = liSubtitle.text.toString() + "\n(From list: ${item.first})"
 
-        val infoBtn: Button = view.findViewById(R.id.item_info_btn)
-
-
-
         return view
-    }
-
-
-    interface OnInfoClickListener {
-        fun onInfoClick(item: TaskItem?)
     }
 }

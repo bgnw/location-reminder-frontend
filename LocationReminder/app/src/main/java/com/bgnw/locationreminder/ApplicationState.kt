@@ -41,4 +41,7 @@ class ApplicationState : ViewModel() {
     var sentRequests: MutableLiveData<List<CollabReq>> = MutableLiveData()
     var collabs: MutableLiveData<List<Collab>> = MutableLiveData()
     var receivedRequestsCount: MutableLiveData<Int> = MutableLiveData()
+    var enableDebug: MutableLiveData<Boolean> = MutableLiveData(false)
+    var updateFrequency: MutableLiveData<Int> = MutableLiveData(30)
+    var remindRadius: MutableLiveData<Int> = MutableLiveData(20)
 }

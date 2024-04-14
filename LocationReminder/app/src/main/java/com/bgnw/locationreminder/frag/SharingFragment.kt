@@ -34,14 +34,10 @@ class SharingFragment : Fragment() {
     private val viewModel: ApplicationState by activityViewModels()
     private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
 
-    private val handler = Handler(Looper.getMainLooper())
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
 
         val layout = inflater.inflate(R.layout.fragment_sharing, container, false)
 
@@ -49,10 +45,8 @@ class SharingFragment : Fragment() {
         val collabLv = layout.findViewById<ListView>(R.id.ui_collabs_lv)
 
         val newReqBtn = layout.findViewById<Button>(R.id.new_req_btn)
-        var reqAdapter: CollabReqListAdapter? = null
-        var collabAdapter: CollabListAdapter? = null
-
-
+        var reqAdapter: CollabReqListAdapter?
+        var collabAdapter: CollabListAdapter?
 
         viewModel.receivedRequests.observe(viewLifecycleOwner) {data ->
             if (data != null) {
@@ -75,9 +69,6 @@ class SharingFragment : Fragment() {
                 collabAdapter?.notifyDataSetChanged()
             }
         }
-
-
-
 
         val editText = EditText(context)
         editText.hint = "Enter the username for the other user"
@@ -108,32 +99,17 @@ class SharingFragment : Fragment() {
                         if (data != null) {
                             newRequestObj.request_id = data.request_id
                             Toast.makeText(context, "Friend request sent to ${data.user_recipient}", Toast.LENGTH_LONG).show()
-//                            reqAdapter?.addItem(data)
                         }
                         else {
                             Toast.makeText(context, "Something went wrong while processing your request", Toast.LENGTH_SHORT).show()
                         }
                     }
-
-
-
-
-
-//                    reqAdapter?.addItem(newRequestObj)
-
-
-
                 }
             }
-            .setNegativeButton("Cancel") { _, _ ->
-            }
+            .setNegativeButton("Cancel") { _, _ -> }
             .create()
 
         newReqBtn.setOnClickListener { dialog.show() }
-
-
-
-
 
     return layout
     }

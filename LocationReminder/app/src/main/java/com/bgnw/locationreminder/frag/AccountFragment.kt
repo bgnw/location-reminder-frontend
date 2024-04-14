@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -31,22 +32,16 @@ class AccountFragment : Fragment() {
 
     private val viewModel: ApplicationState by activityViewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_account, container, false)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val devtextview = getView()?.findViewById<TextView>(R.id.account_temp_text)
         val loginUsername = getView()?.findViewById<EditText>(R.id.account_login_username)
         val loginPassword = getView()?.findViewById<EditText>(R.id.account_login_password)
         val loginSubmitButton = getView()?.findViewById<Button>(R.id.account_login_submit)
@@ -78,7 +73,6 @@ class AccountFragment : Fragment() {
             wrapperLogin?.visibility = View.VISIBLE
         }
 
-
         viewModel.loggedInUsername.observe(viewLifecycleOwner, Observer { username ->
             if (username != null) {
                 AccountDeviceTools.saveUsername(
@@ -87,8 +81,6 @@ class AccountFragment : Fragment() {
                 )
             }
         })
-
-        Log.d("bgnw", "in accountsfr ${viewModel.loggedInUsername.value}")
 
         viewModel.loggedInDisplayName.observe(viewLifecycleOwner, Observer { displayName ->
             if (displayName != null) {
@@ -145,8 +137,11 @@ class AccountFragment : Fragment() {
 
 
                 } catch (e: Exception) {
-                    throw e // TEMP
-                    // Handle exception
+                    Toast.makeText(
+                        context,
+                        "Something went wrong, please try again.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }

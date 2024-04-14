@@ -52,7 +52,6 @@ class Requests {
         lateinit var logApi: LogApi
         lateinit var collabApi: CollabApi
 
-        @OptIn(DelicateCoroutinesApi::class)
         fun initialiseApi() {
             if (!initialised) {
                 val client = OkHttpClient.Builder()
@@ -77,8 +76,7 @@ class Requests {
             itemId: Int,
             itemWithUpdates: TaskItem,
             callback: (success: Boolean) -> Unit
-        ): Unit {
-            // *************** LOOKUP ACCOUNT  *************************
+        ) {
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
 
@@ -88,7 +86,6 @@ class Requests {
                         override fun onFailure(call: Call<Void>, t: Throwable) {
                             callback.invoke(false)
                         }
-
                         override fun onResponse(
                             call: Call<Void>,
                             response: Response<Void>
@@ -108,7 +105,7 @@ class Requests {
         suspend fun deleteItem(
             itemId: Int,
             callback: (success: Boolean) -> Unit
-        ): Unit {
+        ) {
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
 
@@ -134,10 +131,8 @@ class Requests {
             }
         }
 
-
         @OptIn(DelicateCoroutinesApi::class)
         suspend fun lookupUser(username: String): Account {
-            // *************** LOOKUP ACCOUNT  *************************
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
                     var call = accountApi.getAccount(username, "json")
@@ -167,7 +162,6 @@ class Requests {
             }
         }
 
-        @OptIn(DelicateCoroutinesApi::class)
         suspend fun authenticateUser(
             username: String,
             password: String,
@@ -177,7 +171,6 @@ class Requests {
 
                 call.enqueue(object : Callback<AuthResponse> {
                     override fun onFailure(call: Call<AuthResponse>, t: Throwable) {
-                        Log.d("bgnw_DJA API", "ERROR: $t")
                         continuation.resume(null)
                     }
 
@@ -189,7 +182,6 @@ class Requests {
                             val responseBody = response.body()
                             continuation.resume(responseBody)
                         } else {
-                            Log.d("bgnw_DJA API", "body is null")
                             continuation.resume(null)
                         }
                     }
@@ -205,7 +197,6 @@ class Requests {
             sort_by: String,
             visibility: Int,
         ): TaskList {
-            // *************** CREATE TASK LIST  *************************
             return suspendCoroutine { continuation ->
 
                 var dateFormatZulu: DateTimeFormatter =
@@ -221,7 +212,6 @@ class Requests {
                         sort_by = sort_by,
                         visibility = visibility
                     )
-                    Log.d("bgnw_DJA API", obj.toString())
                     var call = taskListApi.createList(obj)
 
                     call.enqueue(object : Callback<TaskList> {
@@ -237,17 +227,12 @@ class Requests {
                                 continuation.resumeWith(Result.failure(Exception("Null TaskList object found when looking at Django REST API response")))
                             } else {
                                 continuation.resumeWith(Result.success(response.body()!!))
-
                             }
                         }
-
-
                     })
                 }
             }
         }
-
-
 
         @OptIn(DelicateCoroutinesApi::class)
         suspend fun createItem(
@@ -267,7 +252,6 @@ class Requests {
             parent_task: Int?,
             filters: Collection<TagValuePair>?,
         ): TaskItem {
-            // *************** CREATE TASK ITEM  *************************
             return suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
                     val obj = TaskItem(
@@ -290,11 +274,6 @@ class Requests {
                     )
                     var call = taskItemApi.createItem(obj)
 
-                    call.request().body
-
-                    Log.d("bgnw", "createitem call:")
-                    Log.d("bgnw", call.request().body.toString())
-
                     call.enqueue(object : Callback<TaskItem> {
                         override fun onFailure(call: Call<TaskItem>, t: Throwable) {
                             continuation.resumeWith(Result.failure(Exception("Django REST API call failed")))
@@ -315,15 +294,10 @@ class Requests {
             }
         }
 
-
-
-
-
         @OptIn(DelicateCoroutinesApi::class)
         suspend fun getListItemsById(
             listId: Int,
         ): List<TaskItem>? = withContext(Dispatchers.IO) {
-            // *************** LOOKUP LIST ITEMS  *************************
             return@withContext suspendCoroutine { continuation ->
                 GlobalScope.launch(Dispatchers.IO) {
 
@@ -350,41 +324,6 @@ class Requests {
             }
         }
 
-        @OptIn(DelicateCoroutinesApi::class)
-        suspend fun getItemOpportunitiesByItemId(
-            itemId: Int,
-        ): MutableList<ItemOpportunity>? = withContext(Dispatchers.IO) {
-            // *************** LOOKUP LIST ITEMS  *************************
-            return@withContext suspendCoroutine { continuation ->
-                GlobalScope.launch(Dispatchers.IO) {
-
-                    var call = taskItemApi.getItemOpps(itemId, "json")
-
-                    call.enqueue(object : Callback<MutableList<ItemOpportunity>> {
-                        override fun onFailure(
-                            call: Call<MutableList<ItemOpportunity>>,
-                            t: Throwable
-                        ) {
-                            continuation.resume(null)
-                        }
-
-                        override fun onResponse(
-                            call: Call<MutableList<ItemOpportunity>>,
-                            response: Response<MutableList<ItemOpportunity>>
-                        ) {
-                            if (response.isSuccessful) {
-                                val responseBody = response.body()
-                                continuation.resume(responseBody)
-                            } else {
-                                continuation.resume(null)
-                            }
-                        }
-                    })
-                }
-            }
-        }
-
-        @OptIn(DelicateCoroutinesApi::class)
         suspend fun getTaskListsByUsername(username: String): MutableList<TaskList>? =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
@@ -412,8 +351,6 @@ class Requests {
                 }
             }
 
-
-        @OptIn(DelicateCoroutinesApi::class)
         suspend fun getFiltersForUser(username: String): List<String>? =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
@@ -450,8 +387,6 @@ class Requests {
                 }
             }
 
-
-        @OptIn(DelicateCoroutinesApi::class)
         suspend fun getFiltersForItem(itemId: Int): List<String>? =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
@@ -488,74 +423,6 @@ class Requests {
                 }
             }
 
-
-
-        /* @OptIn(DelicateCoroutinesApi::class)
-         suspend fun getTaskListsByUsername(username: String): List<TaskList>? = withContext(Dispatchers.IO) {
-             var call = taskListApi.getOwnedLists(username, "json")
-
-             call.enqueue(object : Callback<List<TaskList>> {
-                 override fun onFailure(call: Call<List<TaskList>>, t: Throwable) {
-                 }
-
-                 override fun onResponse(
-                     call: Call<List<TaskList>>,
-                     response: Response<List<TaskList>>
-                 ) {
-                     val responseBody = response.body()
-
-
-                     GlobalScope.launch(Dispatchers.IO) {
-                         if (responseBody != null) {
-                             for (list: TaskList in responseBody) {
-                                 if (list.list_id == null) continue
-                                 val items = getListItemsById(list.list_id, null)
-                                 list.items = items
-                             }
-                         } else {
-                         }
-                     }
-                 }
-             })
-             return@withContext null
-         } */
-
-
-//            // *************** LOOKUP LIST ITEMS  *************************
-//            return suspendCoroutine { continuation ->
-//                GlobalScope.launch(Dispatchers.IO) {
-//                    var call = taskListApi.getOwnedLists(username, "json")
-//
-//                    call.enqueue(object : Callback<List<TaskList>> {
-//                        override fun onFailure(call: Call<List<TaskList>>, t: Throwable) {
-//                        }
-//
-//                        override fun onResponse(
-//                            call: Call<List<TaskList>>,
-//                            response: Response<List<TaskList>>
-//                        ) {
-//                            val responseBody = response.body()
-//
-//
-//                            GlobalScope.launch(Dispatchers.IO) {
-//                                if (responseBody != null) {
-//                                    for (list: TaskList in responseBody) {
-//                                        if (list.list_id == null) continue
-//                                        val items = getListItemsById(list.list_id, null)
-//                                        list.items = items
-//
-//                                        richLists.add(list)
-//                                    }
-//                                }
-//                            }
-//                            return richLists.toList()
-//                        }
-//
-//                    })
-//                }
-//            }
-//        }
-
         suspend fun addLog(lati: Double, longi: Double, notes: String): Log1? =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
@@ -569,11 +436,9 @@ class Requests {
                             notes
                         )
                     )
-                    Log.d("bgnw", "in addlog")
 
                     call.enqueue(object : Callback<Log1?> {
                         override fun onFailure(call: Call<Log1?>, t: Throwable) {
-                            Log.d("bgnw", "failure")
 
                             continuation.resume(null)
                         }
@@ -583,10 +448,8 @@ class Requests {
                             response: Response<Log1?>
                         ) {
                             if (response.isSuccessful) {
-                                Log.d("bgnw", "success")
                                 continuation.resume(response.body())
                             } else {
-                                Log.d("bgnw", "fail")
                                 continuation.resume(null)
                             }
                         }
@@ -594,14 +457,10 @@ class Requests {
                 }
             }
 
-
-
-
         suspend fun updateLocation(account: AccountPartialForLocation) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
                     var call = accountApi.updateAccountLocation(account.username, account)
-                    Log.d("bgnw", "in addlog")
 
                     val df = DecimalFormat("###.########")
                     df.roundingMode = RoundingMode.HALF_UP
@@ -611,7 +470,6 @@ class Requests {
 
                     call.enqueue(object : Callback<AccountPartialForLocation> {
                         override fun onFailure(call: Call<AccountPartialForLocation>, t: Throwable) {
-                            Log.d("bgnw", "failure")
                             continuation.resume(null)
                         }
 
@@ -620,22 +478,14 @@ class Requests {
                             response: Response<AccountPartialForLocation>
                         ) {
                             if (response.isSuccessful) {
-                                Log.d("bgnw", "success")
                                 continuation.resume(response.body())
-                                response
-                                call
                             } else {
-                                Log.d("bgnw", "fail")
                                 continuation.resume(null)
-                                response
-                                call
                             }
                         }
                     })
                 }
             }
-
-
 
         suspend fun addClRequest(clRequest: CollabReq) =
             withContext(Dispatchers.IO) {
@@ -713,9 +563,6 @@ class Requests {
                 }
             }
 
-
-
-
         suspend fun addCollab(clRequest: Collab) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
@@ -773,7 +620,6 @@ class Requests {
                 }
             }
 
-
         suspend fun rejectCollabReq(collabReq: CollabReq) =
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
@@ -804,16 +650,8 @@ class Requests {
                     ))
 
                     deleteCall.enqueue(object : Callback<CollabReq> {
-                        override fun onFailure(call: Call<CollabReq>, t: Throwable) {
-//                            continuation.resume(null)
-                        }
-                        override fun onResponse(call: Call<CollabReq>, response: Response<CollabReq>) {
-                            if (response.isSuccessful) {
-//                                continuation.resume(response.body())
-                            } else {
-//                                continuation.resume(null)
-                            }
-                        }
+                        override fun onFailure(call: Call<CollabReq>, t: Throwable) {}
+                        override fun onResponse(call: Call<CollabReq>, response: Response<CollabReq>) {}
                     })
                     addCall.enqueue(object : Callback<Collab> {
                         override fun onFailure(call: Call<Collab>, t: Throwable) {
@@ -829,7 +667,6 @@ class Requests {
                     })
                 }
             }
-
 
         suspend fun removeCollab(collab: Collab) =
             withContext(Dispatchers.IO) {
@@ -849,8 +686,6 @@ class Requests {
                     })
                 }
             }
-        
-        
 
     }
 }
