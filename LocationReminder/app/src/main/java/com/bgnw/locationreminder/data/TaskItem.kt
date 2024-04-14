@@ -1,11 +1,9 @@
 package com.bgnw.locationreminder.data
 
 import android.os.Parcelable
-import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import com.bgnw.locationreminder.api.TagValuePair
 import com.google.gson.annotations.Expose
 import kotlinx.parcelize.Parcelize
-import java.util.Dictionary
 
 @Parcelize
 data class TaskItem(
@@ -34,8 +32,7 @@ data class TaskItem(
     override fun equals(other: Any?): Boolean {
         if (other is TaskItem) {
             return this.item_id === other.item_id
-        }
-        else {
+        } else {
             return super.equals(other)
         }
     }
@@ -62,7 +59,9 @@ data class TaskItem(
 
     companion object {
         fun convertFiltersToString(filters: Collection<String>): String {
-            if (filters.isEmpty()) { return "[]" }
+            if (filters.isEmpty()) {
+                return "[]"
+            }
 
             val filterString = buildString {
                 append("[")
@@ -73,7 +72,9 @@ data class TaskItem(
         }
 
         fun convertFiltersToMap(filters: Collection<TagValuePair>?): List<Map<String, String>> {
-            if (filters.isNullOrEmpty()) { return listOf() }
+            if (filters.isNullOrEmpty()) {
+                return listOf()
+            }
 
             val list = mutableListOf<Map<String, String>>()
             filters.forEach { filter ->
@@ -81,8 +82,7 @@ data class TaskItem(
 
                 if (filter.value == null) {
                     map.put("filters", filter.tag)
-                }
-                else {
+                } else {
                     map.put("filters", "${filter.tag}=\"${filter.value}\"")
                 }
 
@@ -92,7 +92,10 @@ data class TaskItem(
             return list.toList()
         }
 
-        fun findItemsFromFilters(items: List<TaskItem>, filters: List<Map<String, String>>): List<TaskItem> {
+        fun findItemsFromFilters(
+            items: List<TaskItem>,
+            filters: List<Map<String, String>>
+        ): List<TaskItem> {
             var matches = mutableListOf<TaskItem>()
 
             for (item in items) {

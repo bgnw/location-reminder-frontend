@@ -23,8 +23,10 @@ class NotificationTools {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
 
             if (longText) {
-                builder.setStyle(NotificationCompat.BigTextStyle()
-                    .bigText(body))
+                builder.setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(body)
+                )
             } else {
                 builder.setContentText(body)
             }
@@ -37,8 +39,11 @@ class NotificationTools {
                 ) {
                     return
                 }
-                if (notifID + 1 < Int.MAX_VALUE) { ++notifID }
-                else { notifID = 1 }
+                if (notifID + 1 < Int.MAX_VALUE) {
+                    ++notifID
+                } else {
+                    notifID = 1
+                }
                 notify(notifID, builder.build())
             }
         }

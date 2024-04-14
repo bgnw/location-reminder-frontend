@@ -3,18 +3,15 @@ package com.bgnw.locationreminder.frag
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.marginStart
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
@@ -83,7 +80,7 @@ class ListsFragment : Fragment() {
                 val data = it.data
                 val mutatedList: TaskList? = data?.extras?.getParcelable<TaskList>("MUTATED_LIST")
 
-                if (mutatedList != null ) {
+                if (mutatedList != null) {
 
                     viewModel.lists.value?.removeIf { list -> list.list_id == mutatedList.list_id }
                     viewModel.lists.value?.add(mutatedList)
@@ -125,7 +122,7 @@ class ListsFragment : Fragment() {
 
         if (viewModel.listIdToOpen.value != null && viewModel.lists.value != null) {
             val id = viewModel.listIdToOpen.value!!
-            val list = viewModel.lists.value!!.find { list -> list.list_id ==  id }
+            val list = viewModel.lists.value!!.find { list -> list.list_id == id }
             list?.let { itemClickListener.onItemClick(it) }
             viewModel.listIdToOpen.postValue(null)
         }
@@ -205,13 +202,15 @@ class ListsFragment : Fragment() {
                 dailyDigestButton.setImageResource(R.drawable.baseline_today_24)
                 activity?.title = "Lists"
                 digestShown = false
-            }
-            else {
+            } else {
                 val dueItems: MutableList<Pair<String, TaskItem>> = mutableListOf()
                 val lists = viewModel.lists.value
-                if (lists.isNullOrEmpty()) { digestNoItemsToast?.show(); return@setOnClickListener; }
+                if (lists.isNullOrEmpty()) {
+                    digestNoItemsToast?.show(); return@setOnClickListener; }
                 for (list in lists) {
-                    if (list.items == null) { continue }
+                    if (list.items == null) {
+                        continue
+                    }
                     for (item in list.items!!) {
                         if (
                             (!item.due_at.isNullOrBlank())
@@ -226,7 +225,8 @@ class ListsFragment : Fragment() {
                     }
                 }
 
-                if (dueItems.isEmpty()) { digestNoItemsToast?.show(); return@setOnClickListener; }
+                if (dueItems.isEmpty()) {
+                    digestNoItemsToast?.show(); return@setOnClickListener; }
 
                 adapterDigest = TaskItemMultiListAdapter(context, dueItems)
                 lvDigest.adapter = adapterDigest

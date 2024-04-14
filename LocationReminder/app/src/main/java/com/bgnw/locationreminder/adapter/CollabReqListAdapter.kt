@@ -1,8 +1,6 @@
 package com.bgnw.locationreminder
 
 import android.app.Activity
-import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,23 +8,13 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.data.Collab
 import com.bgnw.locationreminder.data.CollabReq
-import com.bgnw.locationreminder.data.TaskItem
-import com.bgnw.locationreminder.data.TaskList
-import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,7 +27,8 @@ class CollabReqListAdapter(
 ) : ArrayAdapter<CollabReq>(context, R.layout.user_item, items) {
 
     private val dtHuman: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
-    private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
+    private val dtZulu: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
 
@@ -54,10 +43,12 @@ class CollabReqListAdapter(
         val action2Button: Button = view.findViewById(R.id.ui_action2_btn)
 
         liTitle.text = buildSpannedString {
-            bold{ append("${items[position].user_sender}") }
+            bold { append("${items[position].user_sender}") }
             append(" sent you a friend request ")
         }
-        liSubtitle.text = "Requested at ${LocalDateTime.parse(items[position].datetime_sent, dtZulu).format(dtHuman)}"
+        liSubtitle.text = "Requested at ${
+            LocalDateTime.parse(items[position].datetime_sent, dtZulu).format(dtHuman)
+        }"
 
         var selectedItem: CollabReq
 
@@ -67,7 +58,7 @@ class CollabReqListAdapter(
             CoroutineScope(Dispatchers.IO).launch {
                 returnedCollab.postValue(Requests.acceptCollabReq(selectedItem))
             }
-            returnedCollab.observe(parent.context as LifecycleOwner) {data ->
+            returnedCollab.observe(parent.context as LifecycleOwner) { data ->
                 items.remove(selectedItem)
                 this.notifyDataSetChanged()
                 this.notifyDataSetInvalidated()
@@ -76,7 +67,7 @@ class CollabReqListAdapter(
             selectedItem = items[position]
             CoroutineScope(Dispatchers.IO).launch {
             }
-            returnedCollab.observe(parent.context as LifecycleOwner) {data ->
+            returnedCollab.observe(parent.context as LifecycleOwner) { data ->
                 items.remove(selectedItem)
                 this.notifyDataSetChanged()
                 this.notifyDataSetInvalidated()
@@ -90,7 +81,7 @@ class CollabReqListAdapter(
             CoroutineScope(Dispatchers.IO).launch {
                 result.postValue(Requests.rejectCollabReq(selectedItem))
             }
-            result.observe(parent.context as LifecycleOwner) {data ->
+            result.observe(parent.context as LifecycleOwner) { data ->
                 items.remove(selectedItem)
                 this.notifyDataSetChanged()
                 this.notifyDataSetInvalidated()
@@ -100,7 +91,7 @@ class CollabReqListAdapter(
             CoroutineScope(Dispatchers.IO).launch {
                 result.postValue(Requests.rejectCollabReq(selectedItem))
             }
-            result.observe(parent.context as LifecycleOwner) {data ->
+            result.observe(parent.context as LifecycleOwner) { data ->
                 items.remove(selectedItem)
                 this.notifyDataSetChanged()
                 this.notifyDataSetInvalidated()

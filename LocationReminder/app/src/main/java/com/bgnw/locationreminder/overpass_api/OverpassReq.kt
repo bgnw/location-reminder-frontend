@@ -1,6 +1,5 @@
 package com.bgnw.locationreminder.overpass_api
 
-import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import com.bgnw.locationreminder.api.TagValuePair
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -107,9 +106,11 @@ fun getCoordinatesForElement(element: OverpassElement): GeoPoint {
         "node" -> {
             GeoPoint(element.lat!!, element.lon!!)
         }
+
         "way" -> {
             GeoPoint(element.center!!.lat, element.center.lon)
         }
+
         else -> {
             throw Exception("Overpass element isn't a node nor a way -- don't know how to get coords")
         }
@@ -117,7 +118,9 @@ fun getCoordinatesForElement(element: OverpassElement): GeoPoint {
 }
 
 fun tagsClassToPairs(tags: Tags?): MutableList<TagValuePair>? {
-    if (tags == null) { return null }
+    if (tags == null) {
+        return null
+    }
     val tagPairs = mutableListOf<TagValuePair>()
     if (tags.name != null) tagPairs.add(TagValuePair("name", tags.name))
     if (tags.official_name != null) tagPairs.add(TagValuePair("official_name", tags.official_name))
@@ -126,7 +129,12 @@ fun tagsClassToPairs(tags: Tags?): MutableList<TagValuePair>? {
     if (tags.leisure != null) tagPairs.add(TagValuePair("leisure", tags.leisure))
     if (tags.education != null) tagPairs.add(TagValuePair("education", tags.education))
     if (tags.tourism != null) tagPairs.add(TagValuePair("tourism", tags.tourism))
-    if (tags.public_transport != null) tagPairs.add(TagValuePair("public_transport", tags.public_transport))
+    if (tags.public_transport != null) tagPairs.add(
+        TagValuePair(
+            "public_transport",
+            tags.public_transport
+        )
+    )
     if (tags.building != null) tagPairs.add(TagValuePair("building", tags.building))
     if (tags.sport != null) tagPairs.add(TagValuePair("sport", tags.sport))
     if (tags.product != null) tagPairs.add(TagValuePair("product", tags.product))
@@ -134,7 +142,12 @@ fun tagsClassToPairs(tags: Tags?): MutableList<TagValuePair>? {
     if (tags.cuisine != null) tagPairs.add(TagValuePair("cuisine", tags.cuisine))
     if (tags.landuse != null) tagPairs.add(TagValuePair("landuse", tags.landuse))
     if (tags.healthcare != null) tagPairs.add(TagValuePair("healthcare", tags.healthcare))
-    if (tags.place_of_worship != null) tagPairs.add(TagValuePair("place_of_worship", tags.place_of_worship))
+    if (tags.place_of_worship != null) tagPairs.add(
+        TagValuePair(
+            "place_of_worship",
+            tags.place_of_worship
+        )
+    )
     if (tags.restaurant != null) tagPairs.add(TagValuePair("restaurant", tags.restaurant))
     if (tags.beauty != null) tagPairs.add(TagValuePair("beauty", tags.beauty))
     return tagPairs

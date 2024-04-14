@@ -1,7 +1,5 @@
 package com.bgnw.locationreminder.nominatim_api
 
-import com.bgnw.locationreminder.activity.CreateTaskItemActivity
-import com.bgnw.locationreminder.api.TagValuePair
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -9,7 +7,6 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.osmdroid.util.GeoPoint
 
 @Serializable
 data class NominatimResp(
@@ -41,5 +38,6 @@ suspend fun queryNominatimApi(lat: Double, lon: Double): NominatimResp {
         }
     }
 
-    return client.get("https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json").body()
+    return client.get("https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json")
+        .body()
 }

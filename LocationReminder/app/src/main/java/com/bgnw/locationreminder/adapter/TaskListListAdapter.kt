@@ -17,8 +17,10 @@ class TaskListListAdapter(
     private val onItemClickListener: OnItemClickListener
 ) : ArrayAdapter<TaskList>(context, R.layout.list_tasklist_item, taskLists) {
 
-    private val dateFormatHuman: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
-    private val dateFormatZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    private val dateFormatHuman: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
+    private val dateFormatZulu: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val inflater: LayoutInflater = LayoutInflater.from(context)

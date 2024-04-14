@@ -1,7 +1,5 @@
 package com.bgnw.locationreminder.frag
 
-import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,18 +7,10 @@ import android.view.ViewGroup
 import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.adapter.ItemOpportunityListAdapter
-import com.bgnw.locationreminder.api.Utils
-import com.bgnw.locationreminder.data.ItemOpportunity
-import com.bgnw.locationreminder.data.TaskList
-import com.bgnw.locationreminder.databinding.FragmentNearbyBinding
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import java.time.format.DateTimeFormatter
 
 class NearbyFragment : Fragment() {
 

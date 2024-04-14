@@ -1,24 +1,15 @@
 package com.bgnw.locationreminder
 
 import android.app.Activity
-import android.content.Intent
-import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.TextView
-import com.bgnw.locationreminder.adapter.TaskListListAdapter
 import com.bgnw.locationreminder.data.TaskItem
-import com.bgnw.locationreminder.frag.CreateTaskItemFragment
-import com.bgnw.locationreminder.frag.ViewEditTaskItemFragment
+import com.bgnw.locationreminder.nominatim_api.queryNominatimApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.time.format.DateTimeFormatter
-import com.bgnw.locationreminder.nominatim_api.queryNominatimApi
 import kotlinx.coroutines.async
 import java.lang.Thread.sleep
 
@@ -64,15 +55,12 @@ class TaskItemMultiListAdapter(
                     finalMessage += " ($remainingPlacesCount more)..."
                 }
                 liSubtitle.text = "When near locations: ${finalMessage}"
-            }
-            else {
+            } else {
                 liSubtitle.text = ""
             }
-        }
-        else if (item.second.remind_method == "PEER_USER") {
+        } else if (item.second.remind_method == "PEER_USER") {
             liSubtitle.text = "When near user: ${item.second.user_peer}"
-        }
-        else if (item.second.remind_method == "LOCATION_POINT") {
+        } else if (item.second.remind_method == "LOCATION_POINT") {
             val nominatimResp = CoroutineScope(Dispatchers.IO).async {
                 queryNominatimApi(item.second.lati!!, item.second.longi!!)
             }
@@ -90,8 +78,7 @@ class TaskItemMultiListAdapter(
             var locality = "${if (primary != null) "$primary, " else ""}${secondary}"
             liSubtitle.text = "When near location in $locality"
 
-        }
-        else {
+        } else {
             liSubtitle.text = ""
         }
 

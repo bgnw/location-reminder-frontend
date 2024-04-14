@@ -5,13 +5,10 @@ import CollabApi
 import LogApi
 import TaskItemApi
 import TaskListApi
-import android.util.Log
-import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import com.bgnw.locationreminder.data.Account
 import com.bgnw.locationreminder.data.AccountPartialForLocation
 import com.bgnw.locationreminder.data.Collab
 import com.bgnw.locationreminder.data.CollabReq
-import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -19,18 +16,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
-import okhttp3.RequestBody
-import org.json.JSONObject
-import org.osmdroid.util.GeoPoint
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.lang.Thread.sleep
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.time.LocalDateTime
@@ -86,6 +78,7 @@ class Requests {
                         override fun onFailure(call: Call<Void>, t: Throwable) {
                             callback.invoke(false)
                         }
+
                         override fun onResponse(
                             call: Call<Void>,
                             response: Response<Void>
@@ -357,7 +350,10 @@ class Requests {
                     val call = taskItemApi.getFiltersForUser(username, "json")
 
                     call.enqueue(object : Callback<List<Map<String, String>>?> {
-                        override fun onFailure(call: Call<List<Map<String, String>>?>, t: Throwable) {
+                        override fun onFailure(
+                            call: Call<List<Map<String, String>>?>,
+                            t: Throwable
+                        ) {
                             continuation.resume(null)
                         }
 
@@ -375,8 +371,7 @@ class Requests {
                                         el.get("filters")?.let { filtersAsStrings.add(it) }
                                     }
                                     continuation.resume(filtersAsStrings)
-                                }
-                                else {
+                                } else {
                                     continuation.resume(null)
                                 }
                             } else {
@@ -393,7 +388,10 @@ class Requests {
                     val call = taskItemApi.getFiltersForItem(itemId, "json")
 
                     call.enqueue(object : Callback<List<Map<String, String>>?> {
-                        override fun onFailure(call: Call<List<Map<String, String>>?>, t: Throwable) {
+                        override fun onFailure(
+                            call: Call<List<Map<String, String>>?>,
+                            t: Throwable
+                        ) {
                             continuation.resume(null)
                         }
 
@@ -411,8 +409,7 @@ class Requests {
                                         el.get("filters")?.let { filtersAsStrings.add(it) }
                                     }
                                     continuation.resume(filtersAsStrings)
-                                }
-                                else {
+                                } else {
                                     continuation.resume(null)
                                 }
                             } else {
@@ -469,7 +466,10 @@ class Requests {
                     account.longi = df.format(account.longi!!).toDouble()
 
                     call.enqueue(object : Callback<AccountPartialForLocation> {
-                        override fun onFailure(call: Call<AccountPartialForLocation>, t: Throwable) {
+                        override fun onFailure(
+                            call: Call<AccountPartialForLocation>,
+                            t: Throwable
+                        ) {
                             continuation.resume(null)
                         }
 
@@ -495,7 +495,11 @@ class Requests {
                         override fun onFailure(call: Call<CollabReq>, t: Throwable) {
                             continuation.resume(null)
                         }
-                        override fun onResponse(call: Call<CollabReq>, response: Response<CollabReq>) {
+
+                        override fun onResponse(
+                            call: Call<CollabReq>,
+                            response: Response<CollabReq>
+                        ) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())
                             } else {
@@ -514,7 +518,11 @@ class Requests {
                         override fun onFailure(call: Call<CollabReq>, t: Throwable) {
                             continuation.resume(null)
                         }
-                        override fun onResponse(call: Call<CollabReq>, response: Response<CollabReq>) {
+
+                        override fun onResponse(
+                            call: Call<CollabReq>,
+                            response: Response<CollabReq>
+                        ) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())
                             } else {
@@ -533,7 +541,11 @@ class Requests {
                         override fun onFailure(call: Call<List<CollabReq>?>, t: Throwable) {
                             continuation.resume(null)
                         }
-                        override fun onResponse(call: Call<List<CollabReq>?>, response: Response<List<CollabReq>?>) {
+
+                        override fun onResponse(
+                            call: Call<List<CollabReq>?>,
+                            response: Response<List<CollabReq>?>
+                        ) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())
                             } else {
@@ -552,7 +564,11 @@ class Requests {
                         override fun onFailure(call: Call<List<CollabReq>?>, t: Throwable) {
                             continuation.resume(null)
                         }
-                        override fun onResponse(call: Call<List<CollabReq>?>, response: Response<List<CollabReq>?>) {
+
+                        override fun onResponse(
+                            call: Call<List<CollabReq>?>,
+                            response: Response<List<CollabReq>?>
+                        ) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())
                             } else {
@@ -571,6 +587,7 @@ class Requests {
                         override fun onFailure(call: Call<Collab>, t: Throwable) {
                             continuation.resume(null)
                         }
+
                         override fun onResponse(call: Call<Collab>, response: Response<Collab>) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())
@@ -590,6 +607,7 @@ class Requests {
                         override fun onFailure(call: Call<Collab>, t: Throwable) {
                             continuation.resume(null)
                         }
+
                         override fun onResponse(call: Call<Collab>, response: Response<Collab>) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())
@@ -609,7 +627,11 @@ class Requests {
                         override fun onFailure(call: Call<List<Collab>?>, t: Throwable) {
                             continuation.resume(null)
                         }
-                        override fun onResponse(call: Call<List<Collab>?>, response: Response<List<Collab>?>) {
+
+                        override fun onResponse(
+                            call: Call<List<Collab>?>,
+                            response: Response<List<Collab>?>
+                        ) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())
                             } else {
@@ -628,7 +650,11 @@ class Requests {
                         override fun onFailure(call: Call<CollabReq>, t: Throwable) {
                             continuation.resume(null)
                         }
-                        override fun onResponse(call: Call<CollabReq>, response: Response<CollabReq>) {
+
+                        override fun onResponse(
+                            call: Call<CollabReq>,
+                            response: Response<CollabReq>
+                        ) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())
                             } else {
@@ -643,20 +669,27 @@ class Requests {
             withContext(Dispatchers.IO) {
                 return@withContext suspendCoroutine { continuation ->
                     var deleteCall = collabApi.deleteRequest(collabReq.request_id!!)
-                    var addCall = collabApi.addCollab(Collab(
-                        collab_id = null,
-                        user_master = collabReq.user_sender,
-                        user_peer = collabReq.user_recipient
-                    ))
+                    var addCall = collabApi.addCollab(
+                        Collab(
+                            collab_id = null,
+                            user_master = collabReq.user_sender,
+                            user_peer = collabReq.user_recipient
+                        )
+                    )
 
                     deleteCall.enqueue(object : Callback<CollabReq> {
                         override fun onFailure(call: Call<CollabReq>, t: Throwable) {}
-                        override fun onResponse(call: Call<CollabReq>, response: Response<CollabReq>) {}
+                        override fun onResponse(
+                            call: Call<CollabReq>,
+                            response: Response<CollabReq>
+                        ) {
+                        }
                     })
                     addCall.enqueue(object : Callback<Collab> {
                         override fun onFailure(call: Call<Collab>, t: Throwable) {
                             continuation.resume(null)
                         }
+
                         override fun onResponse(call: Call<Collab>, response: Response<Collab>) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())
@@ -676,6 +709,7 @@ class Requests {
                         override fun onFailure(call: Call<Collab>, t: Throwable) {
                             continuation.resume(null)
                         }
+
                         override fun onResponse(call: Call<Collab>, response: Response<Collab>) {
                             if (response.isSuccessful) {
                                 continuation.resume(response.body())

@@ -1,14 +1,11 @@
 package com.bgnw.locationreminder.frag
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -16,10 +13,8 @@ import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.TaskItemListAdapter
-import com.bgnw.locationreminder.activity.CreateTaskItemActivity
 import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
-import com.bgnw.locationreminder.databinding.FragmentNearbyBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class ViewTaskListFragment : Fragment() {
@@ -30,11 +25,11 @@ class ViewTaskListFragment : Fragment() {
 
     private var listObj: TaskList? = null
     private var listId: Int? = null
-    
+
     private var adapter: TaskItemListAdapter? = null
     private var lv: ListView? = null
 
-    private val itemInfoClickListener = object : TaskItemListAdapter.OnInfoClickListener{
+    private val itemInfoClickListener = object : TaskItemListAdapter.OnInfoClickListener {
         override fun onInfoClick(item: TaskItem?) {
             val selectedItem = item ?: return
             val viewEditTaskItemFragment = ViewEditTaskItemFragment()

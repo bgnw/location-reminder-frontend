@@ -38,7 +38,6 @@ import com.bgnw.locationreminder.api.TagValuePair
 import com.bgnw.locationreminder.data.Collab
 import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
-import com.bgnw.locationreminder.map_aux.MapInfoBox
 import com.bgnw.locationreminder.taginfo_api.TagInfoElement
 import com.bgnw.locationreminder.taginfo_api.TagInfoResponse
 import com.bgnw.locationreminder.taginfo_api.procGetSuggestionsFromKeyword
@@ -98,8 +97,7 @@ class CreateTaskItemFragment : Fragment() {
                     bold { append(currentElement.tag) }
                     append(" of ")
                     bold { append(currentElement.value) }
-                }
-                else {
+                } else {
                     append("Places that are/have ")
                     append(decideAOrAn(currentElement.tag[0]))
                     append(" ")
@@ -109,16 +107,21 @@ class CreateTaskItemFragment : Fragment() {
             textView.text = label
 
 
-            checkBox.setOnCheckedChangeListener{_, isChecked ->
-                if (isChecked) { selectedCategories.add(currentElement) }
-                else { selectedCategories.remove(currentElement) }
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    selectedCategories.add(currentElement)
+                } else {
+                    selectedCategories.remove(currentElement)
+                }
             }
 
 
             return view
         }
 
-        fun getSelectedCategories(): MutableList<TagValuePair> { return selectedCategories }
+        fun getSelectedCategories(): MutableList<TagValuePair> {
+            return selectedCategories
+        }
 
     }
 
@@ -156,13 +159,17 @@ class CreateTaskItemFragment : Fragment() {
             }
             return view
         }
-        fun getSelectedUsernames(): String? { return selectedUsername }
+
+        fun getSelectedUsernames(): String? {
+            return selectedUsername
+        }
     }
 
-    class NoInfoWindow(marker: Marker, mapView: MapView): InfoWindow(0, mapView) {
+    class NoInfoWindow(marker: Marker, mapView: MapView) : InfoWindow(0, mapView) {
         init {
             mView = null
         }
+
         override fun onOpen(item: Any?) {}
         override fun onClose() {}
     }
@@ -180,20 +187,223 @@ class CreateTaskItemFragment : Fragment() {
 
 
     private val tags = listOf(
-        mapOf("tag" to "amenity", "values" to listOf("parking", "parking_space", "bench", "place_of_worship", "restaurant", "school", "waste_basket", "bicycle_parking", "fast_food", "cafe", "fuel", "shelter", "recycling", "toilets", "bank", "pharmacy", "post_box", "kindergarten", "drinking_water")),
-        mapOf("tag" to "shop", "values" to listOf("convenience", "supermarket", "clothes", "hairdresser", "car_repair", "bakery", "car", "beauty", "kiosk", "mobile_phone", "hardware", "butcher", "furniture", "car_parts", "alcohol", "florist", "electronics", "variety_store", "shoes", "mall", "optician", "jewelry", "doityourself", "gift")),
-        mapOf("tag" to "leisure", "values" to listOf("pitch", "swimming_pool", "park", "garden", "playground", "picnic_table", "sports_centre", "nature_reserve", "track")),
-        mapOf("tag" to "education", "values" to listOf("kindergarten", "school", "facultative_school", "centre", "courses", "college", "music", "university", "coaching")),
-        mapOf("tag" to "tourism", "values" to listOf("information", "hotel", "artwork", "attraction", "viewpoint", "guest_house", "picnic_site", "camp_site", "museum", "chalet", "camp_pitch", "apartment", "hostel", "motel", "caravan_site")),
-        mapOf("tag" to "sport", "values" to listOf("soccer", "tennis", "basketball", "baseball", "multi", "swimming", "equestrian", "golf", "fitness", "running", "athletics", "table_tennis", "beachvolleyball", "climbing", "volleyball", "boules")),
-        mapOf("tag" to "product", "values" to listOf("food", "charcoal", "oil", "bricks", "wine", "fuel", "beer", "gas")),
-        mapOf("tag" to "vending", "values" to listOf("parking_tickets", "excrement_bags", "drinks", "public_transport_tickets", "cigarettes", "fuel", "sweets", "newspapers", "food", "coffee", "condoms", "water")),
-        mapOf("tag" to "cuisine", "values" to listOf("pizza", "burger", "coffee_shop", "chinese", "italian", "sandwich", "chicken", "mexican", "japanese", "american", "kebab", "indian", "asian", "sushi", "thai", "french", "ice_cream", "seafood", "greek", "german")),
+        mapOf(
+            "tag" to "amenity",
+            "values" to listOf(
+                "parking",
+                "parking_space",
+                "bench",
+                "place_of_worship",
+                "restaurant",
+                "school",
+                "waste_basket",
+                "bicycle_parking",
+                "fast_food",
+                "cafe",
+                "fuel",
+                "shelter",
+                "recycling",
+                "toilets",
+                "bank",
+                "pharmacy",
+                "post_box",
+                "kindergarten",
+                "drinking_water"
+            )
+        ),
+        mapOf(
+            "tag" to "shop",
+            "values" to listOf(
+                "convenience",
+                "supermarket",
+                "clothes",
+                "hairdresser",
+                "car_repair",
+                "bakery",
+                "car",
+                "beauty",
+                "kiosk",
+                "mobile_phone",
+                "hardware",
+                "butcher",
+                "furniture",
+                "car_parts",
+                "alcohol",
+                "florist",
+                "electronics",
+                "variety_store",
+                "shoes",
+                "mall",
+                "optician",
+                "jewelry",
+                "doityourself",
+                "gift"
+            )
+        ),
+        mapOf(
+            "tag" to "leisure",
+            "values" to listOf(
+                "pitch",
+                "swimming_pool",
+                "park",
+                "garden",
+                "playground",
+                "picnic_table",
+                "sports_centre",
+                "nature_reserve",
+                "track"
+            )
+        ),
+        mapOf(
+            "tag" to "education",
+            "values" to listOf(
+                "kindergarten",
+                "school",
+                "facultative_school",
+                "centre",
+                "courses",
+                "college",
+                "music",
+                "university",
+                "coaching"
+            )
+        ),
+        mapOf(
+            "tag" to "tourism",
+            "values" to listOf(
+                "information",
+                "hotel",
+                "artwork",
+                "attraction",
+                "viewpoint",
+                "guest_house",
+                "picnic_site",
+                "camp_site",
+                "museum",
+                "chalet",
+                "camp_pitch",
+                "apartment",
+                "hostel",
+                "motel",
+                "caravan_site"
+            )
+        ),
+        mapOf(
+            "tag" to "sport",
+            "values" to listOf(
+                "soccer",
+                "tennis",
+                "basketball",
+                "baseball",
+                "multi",
+                "swimming",
+                "equestrian",
+                "golf",
+                "fitness",
+                "running",
+                "athletics",
+                "table_tennis",
+                "beachvolleyball",
+                "climbing",
+                "volleyball",
+                "boules"
+            )
+        ),
+        mapOf(
+            "tag" to "product",
+            "values" to listOf("food", "charcoal", "oil", "bricks", "wine", "fuel", "beer", "gas")
+        ),
+        mapOf(
+            "tag" to "vending",
+            "values" to listOf(
+                "parking_tickets",
+                "excrement_bags",
+                "drinks",
+                "public_transport_tickets",
+                "cigarettes",
+                "fuel",
+                "sweets",
+                "newspapers",
+                "food",
+                "coffee",
+                "condoms",
+                "water"
+            )
+        ),
+        mapOf(
+            "tag" to "cuisine",
+            "values" to listOf(
+                "pizza",
+                "burger",
+                "coffee_shop",
+                "chinese",
+                "italian",
+                "sandwich",
+                "chicken",
+                "mexican",
+                "japanese",
+                "american",
+                "kebab",
+                "indian",
+                "asian",
+                "sushi",
+                "thai",
+                "french",
+                "ice_cream",
+                "seafood",
+                "greek",
+                "german"
+            )
+        ),
         mapOf("tag" to "landuse", "values" to listOf("vineyard", "cemetery", "commercial")),
-        mapOf("tag" to "healthcare", "values" to listOf("pharmacy", "doctor", "hospital", "clinic", "dentist", "centre", "physiotherapist", "laboratory", "alternative")),
-        mapOf("tag" to "place_of_worship", "values" to listOf("wayside_chapel", "chapel", "musalla", "holy_well", "mosque", "cross", "lourdes_grotto", "church", "shrine", "monastery", "husayniyyah", "mission_station", "wayside_shrine", "temple", "cemetery_chapel")),
+        mapOf(
+            "tag" to "healthcare",
+            "values" to listOf(
+                "pharmacy",
+                "doctor",
+                "hospital",
+                "clinic",
+                "dentist",
+                "centre",
+                "physiotherapist",
+                "laboratory",
+                "alternative"
+            )
+        ),
+        mapOf(
+            "tag" to "place_of_worship",
+            "values" to listOf(
+                "wayside_chapel",
+                "chapel",
+                "musalla",
+                "holy_well",
+                "mosque",
+                "cross",
+                "lourdes_grotto",
+                "church",
+                "shrine",
+                "monastery",
+                "husayniyyah",
+                "mission_station",
+                "wayside_shrine",
+                "temple",
+                "cemetery_chapel"
+            )
+        ),
         mapOf("tag" to "restaurant", "values" to listOf("fast_food")),
-        mapOf("tag" to "beauty", "values" to listOf("nails", "tanning", "cosmetics", "spa", "skin_care", "hair", "waxing", "hair_removal"))
+        mapOf(
+            "tag" to "beauty",
+            "values" to listOf(
+                "nails",
+                "tanning",
+                "cosmetics",
+                "spa",
+                "skin_care",
+                "hair",
+                "waxing",
+                "hair_removal"
+            )
+        )
     )
 
     private val tagsOfInterest = listOf(
@@ -234,14 +444,18 @@ class CreateTaskItemFragment : Fragment() {
         }
 
         redMarkerDrawable =
-            BitmapDrawable(resources, BitmapFactory.decodeResource(resources, R.drawable.marker_red).let {
-                Bitmap.createScaledBitmap(it, 74, 120, false)
-            })
+            BitmapDrawable(
+                resources,
+                BitmapFactory.decodeResource(resources, R.drawable.marker_red).let {
+                    Bitmap.createScaledBitmap(it, 74, 120, false)
+                })
 
         userLocationMarkerDrawable =
-            BitmapDrawable(resources, BitmapFactory.decodeResource(resources, R.drawable.user_location_marker).let {
-                Bitmap.createScaledBitmap(it, 85, 85, false)
-            })
+            BitmapDrawable(
+                resources,
+                BitmapFactory.decodeResource(resources, R.drawable.user_location_marker).let {
+                    Bitmap.createScaledBitmap(it, 85, 85, false)
+                })
 
         Configuration.getInstance().load(
             context,
@@ -251,9 +465,11 @@ class CreateTaskItemFragment : Fragment() {
         var selectedMethod: String? = null
 
         // hide the category layout initially
-        val categoryLayout: LinearLayout? = rootView.findViewById(R.id.cti_category_selection_layout)
+        val categoryLayout: LinearLayout? =
+            rootView.findViewById(R.id.cti_category_selection_layout)
         val userLayout: LinearLayout? = rootView.findViewById(R.id.cti_user_selection_layout)
-        val locationPointLayout: LinearLayout? = rootView.findViewById(R.id.cti_coordinate_selection_layout)
+        val locationPointLayout: LinearLayout? =
+            rootView.findViewById(R.id.cti_coordinate_selection_layout)
         categoryLayout?.visibility = View.GONE
         userLayout?.visibility = View.GONE
         locationPointLayout?.visibility = View.GONE
@@ -336,7 +552,11 @@ class CreateTaskItemFragment : Fragment() {
             mapView.controller.animateTo(point)
 
         } else {
-            Toast.makeText(context, "Location services are not available - try again later", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                context,
+                "Location services are not available - try again later",
+                Toast.LENGTH_LONG
+            ).show()
         }
 
         class MyMapEventsReceiver : MapEventsReceiver {
@@ -359,7 +579,7 @@ class CreateTaskItemFragment : Fragment() {
         val eventsOverlay: MapEventsOverlay = MapEventsOverlay(mapEventsReceiver)
         mapView.overlays.add(0, eventsOverlay)
 
-        viewModel.userLocation.observe(viewLifecycleOwner) {pair ->
+        viewModel.userLocation.observe(viewLifecycleOwner) { pair ->
             if (pair != null) {
                 val loc = pair.first
                 val diff = pair.second
@@ -372,13 +592,13 @@ class CreateTaskItemFragment : Fragment() {
         }
 
         val submitBtn: Button? = rootView.findViewById(R.id.cti_create_task_btn)
-        submitBtn?.setOnClickListener{
+        submitBtn?.setOnClickListener {
             val title = rootView.findViewById<EditText>(R.id.cti_task_name).text.toString().trim()
             val body = rootView.findViewById<EditText>(R.id.cti_body_text).text.toString().trim()
 
             val categories = catListAdapter.getSelectedCategories()
             val peerUser = userListAdapter.getSelectedUsernames()
-            
+
             if (
                 username.isNullOrBlank()
                 || title.isBlank()
@@ -386,7 +606,11 @@ class CreateTaskItemFragment : Fragment() {
                 || (selectedMethod == "PEER_USER" && peerUser == null)
                 || (selectedMethod == "LOCATION_POINT" && locationPoint == null)
             ) {
-                Toast.makeText(context, "Sorry, something went wrong. Please check the provided information.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Sorry, something went wrong. Please check the provided information.",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
@@ -401,8 +625,7 @@ class CreateTaskItemFragment : Fragment() {
                         ?.add(newItem)
 
                     closeThisFragment()
-                }
-                else {
+                } else {
                     throw Exception("item should not be null once observer gets activated here")
                 }
             }
@@ -427,6 +650,7 @@ class CreateTaskItemFragment : Fragment() {
                             );
                         }
                     }
+
                     "PEER_USER" -> {
                         CoroutineScope(Dispatchers.IO).async {
                             Requests.createItem(
@@ -446,6 +670,7 @@ class CreateTaskItemFragment : Fragment() {
                             )
                         }
                     }
+
                     "LOCATION_POINT" -> {
                         CoroutineScope(Dispatchers.IO).async {
                             Requests.createItem(
@@ -467,6 +692,7 @@ class CreateTaskItemFragment : Fragment() {
                             )
                         }
                     }
+
                     else -> {
                         throw Exception("Illegal selectedMethod state")
                     }
@@ -486,15 +712,13 @@ class CreateTaskItemFragment : Fragment() {
                 userLayout?.visibility = View.GONE
                 locationPointLayout?.visibility = View.GONE
                 selectedMethod = "LOCATION_CATEGORY"
-            }
-            else if (group.checkedRadioButtonId == R.id.cti_radio_opt_person) {
+            } else if (group.checkedRadioButtonId == R.id.cti_radio_opt_person) {
                 categoryLayout?.visibility = View.GONE
                 userLayout?.visibility = View.VISIBLE
                 locationPointLayout?.visibility = View.GONE
                 findFriendUsernames(usernameResults, userListAdapter)
                 selectedMethod = "PEER_USER"
-            }
-            else if (group.checkedRadioButtonId == R.id.cti_radio_opt_locationpoint) {
+            } else if (group.checkedRadioButtonId == R.id.cti_radio_opt_locationpoint) {
                 categoryLayout?.visibility = View.GONE
                 userLayout?.visibility = View.GONE
                 locationPointLayout?.visibility = View.VISIBLE
@@ -525,21 +749,22 @@ class CreateTaskItemFragment : Fragment() {
         term: String,
         resultsDataset: MutableList<TagValuePair>,
         adapter: CategoryAdapter
-    )  {
+    ) {
         resultsDataset.addAll(
             tags.flatMap { tagMap ->
                 val tag = tagMap["tag"] as String
                 val values = tagMap["values"] as List<String>
 
-                val matchingTags = if (tag.contains(term, ignoreCase = true)) listOf(tag) else emptyList()
+                val matchingTags =
+                    if (tag.contains(term, ignoreCase = true)) listOf(tag) else emptyList()
 
                 val matchingValues = values.filter { it.contains(term, ignoreCase = true) }
                     .map { tag to it }
 
                 val out: MutableList<TagValuePair> = mutableListOf()
 
-                matchingTags.forEach{tag -> out.add(TagValuePair(tag, null))}
-                matchingValues.forEach { pair -> out.add(TagValuePair(pair.first, pair.second))  }
+                matchingTags.forEach { tag -> out.add(TagValuePair(tag, null)) }
+                matchingValues.forEach { pair -> out.add(TagValuePair(pair.first, pair.second)) }
 
                 out
             }.toMutableList()
@@ -590,16 +815,19 @@ class CreateTaskItemFragment : Fragment() {
             queryResult.postValue(Requests.getCollabs(viewModel.loggedInUsername.value!!))
         }
 
-        queryResult.observe(viewLifecycleOwner) {data ->
+        queryResult.observe(viewLifecycleOwner) { data ->
 
             resultsDataset.clear()
 
             if (data.isNullOrEmpty()) {
-                Toast.makeText(context, "Please connect with friends first. See the Friends tab for more", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Please connect with friends first. See the Friends tab for more",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
-            data?.forEach {
-                    d ->
+            data?.forEach { d ->
                 if (viewModel.loggedInUsername.value != d.user_master)
                     resultsDataset.add(d.user_master)
                 else
@@ -612,7 +840,8 @@ class CreateTaskItemFragment : Fragment() {
 
     private fun hideKeyboard() {
         if (view != null) {
-            val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val imm =
+                requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(View(requireContext()).windowToken, 0)
         }
     }

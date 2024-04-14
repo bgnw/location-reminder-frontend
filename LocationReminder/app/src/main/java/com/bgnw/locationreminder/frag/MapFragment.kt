@@ -1,6 +1,5 @@
 package com.bgnw.locationreminder.frag
 
-import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
@@ -22,19 +21,12 @@ import androidx.lifecycle.MutableLiveData
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
 import com.bgnw.locationreminder.R
-import com.bgnw.locationreminder.api.Requests
-import com.bgnw.locationreminder.data.Account
 import com.bgnw.locationreminder.data.ItemOpportunity
 import com.bgnw.locationreminder.map_aux.MapInfoBox
 import com.bgnw.locationreminder.nominatim_api.queryNominatimApi
-import com.bgnw.locationreminder.overpass_api.OverpassElement
-import com.bgnw.locationreminder.overpass_api.OverpassResp
-import com.bgnw.locationreminder.overpass_api.queryOverpassApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.config.IConfigurationProvider
 import org.osmdroid.events.MapEventsReceiver
@@ -63,16 +55,21 @@ class MapFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         redMarkerDrawable =
-            BitmapDrawable(resources, BitmapFactory.decodeResource(resources, R.drawable.marker_red).let {
-                Bitmap.createScaledBitmap(it, 74, 120, false)
-            })
+            BitmapDrawable(
+                resources,
+                BitmapFactory.decodeResource(resources, R.drawable.marker_red).let {
+                    Bitmap.createScaledBitmap(it, 74, 120, false)
+                })
 
         userLocationMarkerDrawable =
-            BitmapDrawable(resources, BitmapFactory.decodeResource(resources, R.drawable.user_location_marker).let {
-                Bitmap.createScaledBitmap(it, 85, 85, false)
-            })
+            BitmapDrawable(
+                resources,
+                BitmapFactory.decodeResource(resources, R.drawable.user_location_marker).let {
+                    Bitmap.createScaledBitmap(it, 85, 85, false)
+                })
 
-        val basePeerMarkerDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.baseline_person_pin_circle_24)!!
+        val basePeerMarkerDrawable =
+            ContextCompat.getDrawable(requireContext(), R.drawable.baseline_person_pin_circle_24)!!
         val yellowGreen = ContextCompat.getColor(requireContext(), R.color.yellow_green)
         peerMarkerDrawable = DrawableCompat.wrap(basePeerMarkerDrawable)
         DrawableCompat.setTint(peerMarkerDrawable, yellowGreen)
@@ -135,16 +132,21 @@ class MapFragment : Fragment() {
             mapView.controller.animateTo(point)
 
         } else {
-            Toast.makeText(context, "Location services are not available - try again later", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                context,
+                "Location services are not available - try again later",
+                Toast.LENGTH_LONG
+            ).show()
         }
 
         val mapLocalityMsg: TextView = view.findViewById(R.id.map_locality_msg)
         if (sharedUserLocation != null) {
-            val locality = getLocality(sharedUserLocation.first.latitude, sharedUserLocation.first.longitude)
+            val locality =
+                getLocality(sharedUserLocation.first.latitude, sharedUserLocation.first.longitude)
             mapLocalityMsg.text = "You're in $locality"
         }
 
-        viewModel.userLocation.observe(viewLifecycleOwner) {pair ->
+        viewModel.userLocation.observe(viewLifecycleOwner) { pair ->
             if (pair != null) {
                 val loc = pair.first
                 val diff = pair.second

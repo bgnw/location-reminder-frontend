@@ -1,8 +1,5 @@
 package com.bgnw.locationreminder.api
 
-import android.util.Log
-import com.bgnw.locationreminder.data.ItemOpportunity
-import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.data.TaskList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred

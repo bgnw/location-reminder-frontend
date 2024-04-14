@@ -1,14 +1,9 @@
 package com.bgnw.locationreminder.frag
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,10 +24,7 @@ import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.view.iterator
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.MainActivity
@@ -40,18 +32,14 @@ import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.api.Requests
 import com.bgnw.locationreminder.api.TagValuePair
 import com.bgnw.locationreminder.data.TaskItem
-import com.bgnw.locationreminder.data.TaskList
 import com.bgnw.locationreminder.taginfo_api.TagInfoElement
 import com.bgnw.locationreminder.taginfo_api.TagInfoResponse
 import com.bgnw.locationreminder.taginfo_api.procGetSuggestionsFromKeyword
-import com.google.android.material.internal.ViewUtils.hideKeyboard
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import java.time.Month
 import java.time.format.DateTimeFormatter
 
 class ViewEditTaskItemFragment : Fragment() {
@@ -66,41 +54,245 @@ class ViewEditTaskItemFragment : Fragment() {
     private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
     private val tags = listOf(
-        mapOf("tag" to "amenity", "values" to listOf("parking", "parking_space", "bench", "place_of_worship", "restaurant", "school", "waste_basket", "bicycle_parking", "fast_food", "cafe", "fuel", "shelter", "recycling", "toilets", "bank", "pharmacy", "post_box", "kindergarten", "drinking_water")),
-        mapOf("tag" to "shop", "values" to listOf("convenience", "supermarket", "clothes", "hairdresser", "car_repair", "bakery", "car", "beauty", "kiosk", "mobile_phone", "hardware", "butcher", "furniture", "car_parts", "alcohol", "florist", "electronics", "variety_store", "shoes", "mall", "optician", "jewelry", "doityourself", "gift")),
-        mapOf("tag" to "leisure", "values" to listOf("pitch", "swimming_pool", "park", "garden", "playground", "picnic_table", "sports_centre", "nature_reserve", "track")),
-        mapOf("tag" to "education", "values" to listOf("kindergarten", "school", "facultative_school", "centre", "courses", "college", "music", "university", "coaching")),
-        mapOf("tag" to "tourism", "values" to listOf("information", "hotel", "artwork", "attraction", "viewpoint", "guest_house", "picnic_site", "camp_site", "museum", "chalet", "camp_pitch", "apartment", "hostel", "motel", "caravan_site")),
-        mapOf("tag" to "sport", "values" to listOf("soccer", "tennis", "basketball", "baseball", "multi", "swimming", "equestrian", "golf", "fitness", "running", "athletics", "table_tennis", "beachvolleyball", "climbing", "volleyball", "boules")),
-        mapOf("tag" to "product", "values" to listOf("food", "charcoal", "oil", "bricks", "wine", "fuel", "beer", "gas")),
-        mapOf("tag" to "vending", "values" to listOf("parking_tickets", "excrement_bags", "drinks", "public_transport_tickets", "cigarettes", "fuel", "sweets", "newspapers", "food", "coffee", "condoms", "water")),
-        mapOf("tag" to "cuisine", "values" to listOf("pizza", "burger", "coffee_shop", "chinese", "italian", "sandwich", "chicken", "mexican", "japanese", "american", "kebab", "indian", "asian", "sushi", "thai", "french", "ice_cream", "seafood", "greek", "german")),
+        mapOf(
+            "tag" to "amenity",
+            "values" to listOf(
+                "parking",
+                "parking_space",
+                "bench",
+                "place_of_worship",
+                "restaurant",
+                "school",
+                "waste_basket",
+                "bicycle_parking",
+                "fast_food",
+                "cafe",
+                "fuel",
+                "shelter",
+                "recycling",
+                "toilets",
+                "bank",
+                "pharmacy",
+                "post_box",
+                "kindergarten",
+                "drinking_water"
+            )
+        ),
+        mapOf(
+            "tag" to "shop",
+            "values" to listOf(
+                "convenience",
+                "supermarket",
+                "clothes",
+                "hairdresser",
+                "car_repair",
+                "bakery",
+                "car",
+                "beauty",
+                "kiosk",
+                "mobile_phone",
+                "hardware",
+                "butcher",
+                "furniture",
+                "car_parts",
+                "alcohol",
+                "florist",
+                "electronics",
+                "variety_store",
+                "shoes",
+                "mall",
+                "optician",
+                "jewelry",
+                "doityourself",
+                "gift"
+            )
+        ),
+        mapOf(
+            "tag" to "leisure",
+            "values" to listOf(
+                "pitch",
+                "swimming_pool",
+                "park",
+                "garden",
+                "playground",
+                "picnic_table",
+                "sports_centre",
+                "nature_reserve",
+                "track"
+            )
+        ),
+        mapOf(
+            "tag" to "education",
+            "values" to listOf(
+                "kindergarten",
+                "school",
+                "facultative_school",
+                "centre",
+                "courses",
+                "college",
+                "music",
+                "university",
+                "coaching"
+            )
+        ),
+        mapOf(
+            "tag" to "tourism",
+            "values" to listOf(
+                "information",
+                "hotel",
+                "artwork",
+                "attraction",
+                "viewpoint",
+                "guest_house",
+                "picnic_site",
+                "camp_site",
+                "museum",
+                "chalet",
+                "camp_pitch",
+                "apartment",
+                "hostel",
+                "motel",
+                "caravan_site"
+            )
+        ),
+        mapOf(
+            "tag" to "sport",
+            "values" to listOf(
+                "soccer",
+                "tennis",
+                "basketball",
+                "baseball",
+                "multi",
+                "swimming",
+                "equestrian",
+                "golf",
+                "fitness",
+                "running",
+                "athletics",
+                "table_tennis",
+                "beachvolleyball",
+                "climbing",
+                "volleyball",
+                "boules"
+            )
+        ),
+        mapOf(
+            "tag" to "product",
+            "values" to listOf("food", "charcoal", "oil", "bricks", "wine", "fuel", "beer", "gas")
+        ),
+        mapOf(
+            "tag" to "vending",
+            "values" to listOf(
+                "parking_tickets",
+                "excrement_bags",
+                "drinks",
+                "public_transport_tickets",
+                "cigarettes",
+                "fuel",
+                "sweets",
+                "newspapers",
+                "food",
+                "coffee",
+                "condoms",
+                "water"
+            )
+        ),
+        mapOf(
+            "tag" to "cuisine",
+            "values" to listOf(
+                "pizza",
+                "burger",
+                "coffee_shop",
+                "chinese",
+                "italian",
+                "sandwich",
+                "chicken",
+                "mexican",
+                "japanese",
+                "american",
+                "kebab",
+                "indian",
+                "asian",
+                "sushi",
+                "thai",
+                "french",
+                "ice_cream",
+                "seafood",
+                "greek",
+                "german"
+            )
+        ),
         mapOf("tag" to "landuse", "values" to listOf("vineyard", "cemetery", "commercial")),
-        mapOf("tag" to "healthcare", "values" to listOf("pharmacy", "doctor", "hospital", "clinic", "dentist", "centre", "physiotherapist", "laboratory", "alternative")),
-        mapOf("tag" to "place_of_worship", "values" to listOf("wayside_chapel", "chapel", "musalla", "holy_well", "mosque", "cross", "lourdes_grotto", "church", "shrine", "monastery", "husayniyyah", "mission_station", "wayside_shrine", "temple", "cemetery_chapel")),
+        mapOf(
+            "tag" to "healthcare",
+            "values" to listOf(
+                "pharmacy",
+                "doctor",
+                "hospital",
+                "clinic",
+                "dentist",
+                "centre",
+                "physiotherapist",
+                "laboratory",
+                "alternative"
+            )
+        ),
+        mapOf(
+            "tag" to "place_of_worship",
+            "values" to listOf(
+                "wayside_chapel",
+                "chapel",
+                "musalla",
+                "holy_well",
+                "mosque",
+                "cross",
+                "lourdes_grotto",
+                "church",
+                "shrine",
+                "monastery",
+                "husayniyyah",
+                "mission_station",
+                "wayside_shrine",
+                "temple",
+                "cemetery_chapel"
+            )
+        ),
         mapOf("tag" to "restaurant", "values" to listOf("fast_food")),
-        mapOf("tag" to "beauty", "values" to listOf("nails", "tanning", "cosmetics", "spa", "skin_care", "hair", "waxing", "hair_removal"))
+        mapOf(
+            "tag" to "beauty",
+            "values" to listOf(
+                "nails",
+                "tanning",
+                "cosmetics",
+                "spa",
+                "skin_care",
+                "hair",
+                "waxing",
+                "hair_removal"
+            )
+        )
     )
 
     private fun lookupTagsAndValues(
         term: String,
         resultsDataset: MutableList<TagValuePair>,
         adapter: CategoryAdapter
-    )  {
+    ) {
         resultsDataset.addAll(
             tags.flatMap { tagMap ->
                 val tag = tagMap["tag"] as String
                 val values = tagMap["values"] as List<String>
 
-                val matchingTags = if (tag.contains(term, ignoreCase = true)) listOf(tag) else emptyList()
+                val matchingTags =
+                    if (tag.contains(term, ignoreCase = true)) listOf(tag) else emptyList()
 
                 val matchingValues = values.filter { it.contains(term, ignoreCase = true) }
                     .map { tag to it }
 
                 val out: MutableList<TagValuePair> = mutableListOf()
 
-                matchingTags.forEach{tag -> out.add(TagValuePair(tag, null))}
-                matchingValues.forEach { pair -> out.add(TagValuePair(pair.first, pair.second))  }
+                matchingTags.forEach { tag -> out.add(TagValuePair(tag, null)) }
+                matchingValues.forEach { pair -> out.add(TagValuePair(pair.first, pair.second)) }
 
                 out
             }.toMutableList()
@@ -178,8 +370,7 @@ class ViewEditTaskItemFragment : Fragment() {
                     bold { append(currentElement.tag) }
                     append(" of ")
                     bold { append(currentElement.value) }
-                }
-                else {
+                } else {
                     append("Places that are/have ")
                     append(decideAOrAn(currentElement.tag[0]))
                     append(" ")
@@ -189,9 +380,12 @@ class ViewEditTaskItemFragment : Fragment() {
             textView.text = label
 
 
-            checkBox.setOnCheckedChangeListener{_, isChecked ->
-                if (isChecked) { selectedCategories.add(currentElement) }
-                else { selectedCategories.remove(currentElement) }
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    selectedCategories.add(currentElement)
+                } else {
+                    selectedCategories.remove(currentElement)
+                }
             }
 
 
@@ -220,7 +414,8 @@ class ViewEditTaskItemFragment : Fragment() {
 
     private fun hideKeyboard() {
         if (view != null) {
-            val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val imm =
+                requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(View(requireContext()).windowToken, 0)
         }
     }
@@ -272,9 +467,11 @@ class ViewEditTaskItemFragment : Fragment() {
         fun updateTitleBox() {
             titleBox.text = Editable.Factory.getInstance().newEditable(itemObj!!.title)
         }
+
         fun updateBodyBox() {
             bodyBox.text = Editable.Factory.getInstance().newEditable(itemObj!!.body_text)
         }
+
         fun updateSnoozeMsg() {
             snoozeMsg.text =
                 if (itemObj!!.snooze_until == null)
@@ -282,6 +479,7 @@ class ViewEditTaskItemFragment : Fragment() {
                 else
                     LocalDateTime.parse(itemObj!!.snooze_until!!, dtZulu).format(dtHuman)
         }
+
         fun updateDueMsg() {
             dueMsg.text =
                 if (itemObj!!.due_at == null)
@@ -289,9 +487,11 @@ class ViewEditTaskItemFragment : Fragment() {
                 else
                     LocalDateTime.parse(itemObj!!.due_at!!, dtZulu).format(dtHuman)
         }
+
         fun updateCompletionMsg() {
             completionMsg.text = if (itemObj!!.completed) "Completed" else "Not completed"
-            toggleCompleteBtn.text = if (itemObj!!.completed) "Mark not complete" else "Mark complete"
+            toggleCompleteBtn.text =
+                if (itemObj!!.completed) "Mark not complete" else "Mark complete"
         }
 
         updateTitleBox()
@@ -301,7 +501,8 @@ class ViewEditTaskItemFragment : Fragment() {
         updateCompletionMsg()
 
         // hide the category layout initially
-        val categoryLayout: LinearLayout? = rootView.findViewById(R.id.vti_category_selection_layout)
+        val categoryLayout: LinearLayout? =
+            rootView.findViewById(R.id.vti_category_selection_layout)
         categoryLayout?.visibility = View.GONE
 
         // set function to run when remind method changes
@@ -360,11 +561,9 @@ class ViewEditTaskItemFragment : Fragment() {
                     for (btn in el) {
                         btn.isEnabled = enableButtonsEtc
                     }
-                }
-                else if (el is EditText) {
+                } else if (el is EditText) {
                     el.isEnabled = false
-                }
-                else {
+                } else {
                     el.isEnabled = enableButtonsEtc
                 }
             }
@@ -380,12 +579,16 @@ class ViewEditTaskItemFragment : Fragment() {
                 Requests.updateItem(
                     itemId,
                     item
-                ) {success ->
+                ) { success ->
                     loadingBg.visibility = View.GONE
                     loadingPopup.visibility = View.GONE
                     if (!success) {
                         // todo: revert value shown
-                        Toast.makeText(context, "Update could not be made at this time", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Update could not be made at this time",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -401,35 +604,38 @@ class ViewEditTaskItemFragment : Fragment() {
                 Requests.deleteItem(
                     itemId,
 
-                ) {success ->
+                    ) { success ->
                     loadingBg.visibility = View.GONE
                     loadingPopup.visibility = View.GONE
                     var theItem: TaskItem? = null
                     val theLists = viewModel.lists.value
 
-                    theLists?.forEach{ list ->
+                    theLists?.forEach { list ->
                         list.items?.removeIf { item -> item.item_id == itemId }
                     }
 
                     viewModel.lists.postValue(theLists)
 
                     if (!success) {
-                        Toast.makeText(context, "Item could not be deleted at this time", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Item could not be deleted at this time",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
 
         }
 
-        editTitleBtn.setOnClickListener{
+        editTitleBtn.setOnClickListener {
             if (activeInteraction == null) {
                 stateAll(enableButtonsEtc = false)
                 titleBox.isEnabled = true
                 editTitleBtn.isEnabled = true
                 editTitleBtn.text = "Save"
                 activeInteraction = editTitleBtn
-            }
-            else if (activeInteraction == editTitleBtn) {
+            } else if (activeInteraction == editTitleBtn) {
                 if (titleBox.text.isBlank()) {
                     return@setOnClickListener
                 }
@@ -447,15 +653,14 @@ class ViewEditTaskItemFragment : Fragment() {
             }
         }
 
-        editBodyBtn.setOnClickListener{
+        editBodyBtn.setOnClickListener {
             if (activeInteraction == null) {
                 stateAll(enableButtonsEtc = false)
                 bodyBox.isEnabled = true
                 editBodyBtn.isEnabled = true
                 editBodyBtn.text = "Save"
                 activeInteraction = editBodyBtn
-            }
-            else if (activeInteraction == editBodyBtn) {
+            } else if (activeInteraction == editBodyBtn) {
                 itemObj!!.body_text = bodyBox.text.toString()
 
                 doUpdate(
@@ -520,8 +725,7 @@ class ViewEditTaskItemFragment : Fragment() {
                 )
                 updateSnoozeMsg()
 
-            }
-            else if (activeInteraction == editDueDate) {
+            } else if (activeInteraction == editDueDate) {
                 itemObj!!.due_at = newDT.format(dtZulu)
                 doUpdate(
                     itemObj!!.item_id!!,
@@ -537,7 +741,7 @@ class ViewEditTaskItemFragment : Fragment() {
             pickTimePopup.visibility = View.GONE
 
             val currentSnoozeString =
-                when (activeInteraction){
+                when (activeInteraction) {
                     editSnoozeTime -> itemObj!!.snooze_until
                     editDueTime -> itemObj!!.due_at
                     else -> throw Exception("Illegal activeInteraction")
@@ -563,8 +767,7 @@ class ViewEditTaskItemFragment : Fragment() {
                 )
                 updateSnoozeMsg()
 
-            }
-            else if (activeInteraction == editDueTime) {
+            } else if (activeInteraction == editDueTime) {
                 itemObj!!.due_at = newDT.format(dtZulu)
                 doUpdate(
                     itemObj!!.item_id!!,

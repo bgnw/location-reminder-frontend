@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.TextView
-import androidx.lifecycle.MutableLiveData
 import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.data.ItemOpportunity
 
@@ -30,7 +29,8 @@ class ItemOpportunityListAdapter(
         liTitle.text = opp.place_name ?: opp.category
         liTitle.isSingleLine = false
         liTitle.maxLines = 2
-        liSubtitle.text = "Matches ${opp.matchingItemCount} ${if (opp.matchingItemCount == 1) "item" else "items"}, ${opp.metresFromUser}m away"
+        liSubtitle.text =
+            "Matches ${opp.matchingItemCount} ${if (opp.matchingItemCount == 1) "item" else "items"}, ${opp.metresFromUser}m away"
         liButton.visibility = View.GONE
 
         return view

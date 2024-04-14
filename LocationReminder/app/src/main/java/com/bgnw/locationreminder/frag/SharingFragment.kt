@@ -2,8 +2,6 @@ package com.bgnw.locationreminder.frag
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,19 +18,18 @@ import com.bgnw.locationreminder.CollabListAdapter
 import com.bgnw.locationreminder.CollabReqListAdapter
 import com.bgnw.locationreminder.R
 import com.bgnw.locationreminder.api.Requests
-import com.bgnw.locationreminder.data.Collab
 import com.bgnw.locationreminder.data.CollabReq
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class SharingFragment : Fragment() {
 
     private val viewModel: ApplicationState by activityViewModels()
-    private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
+    private val dtZulu: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,7 +45,7 @@ class SharingFragment : Fragment() {
         var reqAdapter: CollabReqListAdapter?
         var collabAdapter: CollabListAdapter?
 
-        viewModel.receivedRequests.observe(viewLifecycleOwner) {data ->
+        viewModel.receivedRequests.observe(viewLifecycleOwner) { data ->
             if (data != null) {
                 reqAdapter = CollabReqListAdapter(requireActivity(), data.toMutableList())
                 reqLv.adapter = reqAdapter
@@ -56,9 +53,10 @@ class SharingFragment : Fragment() {
             }
         }
 
-        viewModel.sentRequests.observe(viewLifecycleOwner) {data ->
+        viewModel.sentRequests.observe(viewLifecycleOwner) { data ->
             if (data != null) {
-                layout.findViewById<TextView>(R.id.friend_request_msg)?.text = "You've sent ${data.size} pending friend request${if (data.size == 1) "" else "s"}."
+                layout.findViewById<TextView>(R.id.friend_request_msg)?.text =
+                    "You've sent ${data.size} pending friend request${if (data.size == 1) "" else "s"}."
             }
         }
 
@@ -98,10 +96,17 @@ class SharingFragment : Fragment() {
                     returnedReq.observe(viewLifecycleOwner) { data ->
                         if (data != null) {
                             newRequestObj.request_id = data.request_id
-                            Toast.makeText(context, "Friend request sent to ${data.user_recipient}", Toast.LENGTH_LONG).show()
-                        }
-                        else {
-                            Toast.makeText(context, "Something went wrong while processing your request", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Friend request sent to ${data.user_recipient}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Something went wrong while processing your request",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }
@@ -111,6 +116,6 @@ class SharingFragment : Fragment() {
 
         newReqBtn.setOnClickListener { dialog.show() }
 
-    return layout
+        return layout
     }
 }
