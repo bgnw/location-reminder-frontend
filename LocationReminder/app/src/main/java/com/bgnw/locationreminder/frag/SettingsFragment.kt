@@ -2,18 +2,18 @@ package com.bgnw.locationreminder.frag
 
 import android.os.Bundle
 import android.text.Editable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Switch
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import com.bgnw.locationreminder.ApplicationState
 import com.bgnw.locationreminder.R
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.saveDebug
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.saveRemindRadius
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.saveUpdateFreq
 
 class SettingsFragment : Fragment() {
 
@@ -48,11 +48,14 @@ class SettingsFragment : Fragment() {
 
         switchDebug.setOnCheckedChangeListener { button, isOn ->
             viewModel.enableDebug.postValue(isOn)
+            saveDebug(requireContext(), isOn)
         }
         boxUpdateFreq.setOnFocusChangeListener { view, isFocused ->
             if (!isFocused) {
                 try {
-                    viewModel.updateFrequency.postValue(boxUpdateFreq.text.toString().toInt())
+                    val newFreq = boxUpdateFreq.text.toString().toInt()
+                    viewModel.updateFrequency.postValue(newFreq)
+                    saveUpdateFreq(requireContext(), newFreq)
                 } catch (_: Exception) {
                     return@setOnFocusChangeListener
                 }
@@ -61,7 +64,9 @@ class SettingsFragment : Fragment() {
         boxRemindRadius.setOnFocusChangeListener { view, isFocused ->
             if (!isFocused) {
                 try {
-                    viewModel.remindRadius.postValue(boxRemindRadius.text.toString().toInt())
+                    val newRadius = boxRemindRadius.text.toString().toInt()
+                    viewModel.remindRadius.postValue(newRadius)
+                    saveRemindRadius(requireContext(), newRadius)
                 } catch (_: Exception) {
                     return@setOnFocusChangeListener
                 }

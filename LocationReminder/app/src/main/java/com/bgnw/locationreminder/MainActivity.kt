@@ -27,15 +27,30 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.bgnw.locationreminder.api.AccountDeviceTools
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDebug
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDisplayName
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveRemindRadius
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveUpdateFreq
+import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveUsername
 import com.bgnw.locationreminder.api.Requests
+import com.bgnw.locationreminder.api.TagValuePair
+import com.bgnw.locationreminder.api.Utils
+import com.bgnw.locationreminder.data.AccountPartialForLocation
+import com.bgnw.locationreminder.data.ItemOpportunity
+import com.bgnw.locationreminder.data.TaskItem
 import com.bgnw.locationreminder.frag.AccountFragment
 import com.bgnw.locationreminder.frag.ListsFragment
 import com.bgnw.locationreminder.frag.MapFragment
 import com.bgnw.locationreminder.frag.NearbyFragment
 import com.bgnw.locationreminder.frag.SettingsFragment
 import com.bgnw.locationreminder.frag.SharingFragment
+import com.bgnw.locationreminder.location.LocationLiveData
+import com.bgnw.locationreminder.location.LocationModel
 import com.bgnw.locationreminder.overpass_api.OverpassResp
+import com.bgnw.locationreminder.overpass_api.getCoordinatesForElement
 import com.bgnw.locationreminder.overpass_api.queryOverpassApi
+import com.bgnw.locationreminder.overpass_api.tagsClassToPairs
+import com.bgnw.locationreminder.overpass_api.tagsStringMapToPairs
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.navigation.NavigationView
@@ -43,26 +58,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import java.lang.Thread.sleep
-import kotlin.coroutines.CoroutineContext
-import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveUsername
-import com.bgnw.locationreminder.api.AccountDeviceTools.Factory.retrieveDisplayName
-import com.bgnw.locationreminder.api.TagValuePair
-import com.bgnw.locationreminder.api.Utils
-import com.bgnw.locationreminder.data.AccountPartialForLocation
-import com.bgnw.locationreminder.data.ItemOpportunity
-import com.bgnw.locationreminder.data.TaskItem
-import com.bgnw.locationreminder.location.LocationLiveData
-import com.bgnw.locationreminder.location.LocationModel
-import com.bgnw.locationreminder.overpass_api.getCoordinatesForElement
-import com.bgnw.locationreminder.overpass_api.tagsClassToPairs
-import com.bgnw.locationreminder.overpass_api.tagsStringMapToPairs
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
+import java.lang.Thread.sleep
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 
@@ -88,7 +91,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     val fetchCollabsEtcTask = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
-                if (viewModel.loggedInUsername.value == null) { return@launch }
+                if (viewModel.loggedInUsername.value == null) {
+                    return@launch
+                }
                 val username = viewModel.loggedInUsername.value!!
                 viewModel.receivedRequests.postValue(Requests.getReceivedRequests(username))
                 viewModel.sentRequests.postValue(Requests.getSentRequests(username))
@@ -111,7 +116,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             taskIsDone.postValue(true)
         }
 
-        taskIsDone.observe(this) {done ->
+        taskIsDone.observe(this) { done ->
             if (done && task.isCompleted) {
                 viewModel.lists.value = task.getCompleted()?.toMutableList() ?: mutableListOf()
             }
@@ -128,7 +133,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             taskIsDone.postValue(true)
         }
 
-        taskIsDone.observe(this) {done ->
+        taskIsDone.observe(this) { done ->
             if (done && task.isCompleted) {
                 viewModel.filters.value = task.getCompleted() ?: listOf()
             }
@@ -153,7 +158,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-        notLoggedInText = Toast.makeText(applicationContext, "Please log-in or create an account to use GeoCue", Toast.LENGTH_LONG)
+        notLoggedInText = Toast.makeText(
+            applicationContext,
+            "Please log-in or create an account to use GeoCue",
+            Toast.LENGTH_LONG
+        )
 
         Class.forName("org.postgresql.Driver")
 
@@ -174,6 +183,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             viewModel.loggedInUsername.value = savedUser
             viewModel.loggedInDisplayName.value = retrieveDisplayName(this)
         }
+
+        viewModel.enableDebug.postValue(retrieveDebug(this))
+        viewModel.updateFrequency.postValue(retrieveUpdateFreq(this))
+        viewModel.remindRadius.postValue(retrieveRemindRadius(this))
 
         // set main content view
         setContentView(R.layout.activity_main)
@@ -210,11 +223,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         // When user logs in, update the display name shown
         viewModel.loggedInDisplayName.observe(this, Observer { displayName ->
             runOnUiThread {
-               if (displayName == null) {
-                   navDisplayName.text = "Visit the Account tab to log-in"
-               } else {
-                   navDisplayName.text = displayName
-               }
+                if (displayName == null) {
+                    navDisplayName.text = "Visit the Account tab to log-in"
+                } else {
+                    navDisplayName.text = displayName
+                }
             }
         })
 
@@ -228,16 +241,15 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         handler.post(fetchCollabsEtcTask)
 
-        viewModel.receivedRequests.observe(this) {reqs ->
+        viewModel.receivedRequests.observe(this) { reqs ->
             if (
-                (      viewModel.receivedRequestsCount.value == null
-                    || viewModel.receivedRequestsCount.value!! == -1
-                )
+                (viewModel.receivedRequestsCount.value == null
+                        || viewModel.receivedRequestsCount.value!! == -1
+                        )
                 && reqs != null
-                ) {
+            ) {
                 viewModel.receivedRequestsCount.postValue(reqs.size)
-            }
-            else if (reqs != null && reqs.size > (viewModel.receivedRequestsCount.value!!)) {
+            } else if (reqs != null && reqs.size > (viewModel.receivedRequestsCount.value!!)) {
                 NotificationTools.showNotification(
                     this@MainActivity,
                     "You have new friend requests",
@@ -267,7 +279,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         navView.setNavigationItemSelectedListener {
 
             // if the fragment is the same as the currently displayed one, do nothing
-            if (currentFragId == it.itemId) { return@setNavigationItemSelectedListener true }
+            if (currentFragId == it.itemId) {
+                return@setNavigationItemSelectedListener true
+            }
 
             it.isChecked = true
             when (it.itemId) {
@@ -280,6 +294,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         changeFragment(NearbyFragment(), it.title.toString())
                     }
                 }
+
                 R.id.lists -> {
                     if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
                         notLoggedInText.show()
@@ -289,6 +304,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         changeFragment(listFrag, it.title.toString())
                     }
                 }
+
                 R.id.sharing -> {
                     if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
                         notLoggedInText.show()
@@ -298,10 +314,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         changeFragment(sharingFrag, it.title.toString())
                     }
                 }
+
                 R.id.account -> {
                     currentFragId = R.id.account
                     changeFragment(accountFrag, it.title.toString())
                 }
+
                 R.id.settings -> {
                     if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
                         notLoggedInText.show()
@@ -311,6 +329,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         changeFragment(SettingsFragment(), it.title.toString())
                     }
                 }
+
                 R.id.sign_out -> {
                     currentFragId = R.id.account
                     changeFragment(accountFrag, "Account")
@@ -378,11 +397,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         var lastLocation: LocationModel? = null
         fun getLocationData() = locationData
 
-        viewModel.updateFrequency.observe(this) {freq ->
+        viewModel.updateFrequency.observe(this) { freq ->
             LocationLiveData.changeUpdateInterval(freq)
         }
 
-        getLocationData().observe(this) {loc ->
+        getLocationData().observe(this) { loc ->
             val diff = floatArrayOf(99f)
 
             if (lastLocation != null) {
@@ -414,8 +433,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     }
 
                     val locCatReminders = checkForLocationReminders(debug = false)
-                    val locUserReminders = checkForUserReminders(lat = loc.latitude, lon = loc.longitude)
-                    val locPointReminders = checkForLocationPointReminders(lat = loc.latitude, lon = loc.longitude)
+                    val locUserReminders =
+                        checkForUserReminders(lat = loc.latitude, lon = loc.longitude)
+                    val locPointReminders =
+                        checkForLocationPointReminders(lat = loc.latitude, lon = loc.longitude)
 
                     lastUpdateHadContent.postValue(!locCatReminders.isNullOrEmpty())
 
@@ -423,7 +444,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     val locUserRemindersSize = locUserReminders.size
                     val locPointRemindersSize = locPointReminders?.size ?: 0
 
-                    val allRemindersCount = locCatRemindersSize + locUserRemindersSize + locPointRemindersSize
+                    val allRemindersCount =
+                        locCatRemindersSize + locUserRemindersSize + locPointRemindersSize
 
                     var body = ""
                     if (locCatReminders != null) {
@@ -467,7 +489,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        viewModel.reminders.observe(this) {_ ->
+        viewModel.reminders.observe(this) { _ ->
             if (currentFragId == R.id.nearby) {
                 reloadNearbyFragment()
             }
@@ -478,8 +500,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         if (viewModel.loggedInUsername.value.isNullOrEmpty()) {
             notLoggedInText.show()
             return false
-        }
-        else if (toggle.onOptionsItemSelected(item)) {
+        } else if (toggle.onOptionsItemSelected(item)) {
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -578,7 +599,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         areaRadius: Double,
         filters: List<String>?
     ): OverpassResp? {
-        if (filters == null) { return null }
+        if (filters == null) {
+            return null
+        }
 
         val overpassQuery = buildString {
             append("[out:json][timeout:60]; (")
@@ -636,8 +659,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 viewModel.peerLocations.value?.clear()
                 viewModel.peerLocations.value?.putAll(nearbyPeers)
                 viewModel.peerLocations.postValue(viewModel.peerLocations.value)
+            } catch (e: NullPointerException) {
+                return@launch
             }
-            catch (e: NullPointerException) { return@launch }
         }
     }
 
@@ -656,7 +680,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         // get locations for each relevant user
         relevantItems.forEach { item ->
-            if (item.user_peer != null && !userLocations.containsKey(item.user_peer)){
+            if (item.user_peer != null && !userLocations.containsKey(item.user_peer)) {
                 val result = Requests.lookupUser(item.user_peer!!)
                 if (result.lati != null && result.longi != null) {
                     userLocations.put(item.user_peer!!, GeoPoint(result.lati!!, result.longi!!))
@@ -672,7 +696,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     diff
                 )
 
-                if (diff[0] <= viewModel.remindRadius.value!!) { itemsToRemind.add(item) }
+                if (diff[0] <= viewModel.remindRadius.value!!) {
+                    itemsToRemind.add(item)
+                }
             }
         }
         return itemsToRemind
@@ -718,7 +744,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         fun remindersPt3(res: OverpassResp) {
             val lists = viewModel.lists.value
-            if (lists.isNullOrEmpty()) { return }
+            if (lists.isNullOrEmpty()) {
+                return
+            }
             val items = mutableListOf<TaskItem>()
             lists.forEach { list -> items.addAll(list.items ?: listOf()) }
 
@@ -728,7 +756,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             for (element in res.elements) {
                 val coords: GeoPoint = getCoordinatesForElement(element)
                 val dist = FloatArray(1)
-                Location.distanceBetween(userLoc!!.latitude, userLoc!!.longitude, coords.latitude, coords.longitude, dist)
+                Location.distanceBetween(
+                    userLoc!!.latitude,
+                    userLoc!!.longitude,
+                    coords.latitude,
+                    coords.longitude,
+                    dist
+                )
                 if (dist[0] <= viewModel.remindRadius.value!!) {
                     Log.d("bgnw", "notifying")
 
@@ -741,7 +775,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
 
                     for (item in items) {
-                        if (item.applicable_filters == null) { continue }
+                        if (item.applicable_filters == null) {
+                            continue
+                        }
 
                         val tagsForThisItem: List<TagValuePair>? =
                             tagsStringMapToPairs(item.applicable_filters!!)?.toList()
@@ -753,9 +789,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                                     matchingTags.add(tagOption)
                                     break
                                 }
-                                 names.addAll(
-                                    tagsForThisElement.filter { pair -> pair.tag in listOf("name", "official_name") }
-                                 )
+                                names.addAll(
+                                    tagsForThisElement.filter { pair ->
+                                        pair.tag in listOf(
+                                            "name",
+                                            "official_name"
+                                        )
+                                    }
+                                )
                             }
                         }
                     }
@@ -767,10 +808,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                             matchingTags.first().value ?: matchingTags.first().tag
 
                     // put tag name in place name
-                    placeName = placeName[0].uppercase() + placeName.removeRange(0,1).replace('_', ' ')
+                    placeName =
+                        placeName[0].uppercase() + placeName.removeRange(0, 1).replace('_', ' ')
 
                     // if place has an actual name, include it
-                    names = names.filter { pair -> (pair.value != null) && (pair.value!!.isNotBlank()) }.toMutableList()
+                    names =
+                        names.filter { pair -> (pair.value != null) && (pair.value!!.isNotBlank()) }
+                            .toMutableList()
                     if (names.isNotEmpty()) {
                         placeName += " (${names.first().value})"
                     }
@@ -821,17 +865,22 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
         userLoc = viewModel.userLocation.value?.first
-        if (userLoc == null) { return null }
+        if (userLoc == null) {
+            return null
+        }
         remindersPt1()
-        while (resultsDeferred == null) { sleep(1000) }
+        while (resultsDeferred == null) {
+            sleep(1000)
+        }
         val res = resultsDeferred!!.await()
         if (res.first != null) {
             viewModel.reminders.value?.clear() // clear out old reminders
 
             remindersPt3(res.first!!)
             return matchingTasks.toMutableList()
+        } else {
+            return null
         }
-        else { return null }
     }
 
     override fun onBackPressed() {
