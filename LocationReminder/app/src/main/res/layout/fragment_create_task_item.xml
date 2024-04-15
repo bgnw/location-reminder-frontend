@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+<ScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".frag.CreateTaskItemFragment">
-    >
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         tools:context=".activity.CreateTaskItemActivity"
         android:orientation="vertical"
         android:padding="20dp">
@@ -17,7 +22,13 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Task name:" />
+            android:text="Task name:"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/item_back_rounded"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:textStyle="bold"
+            />
 
         <EditText
             android:layout_width="match_parent"
@@ -30,6 +41,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:background="@drawable/item_back_rounded"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:textStyle="bold"
             android:text="Notes:" />
 
         <EditText
@@ -52,12 +67,74 @@
 <!--            android:id="@+id/cti_due_date_time" />-->
 
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/item_back_rounded"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="Due at:"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            >
+
+            <TextView
+                android:id="@+id/cti_due_status_msg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="1dp"
+                android:layout_toStartOf="@+id/cti_due_btn_cont"
+                android:gravity="bottom"
+                android:paddingStart="15dp"
+                android:paddingTop="13dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="10dp"
+                android:text="No due date" />
+
+
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/cti_due_btn_cont"
+                android:orientation="vertical">
+                <Button
+                    android:id="@+id/cti_due_edit_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Edit date"
+                    />
+
+                <Button
+                    android:id="@+id/cti_due_edit_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Edit time"
+                    />
+            </LinearLayout>
+
+        </RelativeLayout>
+
 
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/item_back_rounded"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:textStyle="bold"
             android:text="Reminder type:" />
 
 
@@ -252,3 +329,79 @@
 
     </LinearLayout>
 </ScrollView>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/cti_loading_bg"
+        android:visibility="gone"
+        android:background="#C8000000"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/cti_timepicker_popup"
+        android:visibility="gone"
+        android:layout_marginHorizontal="30dp"
+        android:paddingVertical="20dp"
+        android:background="@drawable/item_back_rounded_opaque"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <TimePicker
+            android:id="@+id/cti_timepicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:timePickerMode="clock"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cti_pick_time_done_btn"
+            android:text="Done" />
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/cti_datepicker_popup"
+        android:visibility="gone"
+        android:layout_marginHorizontal="30dp"
+        android:padding="20dp"
+        android:background="@drawable/item_back_rounded_opaque"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <DatePicker
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cti_datepicker"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cti_pick_date_done_btn"
+            android:text="Done" />
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,12 +15,14 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
@@ -59,6 +61,8 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow
 import java.io.File
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class CreateTaskItemFragment : Fragment() {
 
@@ -176,6 +180,8 @@ class CreateTaskItemFragment : Fragment() {
     private var listId: Int? = null
     private val df = DecimalFormat("###.########")
 
+    private val dtHuman: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM 'at' HH:mm")
+    private val dtZulu: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
     private val tags = listOf(
         mapOf(
@@ -454,6 +460,7 @@ class CreateTaskItemFragment : Fragment() {
         )
 
         var selectedMethod: String? = null
+        var dueTimestamp: LocalDateTime? = null
 
         // hide the category layout initially
         val categoryLayout: LinearLayout? =
@@ -634,7 +641,7 @@ class CreateTaskItemFragment : Fragment() {
                                 attachment_img_path = null,
                                 snooze_until = null,
                                 completed = false,
-                                due_at = null,
+                                due_at = dueTimestamp?.format(dtZulu),
                                 is_sub_task = false,
                                 parent_task = null,
                                 filters = categories
@@ -654,7 +661,7 @@ class CreateTaskItemFragment : Fragment() {
                                 attachment_img_path = null,
                                 snooze_until = null,
                                 completed = false,
-                                due_at = null,
+                                due_at = dueTimestamp?.format(dtZulu),
                                 is_sub_task = false,
                                 parent_task = null,
                                 filters = null
@@ -674,7 +681,7 @@ class CreateTaskItemFragment : Fragment() {
                                 attachment_img_path = null,
                                 snooze_until = null,
                                 completed = false,
-                                due_at = null,
+                                due_at = dueTimestamp?.format(dtZulu),
                                 lati = df.format(locationPoint?.latitude).toDouble(),
                                 longi = df.format(locationPoint?.longitude).toDouble(),
                                 is_sub_task = false,
@@ -715,6 +722,57 @@ class CreateTaskItemFragment : Fragment() {
                 locationPointLayout?.visibility = View.VISIBLE
                 selectedMethod = "LOCATION_POINT"
             }
+        }
+
+        val editDueDate = rootView.findViewById<Button>(R.id.cti_due_edit_date)
+        val editDueTime = rootView.findViewById<Button>(R.id.cti_due_edit_time)
+        val loadingBg = rootView.findViewById<LinearLayout>(R.id.cti_loading_bg)
+        val timePicker = rootView.findViewById<TimePicker>(R.id.cti_timepicker)
+        val datePicker = rootView.findViewById<DatePicker>(R.id.cti_datepicker)
+        val pickTimePopup = rootView.findViewById<LinearLayout>(R.id.cti_timepicker_popup)
+        val pickDatePopup = rootView.findViewById<LinearLayout>(R.id.cti_datepicker_popup)
+        val pickTimeDoneBtn = rootView.findViewById<Button>(R.id.cti_pick_time_done_btn)
+        val pickDateDoneBtn = rootView.findViewById<Button>(R.id.cti_pick_date_done_btn)
+        val dueMsg = rootView.findViewById<TextView>(R.id.cti_due_status_msg)
+
+        editDueDate.setOnClickListener {
+            loadingBg.visibility = View.VISIBLE
+            pickDatePopup.visibility = View.VISIBLE
+        }
+
+        editDueTime.setOnClickListener {
+            loadingBg.visibility = View.VISIBLE
+            pickTimePopup.visibility = View.VISIBLE
+        }
+
+        pickDateDoneBtn.setOnClickListener {
+            loadingBg.visibility = View.GONE
+            pickDatePopup.visibility = View.GONE
+
+            dueTimestamp = LocalDateTime.of(
+                datePicker.year,
+                datePicker.month,
+                datePicker.dayOfMonth,
+                dueTimestamp?.hour ?: 0,
+                dueTimestamp?.minute ?: 0
+            )
+
+            dueMsg.text = dueTimestamp!!.format(dtHuman)
+        }
+
+        pickTimeDoneBtn.setOnClickListener {
+            loadingBg.visibility = View.GONE
+            pickTimePopup.visibility = View.GONE
+
+            dueTimestamp = LocalDateTime.of(
+                dueTimestamp?.year ?: LocalDateTime.now().year,
+                dueTimestamp?.month ?: LocalDateTime.now().month,
+                dueTimestamp?.dayOfMonth ?: LocalDateTime.now().dayOfMonth,
+                timePicker.hour,
+                timePicker.minute
+            )
+
+            dueMsg.text = dueTimestamp!!.format(dtHuman)
         }
 
         return rootView
